@@ -124,7 +124,7 @@ public:
     /// Get the required number of iterations for the current round.
     ///
     /// \return The required number of iterations for the current round.
-    Count get_this_max() {
+    Count get_this_max() const {
         return this_max;
     }
 

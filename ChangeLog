@@ -1,0 +1,5 @@
+2012-01-13  Jes Frellsen  <frellsen@binf>
+
+	* muninn/UpdateSchemes/IncreaseFactorScheme.h: Corrected
+	const-correctness for get_this_max().
+
