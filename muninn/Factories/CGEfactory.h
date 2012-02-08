@@ -101,8 +101,14 @@ public:
         /// Use dynamic binning.
         bool use_dynamic_binning;
 
+        /// The maximal number of bins allowed to be used by the binner
+        unsigned int max_number_of_bins;
+
         /// Bin width used for non-dynamic binning.
         double bin_width;
+
+        /// The separator symbol between option name and value used in the output operator of the settings object.
+        std::string separator;
 
         /// The verbose level of Muninn.
         int verbose;
@@ -125,7 +131,9 @@ public:
         /// \param min_count See documentation for Settings::min_count.
         /// \param restricted_individual_support See documentation for Settings::restricted_individual_support.
         /// \param use_dynamic_binning See documentation for Settings::use_dynamic_binning.
+        /// \param max_number_of_bins See documentation for Settings::max_number_of_bins.
         /// \param bin_width See documentation for Settings::bin_width.
+        /// \param separator See documentation for Settings::separator.
         /// \param verbose See documentation for Settings::verbose.
         Settings(GeEnum weight_scheme=GE_MULTICANONICAL,
                  double slope_factor_up = 0.3,
@@ -143,7 +151,9 @@ public:
                  unsigned int min_count = 30,
                  bool restricted_individual_support=false,
                  bool use_dynamic_binning=true,
+                 unsigned int max_number_of_bins=1000000,
                  double bin_width = 0.1,
+                 std::string separator=":",
                  int verbose=3)
         : weight_scheme(weight_scheme),
           slope_factor_up(slope_factor_up),
@@ -161,29 +171,41 @@ public:
           min_count(min_count),
           restricted_individual_support(restricted_individual_support),
           use_dynamic_binning(use_dynamic_binning),
+          max_number_of_bins(max_number_of_bins),
           bin_width(bin_width),
+          separator(separator),
           verbose(verbose) {}
+
+        /// Function for setting the separator symbol.
+        ///
+        /// \param new_separator The new value for the separator.
+        /// \return A pointer to the Settings object.
+        Settings* set_separator(std::string new_separator) {
+            separator = new_separator;
+            return this;
+        }
 
         /// Output operator
         friend std::ostream &operator<<(std::ostream &o, const Settings &settings) {
-            o << "weight_scheme:" << settings.weight_scheme << std::endl;
-            o << "slope_factor_up:" << settings.slope_factor_up << std::endl;
-            o << "slope_factor_down:" << settings.slope_factor_down << std::endl;
-            o << "min_beta:" << settings.min_beta << std::endl;
-            o << "max_beta:" << settings.max_beta << std::endl;
-            o << "initial_beta:" << settings.initial_beta << std::endl;
-            o << "resolution:" << settings.resolution << std::endl;
-            o << "initial_width_is_max_left:" << settings.initial_width_is_max_left << std::endl;
-            o << "initial_width_is_max_right:" << settings.initial_width_is_max_right << std::endl;
-            o << "statistics_log_filename:" << settings.statistics_log_filename << std::endl;
-            o << "log_mode:" << Muninn::StatisticsLogger::ModeNames[settings.log_mode] << std::endl;
-            o << "initial_max:" << settings.initial_max << std::endl;
-            o << "memory:" << settings.memory << std::endl;
-            o << "min_count:" << settings.min_count << std::endl;
-            o << "restricted_individual_support:" << settings.restricted_individual_support << std::endl;
-            o << "use_dynamic_binning:" << settings.use_dynamic_binning << std::endl;
-            o << "bin_width:" << settings.bin_width << std::endl;
-            o << "verbose:" << settings.verbose << std::endl;
+            o << "weight_scheme" << settings.separator << settings.weight_scheme << std::endl;
+            o << "slope_factor_up" << settings.separator << settings.slope_factor_up << std::endl;
+            o << "slope_factor_down" << settings.separator << settings.slope_factor_down << std::endl;
+            o << "min_beta" << settings.separator << settings.min_beta << std::endl;
+            o << "max_beta" << settings.separator << settings.max_beta << std::endl;
+            o << "initial_beta" << settings.separator << settings.initial_beta << std::endl;
+            o << "resolution" << settings.separator << settings.resolution << std::endl;
+            o << "initial_width_is_max_left" << settings.separator << settings.initial_width_is_max_left << std::endl;
+            o << "initial_width_is_max_right" << settings.separator << settings.initial_width_is_max_right << std::endl;
+            o << "statistics_log_filename" << settings.separator << settings.statistics_log_filename << std::endl;
+            o << "log_mode" << settings.separator << Muninn::StatisticsLogger::ModeNames[settings.log_mode] << std::endl;
+            o << "initial_max" << settings.separator << settings.initial_max << std::endl;
+            o << "memory" << settings.separator << settings.memory << std::endl;
+            o << "min_count" << settings.separator << settings.min_count << std::endl;
+            o << "restricted_individual_support" << settings.separator << settings.restricted_individual_support << std::endl;
+            o << "use_dynamic_binning" << settings.separator << settings.use_dynamic_binning << std::endl;
+            o << "max_number_of_bins" << settings.separator << settings.max_number_of_bins << std::endl;
+            o << "bin_width" << settings.separator << settings.bin_width << std::endl;
+            o << "verbose" << settings.separator << settings.verbose << std::endl;
             return o;
         }
     };

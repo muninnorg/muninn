@@ -59,10 +59,13 @@ CGE* CGEfactory::new_CGE(const Settings& settings) {
     // Allocate the binner
     Binner* binner = NULL;
 
-    if (settings.use_dynamic_binning)
-        binner = new NonUniformDynamicBinner(settings.resolution, settings.initial_width_is_max_left, settings.initial_width_is_max_right);
-    else
+    if (settings.use_dynamic_binning) {
+        binner = new NonUniformDynamicBinner(settings.resolution, settings.initial_width_is_max_left, settings.initial_width_is_max_right, settings.max_number_of_bins);
+    }
+    else {
+        // TODO: This constructor should also use the max_number_of_bins
         binner = new UniformBinner(settings.bin_width);
+    }
 
     // Allocate the looger
     StatisticsLogger* statistics_logger = new StatisticsLogger(settings.statistics_log_filename, settings.log_mode);

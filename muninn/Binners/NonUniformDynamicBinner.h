@@ -25,11 +25,13 @@
 #define MUNINN_NONUNIFORMDYNAMICBINNER_H_
 
 #include <algorithm>
+#include <cmath>
 
 #include "muninn/common.h"
 #include "muninn/Binner.h"
 #include "muninn/Binners/NonUniformBinner.h"
 #include "muninn/Histories/MultiHistogramHistory.h"
+#include "muninn/Exceptions/MaximalNumberOfBinsExceed.h"
 
 #include "muninn/utils/polation/SupportBoundaries.h"
 #include "muninn/utils/polation/AverageSlope.h"
@@ -50,16 +52,17 @@ public:
     ///                                  bin width, when expanding to the left.
     /// \param initial_width_is_max_right Use the initial bin with as maximal
     ///                                   bin width, when expanding to the right.
+    /// \param max_number_of_bins The maximal number of bins the binner can use.
     /// \param extend_factor When extending the binned area the extension is
     ///                      padded with extend_factor/resolution bins.
     /// \param sigma The number of observed bins used in the Gaussian kernel
     ///              for the slope estimate of the weights. The estimated is
     ///              used to obtained a constant resolution in the weights.
     NonUniformDynamicBinner(double resolution=0.2, bool initial_width_is_max_left=true, bool initial_width_is_max_right=false,
-                            unsigned int max_number_bins=1000000, double extend_factor=1.0, unsigned int sigma = 20) :
+                            unsigned int max_number_of_bins=1000000, double extend_factor=1.0, unsigned int sigma = 20) :
         NonUniformBinner(DArray(0u)), resolution(resolution), initial_width_is_max_left(initial_width_is_max_left),
-        initial_width_is_max_right(initial_width_is_max_right), extend_factor(extend_factor), sigma(sigma),
-        initial_bin_width(0.0) {};
+        initial_width_is_max_right(initial_width_is_max_right), max_number_of_bins(max_number_of_bins),
+        extend_factor(extend_factor), sigma(sigma), initial_bin_width(0.0) {};
 
     // Implementation of Binner interface (see base class for documentation).
     virtual void initialize(std::vector<double> &initial_values, double beta=0.0) {
@@ -67,11 +70,15 @@ public:
         // from the mean, as the initial beta
         if (std::abs(beta)<1E-6) {
             // Find the quantiles corresponding to +/- a standard deviation
-            std::vector<double> quantiles = calculate_fractiles(initial_values, newvector(0.1586553, 0.8413447));
-            assert(quantiles[1]-quantiles[0]>0); // TODO: Raise an exception instead of an assert
+            std::vector<double> fractiles = calculate_fractiles(initial_values, newvector(0.1586553, 0.8413447));
+
+            // Check that the quantiles differ
+            if (!(fractiles[1]-fractiles[0]>0)) {
+                throw MessageException("An initial binning could not be estimate since the 16% and 84% fractiles for the sampled energies have the same value. This means that 68% of the sampled energies have the same value.");
+            }
 
             // Find the standard deviation and the bin width
-            double sigma = 0.5*(quantiles[1]-quantiles[0]);
+            double sigma = 0.5*(fractiles[1]-fractiles[0]);
 
             // Set the beta calculate one std away
             beta = 1.0/sigma;
@@ -84,11 +91,23 @@ public:
         // Calculate the initial bin width
         initial_bin_width = std::abs(resolution/beta);
 
-        // Find the number of bins
+        // Find the min and max values among the reported values
         double min_value = initial_values[0] - initial_bin_width/2.0;
         double max_value = initial_values[initial_values.size() - 1] + initial_bin_width/2.0;
 
-        nbins = static_cast<unsigned int>((max_value - min_value) / initial_bin_width + 1);
+        // Check that the minimal and maximal value are finite
+        if (!std::isfinite(min_value) || !std::isfinite(max_value)) {
+            throw MessageException("An initial binning could not be estimate since a non finite energy has been added to Muninn.");
+        }
+
+        // Find the number of bins
+        double nbins_double_precision = (max_value - min_value) / initial_bin_width + 1;
+        nbins = static_cast<unsigned int>(nbins_double_precision);
+
+        // Check that the maximal number of bins has not been exceeded
+        if (nbins_double_precision > static_cast<double>(max_number_of_bins) ) {
+            throw MaximalNumberOfBinsExceed(max_number_of_bins, nbins>0 ? nbins : std::numeric_limits<unsigned int>::max());
+        }
 
         // Set the binning array
         binning = DArray(nbins+1);
@@ -124,7 +143,13 @@ public:
                 bin_width = std::min(bin_width, initial_bin_width);
 
             // Find the number of bins to add
-            unsigned int to_add = static_cast<unsigned int>( (binning(0) - value)/bin_width + 1 + extend_factor/resolution);
+            unsigned int to_add_double_precision = (binning(0) - value)/bin_width + 1 + extend_factor/resolution;
+            unsigned int to_add = static_cast<unsigned int>(to_add_double_precision);
+
+            // Check that the maximal number of bins had not been exceeded (do it in double to avoid overflow
+            if (to_add_double_precision + static_cast<double>(nbins) > static_cast<double>(max_number_of_bins)) {
+                throw MaximalNumberOfBinsExceed(max_number_of_bins, nbins+to_add);
+            }
 
             // Updated the number of bins and the binning array
             nbins += to_add;
@@ -153,7 +178,13 @@ public:
 
             // Find the number of bins to add
             unsigned int prev_nbins = binning.get_shape(0)-1;
-            unsigned int to_add = static_cast<unsigned int>( (value-binning(prev_nbins))/bin_width + 1 + extend_factor/resolution);
+            double to_add_double_precision = (value-binning(prev_nbins))/bin_width + 1 + extend_factor/resolution;
+            unsigned int to_add = static_cast<unsigned int>(to_add_double_precision);
+
+            // Check that the maximal number of bins had not been exceeded (do it in double to avoid overflow
+            if (to_add_double_precision + static_cast<double>(nbins) > static_cast<double>(max_number_of_bins)) {
+                throw MaximalNumberOfBinsExceed(max_number_of_bins, nbins+to_add);
+            }
 
             // Updated the number of bins and the binning array
             nbins += to_add;
@@ -177,6 +208,7 @@ private:
     const double resolution;         ///< The (constant) resolution used for binning.
     bool initial_width_is_max_left;  ///< Use the initial bin with as maximal bin width, when expanding to the left.
     bool initial_width_is_max_right; ///< Use the initial bin with as maximal bin width, when expanding to the right.
+    unsigned int max_number_of_bins; ///< The maximal number of bins the binner can use.
     const double extend_factor;      ///< When extending the binned area the extension is padded with extend_factor/resolution bins.
     unsigned int sigma;              ///< The number of observed bins used in the Gaussian kernel for the slope estimate of the weights.
     double initial_bin_width;        ///< The bin width estimated based on the initial samples in the function initialize().

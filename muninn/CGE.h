@@ -36,6 +36,7 @@
 #include "muninn/ExtrapolatedWeightScheme.h"
 #include "muninn/Binner.h"
 #include "muninn/utils/StatisticsLogger.h"
+#include "muninn/Exceptions/MaximalNumberOfBinsExceed.h"
 
 namespace Muninn {
 
@@ -119,7 +120,14 @@ public:
             return initial_new_weights();
         }
         else {
-            unsigned int bin = calc_bin_with_extention(energy);
+            unsigned int bin;
+            try {
+                bin = calc_bin_with_extention(energy);
+            }
+            catch (MaximalNumberOfBinsExceed exception) {
+                MessageLogger::get().warning(exception.what());
+                return ge.new_weights();
+            }
             return ge.add_observation(bin);
         }
     }
@@ -151,7 +159,14 @@ public:
             }
             // With a normal weightscheme, the binning has the be extended in order to get a weight
             else {
-                unsigned int bin = calc_bin_with_extention(energy);
+                unsigned int bin;
+                try {
+                    bin = calc_bin_with_extention(energy);
+                }
+                catch (MaximalNumberOfBinsExceed exception) {
+                    MessageLogger::get().warning(exception.what());
+                    return std::numeric_limits<double>::infinity();
+                }
                 return ge.get_lnweights(bin);
             }
         }

@@ -27,7 +27,7 @@
 #include <exception>
 #include <string>
 
-#include "muninn/Exceptions/MessageException.h"
+#include "muninn/Exceptions/MuninnException.h"
 
 namespace Muninn {
 
@@ -37,19 +37,21 @@ class MessageException : public MuninnException {
 public:
     /// Constructor
     ///
-    /// \param message The message to be returned by what()
+    /// \param message The message to be returned by what().
     MessageException(const std::string &message) throw() : message(message) {}
 
     /// Virtual destructor
     virtual ~MessageException() throw() {};
 
     /// Returns a character string describing the cause of the error.
+    ///
+    /// \return A character string describing the cause of the error.
     virtual const char* what() const throw() {
         return message.c_str();
     }
 
 private:
-    std::string message;
+    std::string message;  ///< The message to be returned by what().
 };
 
 } // namespace Muninn
