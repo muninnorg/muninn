@@ -1,5 +1,9 @@
 2012-02-08  Jes Frellsen  <frellsen@binf>
 
+	* README.txt: Minor correction.
+	
+2012-02-08  Jes Frellsen  <frellsen@binf>
+
 	* muninn/CGE.h (CGE.~CGE): Corrected bug in deleting the binner.
 
 2012-01-13  Jes Frellsen  <frellsen@binf>
