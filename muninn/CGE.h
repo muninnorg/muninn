@@ -105,7 +105,7 @@ public:
     /// the GE class.
     virtual ~CGE() {
         if (has_ownership) {
-            delete &binner;
+            delete binner;
         }
     }
 
