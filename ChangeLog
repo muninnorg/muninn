@@ -1,3 +1,8 @@
+2012-03-05  Jes Frellsen  <frellsen@binf>
+
+	* scripts/details/myhist.py: Fix function myhist, so that xmax is
+	compared to the right bin edge (rather than the left).
+
 2012-02-08  Jes Frellsen  <frellsen@binf>
 
 	* muninn/CGE.h: Added try-catch around the calc_bin_with_extention

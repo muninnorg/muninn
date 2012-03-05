@@ -38,7 +38,7 @@ def myhist(lnw, color="black", makenewplot=True, main=None, bins=None, support=N
     
     if bins==None:
         for bin in range(nbins):
-            if (lnw[bin] > -inf or lnw[bin] < inf) and (support==None or support[bin]) and (xmin==None or xmin<=bin) and (xmax==None or bin<=xmax):
+            if (lnw[bin] > -inf or lnw[bin] < inf) and (support==None or support[bin]) and (xmin==None or xmin<=bin) and (xmax==None or (bin+1)<=xmax):
                 xss[-1] += [bin, bin+1]
                 yss[-1] += [lnw[bin], lnw[bin]]
 
@@ -53,7 +53,7 @@ def myhist(lnw, color="black", makenewplot=True, main=None, bins=None, support=N
             xlim = (min(xs), max(xs))
     else:
         for bin in range(nbins):
-            if (lnw[bin] > -inf or lnw[bin] < inf) and (support==None or support[bin]) and (xmin==None or xmin<=bins[bin]) and (xmax==None or bins[bin]<=xmax):
+            if (lnw[bin] > -inf or lnw[bin] < inf) and (support==None or support[bin]) and (xmin==None or xmin<=bins[bin]) and (xmax==None or bins[bin+1]<=xmax):
                 xss[-1] += [bins[bin], bins[bin+1]]
                 yss[-1] += [lnw[bin], lnw[bin]]
 
