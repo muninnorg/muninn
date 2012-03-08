@@ -1,3 +1,48 @@
+2012-03-08  Jes Frellsen  <frellsen@binf>
+
+	* muninn/Binner.h: Added more documentation.
+
+	* muninn/CGE.h: Added a construct that takes a given history and
+	lnG estimate as arguments.
+
+	* muninn/Estimator.h: Added a new prototype for the pure virtual
+	function Estimate::new_estimate.
+
+	* muninn/GE.h: (1) Added member variable has_ownership_history,
+	and (2) added a constructor that takes a given history and lnG
+	estimate as arguments.
+
+	* muninn/Histogram.h: Added a constructor that takes both a
+	initial set of counts and weights as an argument.
+
+	* muninn/Binners/NonUniformDynamicBinner.h: Added a constructor
+	that takes a previous binning as argument.
+
+	* muninn/Binners/UniformBinner.h: Removed warning caused by
+	constructor.
+
+	* muninn/Factories/CGEfactory.h: Added
+	read_statistics_log_filename setting.
+
+	* muninn/Factories/CGEfactory.cpp: Added functionally to read in
+	the hisgory given by the setting read_statistics_log_filename.
+
+	* muninn/MLE/MLE.h: Added prototype for the new MLE::new_estimate
+	function.
+
+	* muninn/MLE/MLE.cpp: Added implementation of the new
+	MLE::new_estimate function.
+
+	* muninn/MLE/MLEestimate.h: Added missing doxygen documentation.
+
+	* muninn/utils/ArrayAligner.h: Added functionality for aligning
+	to arrays.
+
+	* muninn/utils/TArray.h: Made TArray::extended const
+	member functions.
+
+	* muninn/utils/TArrayUtils.h: Added arg_min functions.
+
 2012-03-05  Jes Frellsen  <frellsen@binf>
 
 	* scripts/details/myhist.py: Fix function myhist, so that xmax is

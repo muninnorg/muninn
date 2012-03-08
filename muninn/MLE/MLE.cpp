@@ -25,6 +25,7 @@
 
 #include "muninn/MLE/MLE.h"
 #include "muninn/utils/TArrayUtils.h"
+#include "muninn/utils/TArrayMath.h"
 #include "muninn/utils/nonlinear/NonlinearEquation.h"
 #include "muninn/utils/nonlinear/newton.h"
 
@@ -184,7 +185,7 @@ double MLE::initial_free_energy_estimate(const MultiHistogramHistory &history, c
     else {
         // Else the initial guess is defined as described in equation (A.4) in [JFB02].
 
-        // Find the regions where we we can use the old estimate of lnG.
+        // Find the regions where we can use the old estimate of lnG.
         // If sum_N-history[0].get_N() >= minount then we know that lnG has been estimated for this been
         BArray usable = (sum_N - history[0].get_N()) >= min_count && history[0].get_N() > 0;
 
@@ -260,6 +261,85 @@ void MLE::calc_lnG_accumulated(const MultiHistogramHistory &history, const CArra
         // Calculate the entropy using equation (4.2) in [JBF02]
         new_lnG(it) = log(sum_N(it)) - log_denominator;
     }
+}
+
+Estimate* MLE::new_estimate(const DArray &lnG, const BArray &lnG_support, const History &base_history, const Binner *binner) {
+	assert(lnG.same_shape(lnG_support) && lnG.has_shape(base_history.get_shape()));
+
+    // Cast the history and estimate to be the MLE type
+    const MultiHistogramHistory& history = MultiHistogramHistory::cast_from_base(base_history, "The MLE estimator is only compatible with the MultiHistogramHistory.");
+
+	// Make a new MLE estimate
+	MLEestimate *estimate = new MLEestimate(lnG.get_shape());
+
+	// Set the reference bin, as the bin where lnG is closed to zero.
+	// Check if the reference bin is set in the estimate and it has support
+	std::vector<unsigned int> x0 = arg_min(TArray_abs<DArray>(lnG), lnG_support);
+
+	if (history.get_sum_N()(x0)<min_count) {
+    	x0 = arg_max(history.get_sum_N());
+    }
+
+	estimate->set_x0(x0);
+
+	// Calculate the support for the individual histogram in the history as the
+	// intersection between lnG_support and the history
+	std::vector<CArray> supports(history.get_size());
+
+	// Calculate a crude estimate of the free energy based on the lnG estimate
+	// and lnG_support
+	// TODO: Take into account n_out?
+	// TODO: Improve the estimate
+    if (restricted_individual_support) {
+    	BArray support = history.get_sum_N()>=min_count && lnG_support;
+
+    	for (MultiHistogramHistory::const_iterator set=history.begin(); set!=history.end(); ++set) {
+    		// Calculate the partition function within the area with support as given by equation (A.5) in [JFB02].
+    		DArray summands(history.get_shape());
+
+    		for (BArray::constwheretrueiterator it = support.get_constwheretrueiterator(); it(); ++it) {
+    			summands(it) = lnG(it) + (*set)->get_lnw()(it);
+    		}
+
+    		double lnZ = log_sum_exp(summands, support);
+    		estimate->free_energies[*set] = -lnZ;
+    	}
+    }
+    else {
+		CArray sum_N(history.get_shape());
+
+		for (MultiHistogramHistory::const_reverse_iterator set=history.rbegin(); set!=history.rend(); ++set) {
+			for (unsigned int bin=0; bin < sum_N.get_asize(); ++bin) {
+				sum_N(bin) += (*set)->get_N()(bin);
+			}
+
+			BArray support = sum_N>min_count && lnG_support;
+
+    		// Calculate the partition function within the area with support as given by equation (A.5) in [JFB02].
+    		DArray summands(history.get_shape());
+
+    		for (BArray::constwheretrueiterator it = support.get_constwheretrueiterator(); it(); ++it) {
+    			summands(it) = lnG(it) + (*set)->get_lnw()(it);
+    		}
+
+    		double lnZ = log_sum_exp(summands, support);
+    		estimate->free_energies[*set] = -lnZ;
+		}
+    }
+
+    // Copy the free energies to an array and print them. This is inefficient
+    // but the easiest way to make the printing consistent with the estimator.
+    //    DArray free_energies(history.get_size());
+    //    for (unsigned int set=0; set<history.get_size(); set++) {
+    //    	free_energies(set) = estimate->free_energies[&history[set]];
+    //    }
+    //    MessageLogger::get().debug("MLE estimated free energies are: " + free_energies.write(3, false, false));
+
+    // Get an accurate estimate of the free energies (the estimate is set
+    // automatically by the estimate function).
+    this->estimate(base_history, *estimate, binner);
+
+    return estimate;
 }
 
 } // namespace Muninn

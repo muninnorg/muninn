@@ -64,6 +64,37 @@ public:
         initial_width_is_max_right(initial_width_is_max_right), max_number_of_bins(max_number_of_bins),
         extend_factor(extend_factor), sigma(sigma), initial_bin_width(0.0) {};
 
+    /// Constructor based on a previous estimated binning.
+    ///
+    /// \param binning A previous estimated binning to start from.
+    /// \param beta The value used of the initial beta, used for estimating the
+    ///             binning.
+    /// \param resolution The resolution for the binner. The binning is set so
+    ///                   that a uniform resolution, \f$ r \f$, in the weights
+    ///                   is obtained, \f$ |ln w(E_j) - \ln w(E_{j+1})| \simeq r \f$.
+    /// \param initial_width_is_max_left Use the initial bin with as maximal
+    ///                                  bin width, when expanding to the left.
+    /// \param initial_width_is_max_right Use the initial bin with as maximal
+    ///                                   bin width, when expanding to the right.
+    /// \param max_number_of_bins The maximal number of bins the binner can use.
+    /// \param extend_factor When extending the binned area the extension is
+    ///                      padded with extend_factor/resolution bins.
+    /// \param sigma The number of observed bins used in the Gaussian kernel
+    ///              for the slope estimate of the weights. The estimated is
+    ///              used to obtained a constant resolution in the weights.
+    NonUniformDynamicBinner(const DArray& binning, double beta, double resolution=0.2, bool initial_width_is_max_left=true, bool initial_width_is_max_right=false,
+                            unsigned int max_number_of_bins=1000000, double extend_factor=1.0, unsigned int sigma = 20) :
+        NonUniformBinner(binning), resolution(resolution), initial_width_is_max_left(initial_width_is_max_left),
+        initial_width_is_max_right(initial_width_is_max_right), max_number_of_bins(max_number_of_bins),
+        extend_factor(extend_factor), sigma(sigma), initial_bin_width(0.0) {
+        if (std::abs(beta)<1E-6) {
+            initial_bin_width = get_bin_widths().max();
+        }
+        else {
+        	initial_bin_width = std::abs(resolution/beta);
+        }
+    };
+
     // Implementation of Binner interface (see base class for documentation).
     virtual void initialize(std::vector<double> &initial_values, double beta=0.0) {
         // If the initial sampling was done a beta=0, we will use the beta one std away

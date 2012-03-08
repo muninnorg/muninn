@@ -41,7 +41,10 @@
 namespace Muninn {
 
 /// The Continuous Generalized Ensemble (CGE) class. The class constitutes
-/// the main user interface to Muninn
+/// the main user interface to Muninn.
+///
+/// Note that while the GE class generally support any number of dimensions,
+/// the CGE class currently only support one dimension.
 class CGE {
 public:
 
@@ -67,13 +70,63 @@ public:
         StatisticsLogger *statisticslogger=NULL,
         double initial_beta=0,
         bool receives_ownership=false) :
-            ge(0, estimator, updatescheme, weightscheme, statisticslogger, receives_ownership),
+            ge(0u, estimator, updatescheme, weightscheme, statisticslogger, receives_ownership),
             binner(binner),
             extrapolated_weightscheme(dynamic_cast<ExtrapolatedWeightScheme*>(weightscheme)),
             has_ownership(receives_ownership),
             initial_max(updatescheme->get_initial_max()),
             initial_collection(true),
             initial_beta(initial_beta) {}
+
+	/// Construct a CGE object based on a given history and an estimate of the
+    /// statistical weight, lnG. The shape of the history and the weights must
+    /// match the number bins represented in the binner.
+    ///
+    /// The constructor is based on pointers to the Estimator, UpdateScheme,
+    /// WeighScheme, Binner and History objects. The class can take ownership
+    /// of these objects and delete them upon destruction of the CGE object.
+    ///
+    /// \param history The initial history.
+    /// \param estimator A pointer to the Estimator to be used.
+    /// \param updatescheme A pointer to the UpdateScheme to be used.
+    /// \param weightscheme A pointer to the weightscheme to be used.
+    /// \param binner A reference to the binner to be used.
+    /// \param statisticslogger A pointer to the StatisticsLogger (if set to
+    ///                         null no statistics will be logged).
+    /// \param receives_ownership Whether the CGE class takes ownership of the
+    ///                           Estimator, UpdateScheme, WeighScheme and
+    ///                           History objects. If set to true, these will
+    ///                           be delete when the CGE object is deleted.
+    CGE(const DArray &lnG,
+    	const BArray &lnG_support,
+    	History *history,
+    	Estimator *estimator,
+        UpdateScheme *updatescheme,
+        WeightScheme *weightscheme,
+        Binner *binner,
+        StatisticsLogger *statisticslogger=NULL,
+        bool receives_ownership=false) :
+            ge(lnG, lnG_support, history, estimator, updatescheme, weightscheme, binner, statisticslogger, receives_ownership),
+            binner(binner),
+            extrapolated_weightscheme(dynamic_cast<ExtrapolatedWeightScheme*>(weightscheme)),
+            has_ownership(receives_ownership),
+            initial_max(updatescheme->get_initial_max()),
+            initial_collection(false),
+            initial_beta(0.0) {
+
+    	if(!(lnG.get_ndims()==1 && lnG.same_shape(lnG_support))) {
+    		throw MessageException("The shape of lnG and lnG_support given to the GE constructor must match each other and have dimension one.");
+    	}
+
+
+    	if(!(lnG.get_ndims()==1 && lnG.get_shape(0)==history->get_shape()[0])) {
+    		throw MessageException("The shape of lnG and the history given to the GE constructor must match each other and have dimension one.");
+    	}
+
+    	if(!(history->get_shape().size()==1 && history->get_shape()[0]==binner->get_nbins())) {
+    		throw MessageException("The shape of the history given to the GE constructor must match the number of bins represented in the binner.");
+    	}
+    }
 
     /// Constructor based on reference of the Estimator, UpdateScheme and
     /// WeighScheme classes.
@@ -91,7 +144,7 @@ public:
         Binner &binner,
         StatisticsLogger *statisticslogger=NULL,
         double initial_beta=0) :
-            ge(0, &estimator, &updatescheme, &weightscheme, statisticslogger, false),
+            ge(0u, &estimator, &updatescheme, &weightscheme, statisticslogger, false),
             binner(&binner),
             extrapolated_weightscheme(dynamic_cast<ExtrapolatedWeightScheme*>(&weightscheme)),
             has_ownership(false),

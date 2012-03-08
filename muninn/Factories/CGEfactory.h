@@ -79,12 +79,17 @@ public:
         /// Use the initial bin with as maximal bin width, when expanding to the right.
         bool initial_width_is_max_right;
 
-        /// The filename for the Muninn statistics logfile.
+        /// The filename for writing the Muninn statistics logfile.
         std::string statistics_log_filename;
 
         /// Muninn log mode (current|all). See Muninn::StatisticsLogger::Mode
         /// for details.
         Muninn::StatisticsLogger::Mode log_mode;
+
+        /// The filename for reading the Muninn statistics logfile. If the
+        /// value difference from the empty string (""), this log file is read
+        /// and the history is set based on the content.
+        std::string read_statistics_log_filename;
 
         /// Number of iterations used in first round of sampling.
         unsigned int initial_max;
@@ -126,6 +131,7 @@ public:
         /// \param initial_width_is_max_right See documentation for Settings::initial_width_is_max_right.
         /// \param statistics_log_filename See documentation for Settings::statistics_log_filename.
         /// \param log_mode See documentation for Settings::log_mode.
+        /// \param read_statistics_log_filename See documentation for Settings::read_statistics_log_filename.
         /// \param initial_max  See documentation for Settings::initial_max.
         /// \param memory See documentation for Settings::memory.
         /// \param min_count See documentation for Settings::min_count.
@@ -146,6 +152,7 @@ public:
                  bool initial_width_is_max_right=false,
                  std::string statistics_log_filename = "muninn.txt",
                  Muninn::StatisticsLogger::Mode log_mode = Muninn::StatisticsLogger::ALL,
+                 std::string read_statistics_log_filename = "",
                  unsigned int initial_max = 5000,
                  unsigned int memory = 40,
                  unsigned int min_count = 30,
@@ -166,6 +173,7 @@ public:
           initial_width_is_max_right(initial_width_is_max_right),
           statistics_log_filename(statistics_log_filename),
           log_mode(log_mode),
+          read_statistics_log_filename(read_statistics_log_filename),
           initial_max(initial_max),
           memory(memory),
           min_count(min_count),
@@ -198,6 +206,7 @@ public:
             o << "initial_width_is_max_right" << settings.separator << settings.initial_width_is_max_right << std::endl;
             o << "statistics_log_filename" << settings.separator << settings.statistics_log_filename << std::endl;
             o << "log_mode" << settings.separator << Muninn::StatisticsLogger::ModeNames[settings.log_mode] << std::endl;
+            o << "read_statistics_log_filename" << settings.separator << settings.read_statistics_log_filename << std::endl;
             o << "initial_max" << settings.separator << settings.initial_max << std::endl;
             o << "memory" << settings.separator << settings.memory << std::endl;
             o << "min_count" << settings.separator << settings.min_count << std::endl;

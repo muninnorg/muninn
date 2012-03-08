@@ -79,6 +79,16 @@ public:
     /// \return A new empty Estimate.
     virtual Estimate* new_estimate(const std::vector<unsigned int> &shape) = 0;
 
+    /// Make a new Estimate based on lnG and lnG support compatible with the
+    /// Estimator. The returned Estimate may be a class derived from the
+    /// Estimate base class.
+    ///
+    /// \param lnG The estimated entropy.
+    /// \param lnG_support The support for the estimated entropy.
+    /// \param binner If a Binner has been use, it can be passed to the estimator.
+    /// \return A new empty Estimate.
+    virtual Estimate* new_estimate(const DArray &lnG, const BArray &lnG_support, const History &history, const Binner *binner=NULL) = 0;
+
 protected:
     /// The constructor is protected since this is a abstract class with no
     /// implementations.

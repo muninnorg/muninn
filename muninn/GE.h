@@ -75,7 +75,8 @@ public:
         updatescheme(updatescheme),
         weightscheme(weightscheme),
         statisticslogger(statisticslogger),
-        has_ownership(receives_ownership) {
+        has_ownership(receives_ownership),
+        has_ownership_history(true) {
         init();
     }
 
@@ -103,7 +104,8 @@ public:
         updatescheme(updatescheme),
         weightscheme(weightscheme),
         statisticslogger(statisticslogger),
-        has_ownership(receives_ownership) {
+        has_ownership(receives_ownership),
+        has_ownership_history(true) {
         init();
     }
 
@@ -128,15 +130,55 @@ public:
         updatescheme(updatescheme),
         weightscheme(weightscheme),
         statisticslogger(statisticslogger),
-        has_ownership(receives_ownership) {
+        has_ownership(receives_ownership),
+        has_ownership_history(true) {
         init();
+    }
+
+    /// Construct a GE object based on a given history. The shape of the
+    /// current histogram is set based on the shape of the history.
+    ///
+    /// \param lnG The lnG used to construct the current estimate with. This is
+    ///            also used for setting the weights.
+    /// \param lnG_support The support of the estimated lnG.
+    /// \param history The initial history.
+    /// \param estimator A pointer to the Estimator to be used.
+    /// \param updatescheme A pointer to the UpdateScheme to be used.
+    /// \param weightscheme A pointer to the WeightScheme to be used.
+    /// \param binner A Binner should be passed if the binning of the entropy
+    ///               and histogram is non-uniform.
+    /// \param statisticslogger A pointer to the StatisticsLogger (if set to
+    ///                         null no statistics will be logged).
+    /// \param receives_ownership Whether the CE class takes ownership of the
+    ///                           Estimator, UpdateScheme, WeighScheme,
+    ///                           StatisticsLogger and History objects. If set
+    ///                           to true, these will be delete when the GE
+    ///                           object is deleted.
+    GE(const DArray &lnG, const BArray &lnG_support, History *history, Estimator *estimator, UpdateScheme *updatescheme, WeightScheme *weightscheme,  const Binner *binner=NULL, StatisticsLogger *statisticslogger=NULL, bool receives_ownership=false) :
+        current(newvector<unsigned int>(0)),
+        history(history),
+        estimate(estimator->new_estimate(lnG, lnG_support, *history, binner)),
+        estimator(estimator),
+        updatescheme(updatescheme),
+        weightscheme(weightscheme),
+        statisticslogger(statisticslogger),
+        has_ownership(receives_ownership),
+        has_ownership_history(receives_ownership) {
+        init();
+
+        // Set the weights correctly
+        DArray new_weights = weightscheme->get_weights(*estimate, *history, binner);
+        current = Histogram(new_weights); // TODO: Is this the best way of making an empty histogram?
     }
 
     /// Destructor for the GE class. If has_ownership is set to true, the
     /// Estimator, UpdateScheme, WeightScheme and StatisticsLogger objects are
     /// also deleted.
     virtual ~GE() {
-        delete history;
+        if (has_ownership_history) {
+        	delete history;
+        }
+
         delete estimate;
 
         if (has_ownership) {
@@ -293,6 +335,7 @@ private:
     StatisticsLogger *statisticslogger;
 
     bool has_ownership;                 ///< Whether this GE object owns the Estimator, UpdateScheme, WeighScheme and StatisticsLogger objects.
+    bool has_ownership_history;         ///< Whether this GE object owns the History object.
 
     int total_iterations;               ///< The total number of iterations recorded by the GE class, including observations dropped from the history.
     bool new_weights_variable;          ///< This variable is set to true, when the UpdateScheme says it is time to estimate new weights.

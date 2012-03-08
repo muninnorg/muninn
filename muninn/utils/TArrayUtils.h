@@ -114,6 +114,44 @@ inline std::vector<unsigned int> arg_max(const TArray<T> &array, const BArray &w
     return array.get_coord(MAX_INDEX);
 }
 
+/// Find the index of the minimal element in an array.
+///
+/// \param array The array to find the minimal value in.
+/// \return The index of the minimal value in the array.
+template<typename T>
+inline std::vector<unsigned int> arg_min(const TArray<T> &array) {
+    T MIN = std::numeric_limits<T>::infinity();
+    int MIN_INDEX = 0;
+
+    for (typename TArray<T>::constflatiterator it = array.get_constflatiterator(); it(); ++it) {
+        if (*it < MIN) {
+            MIN = *it;
+            MIN_INDEX = it.get_index();
+        }
+    }
+    return array.get_coord(MIN_INDEX);
+}
+
+/// Find the index of the minimal element in an array, but only among
+/// a limited set of indices.
+///
+/// \param array The array to find the minimal value in.
+/// \param where Only indices where this array is true is considered.
+/// \return The index of the minimal value in the array.
+template<typename T>
+inline std::vector<unsigned int> arg_min(const TArray<T> &array, const BArray &where) {
+    T MIN = std::numeric_limits<T>::infinity();
+    int MIN_INDEX = 0;
+
+    for (BArray::constwheretrueiterator it = where.get_constwheretrueiterator(); it(); ++it) {
+        if (array(it) < MIN) {
+            MIN = array(it);
+            MIN_INDEX = it.get_index();
+        }
+    }
+    return array.get_coord(MIN_INDEX);
+}
+
 /// Find the number of elements that are true in an array.
 ///
 /// \param array The array to find the number of true values in.

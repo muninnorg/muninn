@@ -42,7 +42,7 @@ public:
     /// \param extend_nbins The number of bins used as additional padding when
     ///                     extending the binned region.
     UniformBinner(double bin_width, unsigned int extend_nbins=20) :
-        Binner(0, true), std_bins(0.0), extend_nbins(extend_nbins),
+        Binner(0, true), std_bins(0), extend_nbins(extend_nbins),
         min_value(0.0), max_value(0.0), bin_width(bin_width) {};
 
     /// Constructor where the bin width is set based on assuming that the

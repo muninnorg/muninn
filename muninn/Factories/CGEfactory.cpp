@@ -30,15 +30,38 @@
 #include "muninn/WeightSchemes/LinearPolatedMulticanonical.h"
 #include "muninn/WeightSchemes/LinearPolatedInvK.h"
 
+#include "muninn/utils/StatisticsLogReader.h"
+#include "muninn/utils/ArrayAligner.h"
+
 namespace Muninn {
 
 CGE* CGEfactory::new_CGE(const Settings& settings) {
     // Set the Muninn debug level
     MessageLogger::get().set_verbose(settings.verbose);
 
-    // Allocate the estimator and the update scheme
+    // Possibly read a statistics log file
+    StatisticsLogReader *statistics_log_reader = NULL;
+
+    if (settings.read_statistics_log_filename!="") {
+        MessageLogger::get().info("Reading statistics log file");
+    	statistics_log_reader = new StatisticsLogReader(settings.read_statistics_log_filename, settings.memory);
+    }
+
+    // Allocate the estimator
     MLE* estimator = new MLE(settings.min_count, settings.memory, settings.restricted_individual_support);
-    IncreaseFactorScheme* update_scheme = new IncreaseFactorScheme(settings.initial_max);
+
+    // Allocate the update scheme
+    unsigned int initial_max;
+
+    if (statistics_log_reader==NULL) {
+    	initial_max = settings.initial_max;
+    }
+    else {
+    	initial_max = statistics_log_reader->get_Ns().back().second.sum();
+    	MessageLogger::get().debug("Settings initial_max to "+to_string(initial_max)+".");
+    }
+
+    IncreaseFactorScheme* update_scheme = new IncreaseFactorScheme(initial_max);
 
     // Allocate the weight scheme
     LinearPolatedWeigths *weight_scheme = NULL;
@@ -60,18 +83,53 @@ CGE* CGEfactory::new_CGE(const Settings& settings) {
     Binner* binner = NULL;
 
     if (settings.use_dynamic_binning) {
-        binner = new NonUniformDynamicBinner(settings.resolution, settings.initial_width_is_max_left, settings.initial_width_is_max_right, settings.max_number_of_bins);
+        if (statistics_log_reader==NULL) {
+        	binner = new NonUniformDynamicBinner(settings.resolution, settings.initial_width_is_max_left, settings.initial_width_is_max_right, settings.max_number_of_bins);
+        }
+        else {
+        	binner = new NonUniformDynamicBinner(statistics_log_reader->get_binnings().back().second, settings.initial_beta, settings.resolution, settings.initial_width_is_max_left, settings.initial_width_is_max_right, settings.max_number_of_bins);
+        }
     }
     else {
-        // TODO: This constructor should also use the max_number_of_bins
-        binner = new UniformBinner(settings.bin_width);
+        if (statistics_log_reader==NULL) {
+        	// TODO: This constructor should also use the max_number_of_bins
+        	binner = new UniformBinner(settings.bin_width);
+        }
+        else {
+        	binner = new UniformBinner(statistics_log_reader->get_binnings().back().second.min(), statistics_log_reader->get_binnings().back().second.max(), statistics_log_reader->get_binnings().back().second.get_asize()-1);
+        }
     }
 
-    // Allocate the looger
+    // Allocate the logger
     StatisticsLogger* statistics_logger = new StatisticsLogger(settings.statistics_log_filename, settings.log_mode);
 
     // Create the CGE object
-    CGE* cge = new CGE(estimator, update_scheme, weight_scheme, binner, statistics_logger, settings.initial_beta, true);
+    CGE* cge = NULL;
+
+    if (statistics_log_reader==NULL) {
+    	cge = new CGE(estimator, update_scheme, weight_scheme, binner, statistics_logger, settings.initial_beta, true);
+    }
+    else {
+    	History* history = estimator->new_history(statistics_log_reader->get_Ns().back().second.get_shape());
+
+    	for (unsigned int i = 0; i < statistics_log_reader->get_Ns().size(); ++i) {
+    		const DArray& current_binning = statistics_log_reader->get_binnings()[i].second;
+    		const DArray& final_binning = statistics_log_reader->get_binnings().back().second;
+
+    		// Check if the binning is the same as the last histogram
+    		if (!current_binning.same_shape(final_binning)) {
+    			std::pair<unsigned int, unsigned int> offsets = ArrayAligner::calculate_alignment_offsets(final_binning, current_binning);
+        		const CArray extended_Ns = statistics_log_reader->get_Ns()[i].second.extended(offsets.first, offsets.second);
+        		const DArray extended_lnws = statistics_log_reader->get_lnws()[i].second.extended(offsets.first, offsets.second);
+        		history->add_histogram(Histogram(extended_Ns, extended_lnws));
+    		}
+    		else {
+        		history->add_histogram(Histogram(statistics_log_reader->get_Ns()[i].second, statistics_log_reader->get_lnws()[i].second));
+    		}
+    	}
+
+    	cge = new CGE(statistics_log_reader->get_lnGs().back().second, statistics_log_reader->get_lnG_supports().back().second, history, estimator, update_scheme, weight_scheme, binner, statistics_logger, true);
+    }
 
     return cge;
 }

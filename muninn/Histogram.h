@@ -53,6 +53,15 @@ public:
     Histogram(const DArray &lnw) :
         N(lnw.get_shape()), lnw(lnw), n(0), shape(lnw.get_shape()) {}
 
+    /// Constructor for an histogram with a initial set of counts and a set of
+    /// corresponding weights. The count histogram.
+    ///
+    /// \param N The initial set of counts.
+    /// \param lnw The weights the histogram will be initialized with.
+    Histogram(const CArray &N, const DArray &lnw) :
+        N(N), lnw(lnw), n(N.sum()), shape(N.get_shape()) {
+    	assert(N.same_shape(lnw));
+    }
 
     /// Function for adding a one dimensional observation to the histogram.
     ///

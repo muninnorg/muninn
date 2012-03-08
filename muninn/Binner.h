@@ -35,7 +35,11 @@
 namespace Muninn {
 
 /// The Binner abstract class is the interface for binner classes. Binner
-/// classes provides an method to partition the energy space into discrete bins.
+/// classes provides an method to partition the energy space into discrete
+/// bins.
+///
+/// Note that binners currently only supports a one dimensional reaction
+/// coordinate/energy.
 class Binner {
 public:
     /// The constructor of the Binner base class.

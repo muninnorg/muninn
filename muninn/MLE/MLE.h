@@ -72,6 +72,9 @@ public:
         return new MLEestimate(shape);
     }
 
+    // Implementation of Estimator interface (see base class for documentation).
+    virtual Estimate* new_estimate(const DArray &lnG, const BArray &lnG_support, const History &base_history,  const Binner *binner=NULL);
+
 private:
     const Count min_count;                           ///< The minimal number of counts in a bin in order to have support in a bin.
     const unsigned int memory;                       ///< The maximal number of histogram to keep in the history.

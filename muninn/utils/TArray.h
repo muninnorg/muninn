@@ -176,9 +176,9 @@ public:
     inline bool valid_coord(const std::vector<Index> &coord) const;
 
     // Functions for resizing
-    TArray<T> extended(Index add_under, Index add_over);
-    TArray<T> extended(Index add_under_1, Index add_under_2, Index add_over_1, Index add_over_2);
-    TArray<T> extended(const std::vector<Index> &add_under, const std::vector<Index> &add_over);
+    TArray<T> extended(Index add_under, Index add_over) const;
+    TArray<T> extended(Index add_under_1, Index add_under_2, Index add_over_1, Index add_over_2) const;
+    TArray<T> extended(const std::vector<Index> &add_under, const std::vector<Index> &add_over) const;
 
     // Iterators
     typedef TArrayFlatIterator<TArray<T>, T> flatiterator;
@@ -1246,7 +1246,7 @@ inline bool TArray<T>::valid_coord(const std::vector<Index> &coord) const {
 /// \param add_over The number of bins to add above the size of the array.
 /// \return An extend version of the array.
 template<typename T>
-TArray<T> TArray<T>::extended(Index add_under, Index add_over) {
+TArray<T> TArray<T>::extended(Index add_under, Index add_over) const {
     // Note, that since arguments are unsigned (Index should be unsigned), they cannot be negative
     // Assert that he array is one dimensional
     assert(ndims==1);
@@ -1273,7 +1273,7 @@ TArray<T> TArray<T>::extended(Index add_under, Index add_over) {
 /// \param add_over_2 The number of bins to add above the size of the array in the second dimension.
 /// \return An extend version of the array.
 template<typename T>
-TArray<T> TArray<T>::extended(Index add_under_1, Index add_under_2, Index add_over_1, Index add_over_2) {
+TArray<T> TArray<T>::extended(Index add_under_1, Index add_under_2, Index add_over_1, Index add_over_2) const {
     // Note, that since arguments are unsigned (Index should be unsinged), they cannot be negative
     // Assert that he array is one dimensional
     assert(ndims==2);
@@ -1301,7 +1301,7 @@ TArray<T> TArray<T>::extended(Index add_under_1, Index add_under_2, Index add_ov
 /// \param add_over The number of bins to add in each dimension above the array size in the given dimension.
 /// \return An extend version of the array.
 template<typename T>
-TArray<T> TArray<T>::extended(const std::vector<Index> &add_under, const std::vector<Index> &add_over) {
+TArray<T> TArray<T>::extended(const std::vector<Index> &add_under, const std::vector<Index> &add_over) const {
     // Note, that since arguments are unsigned (Index should be unsigned), they cannot be negative
     // Assert that he array is one dimensional
     assert(add_under.size() == ndims);
@@ -1320,7 +1320,7 @@ TArray<T> TArray<T>::extended(const std::vector<Index> &add_under, const std::ve
         TArray<T> newarray(newshape);
 
         // Copy the content from the original to the new
-        for(flatiteratorcoord it = get_flatiteratorcoord(); it(); ++it) {
+        for(constflatiteratorcoord it = get_constflatiteratorcoord(); it(); ++it) {
             newarray(add_vectors(add_under, it.get_coord())) = *it;
         }
 
