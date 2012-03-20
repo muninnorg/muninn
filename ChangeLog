@@ -1,3 +1,12 @@
+2012-03-20  Jes Frellsen  <frellsen@bind>
+
+	* muninn/utils/nonlinear/newton/LineSearchAlgorithm.h: Added the
+	return value function_not_finite for linesearch.
+	
+	* muninn/utils/nonlinear/newton/NewtonRootFinder.h: Added handling
+	of the return value function_not_finite from linesearch and added
+	missing break.
+
 2012-03-08  Jes Frellsen  <frellsen@binf>
 
 	* muninn/Binner.h: Added more documentation.

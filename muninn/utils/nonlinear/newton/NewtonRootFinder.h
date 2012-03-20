@@ -149,8 +149,9 @@ public:
                 typename LSA::ReturnValue linesearch_return_value = line_search_algorithm.linesearch(x_old, error_old, gradient, delta, x, error_function, max_step_size);
 
                 // Check if line search was successful
-                if (linesearch_return_value == LSA::function_encreasing_in_delta_direction) {
+                if (linesearch_return_value > LSA::successful && linesearch_return_value != LSA::lambda_to_small) {
                     return_value = line_search_error;
+                    break;
                 }
 
                 // Test for convergence in the function value using the max norm

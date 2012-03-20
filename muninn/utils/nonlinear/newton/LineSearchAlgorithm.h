@@ -25,6 +25,7 @@
 #define MUNINN_NEWTON_LINESEARCH_ALGORITHM_H_
 
 #include <limits>
+#include <cmath>
 
 #include "Eigen/Core"
 
@@ -55,7 +56,7 @@ public:
         tolerance_x(tolerance_x>=0 ? tolerance_x : std::numeric_limits<Scalar>::epsilon()) {}
 
     /// Return values for line search algorithm
-    enum ReturnValue {successful=0, lambda_to_small, function_encreasing_in_delta_direction, return_value_size};
+    enum ReturnValue {successful=0, lambda_to_small, function_encreasing_in_delta_direction, function_not_finite, return_value_size};
 
     /// The implementation of the line search algorithm
     ///
@@ -128,9 +129,14 @@ public:
                 return lambda_to_small;
             }
 
-            // Update the x value
+            // Update the x value and the function value
             x_new = x_old + lambda * delta;
             Scalar function_new = function.template operator()<Vector>(x_new);
+
+            // Check that the function value is finite
+            if (!std::isfinite(function_new)) {
+            	return function_not_finite;
+            }
 
             // Check if the convergence condition is fulfilled
             condition = function_new <= function_x_old + alpha*lambda*g_prime_0;
