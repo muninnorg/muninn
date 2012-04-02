@@ -1,5 +1,9 @@
 2012-04-01  Jes Frellsen  <frellsen@binf>
 
+	* muninn/Makefile.am: Updated with Loggable.h. 
+	
+2012-04-01  Jes Frellsen  <frellsen@binf>
+ 
 	* bin/examples/normal.cpp: Added extra options, and corrected the
 	settings for the StatisticsLogger.
 
