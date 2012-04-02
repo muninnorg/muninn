@@ -40,7 +40,8 @@ double inline drandom() {
 int main(int argc, char *argv[]) {
     // Setup the option parser
     OptionParser parser("An example of using Muninn to sample from a normal distribution.");
-    parser.add_option("-l", "statistics_log", "The Muninn statics log file", "Muninn.txt");
+    parser.add_option("-l", "statistics_log", "The Muninn statics log file", "muninn.txt");
+    parser.add_option("-L", "log_mode", "The mode for the logger (options are ALL or CURRENT)", "all");
     parser.add_option("-s", "mcmc_steps", "Number of MCMC steps", "1E7");
     parser.add_option("-S", "seed", "The seed for the normal sampler, by default the time is used");
     parser.add_option("-r", "read_statistics_log", "Read a Muninn statics log file", "");
@@ -74,9 +75,11 @@ int main(int argc, char *argv[]) {
     settings.weight_scheme = Muninn::GE_MULTICANONICAL;
     settings.initial_width_is_max_right = true;
     settings.statistics_log_filename = parser.get("statistics_log");
-    settings.log_mode = Muninn::StatisticsLogger::CURRENT;
+    settings.log_mode = parser.get_as<Muninn::StatisticsLogger::Mode>("log_mode");
     settings.read_statistics_log_filename = parser.get("read_statistics_log");
     settings.verbose = 3;
+
+    std::cout << settings;
 
     Muninn::CGE *cge = Muninn::CGEfactory::new_CGE(settings);
 

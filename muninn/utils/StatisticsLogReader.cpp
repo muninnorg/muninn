@@ -36,6 +36,9 @@ void StatisticsLogReader::read(std::istream& input) {
     std::deque<std::pair<std::string,std::string> > lnG_supports_string;
     std::deque<std::pair<std::string,std::string> > binnings_string;
     std::deque<std::pair<std::string,std::string> > bin_widths_string;
+    std::deque<std::pair<std::string,std::string> > free_energies_string;
+    std::deque<std::pair<std::string,std::string> > this_maxs_string;
+    std::deque<std::pair<std::string,std::string> > x_zeros_string;
 
     // Read the input
     while (input.good()) {
@@ -85,6 +88,21 @@ void StatisticsLogReader::read(std::istream& input) {
                     if (max_hist>0 && binnings_string.size()>max_hist)
                         binnings_string.pop_front();
                 }
+                else if (name.substr(0,13)=="free_energies") {
+                    free_energies_string.push_back(std::pair<std::string,std::string>(name,array));
+                    if (max_hist>0 && free_energies_string.size()>max_hist)
+                        free_energies_string.pop_front();
+                }
+                else if (name.substr(0,8)=="this_max") {
+                    this_maxs_string.push_back(std::pair<std::string,std::string>(name,array));
+                    if (max_hist>0 && this_maxs_string.size()>max_hist)
+                        this_maxs_string.pop_front();
+                }
+                else if (name.substr(0,6)=="x_zero") {
+                     x_zeros_string.push_back(std::pair<std::string,std::string>(name,array));
+                     if (max_hist>0 && x_zeros_string.size()>max_hist)
+                         x_zeros_string.pop_front();
+                 }
                 else {
                     MessageLogger::get().warning("When reading statistics log, found unknown identifier \"" + name + "\" at line " + to_string(line_counter) + ".");
                 }
@@ -102,6 +120,9 @@ void StatisticsLogReader::read(std::istream& input) {
     string_to_array(lnG_supports_string, lnG_supports);
     string_to_array(binnings_string, binnings);
     string_to_array(bin_widths_string, bin_widths);
+    string_to_array(free_energies_string, free_energies);
+    string_to_array(this_maxs_string, this_maxs);
+    string_to_array(x_zeros_string, x_zeros);
 }
 
 } // namespace Muninn

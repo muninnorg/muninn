@@ -76,7 +76,7 @@ public:
         weightscheme(weightscheme),
         statisticslogger(statisticslogger),
         has_ownership(receives_ownership),
-        has_ownership_history(true) {
+        has_ownership_estimate_and_history(true) {
         init();
         add_loggables();
     }
@@ -106,7 +106,7 @@ public:
         weightscheme(weightscheme),
         statisticslogger(statisticslogger),
         has_ownership(receives_ownership),
-        has_ownership_history(true) {
+        has_ownership_estimate_and_history(true) {
         init();
         add_loggables();
     }
@@ -133,17 +133,15 @@ public:
         weightscheme(weightscheme),
         statisticslogger(statisticslogger),
         has_ownership(receives_ownership),
-        has_ownership_history(true) {
+        has_ownership_estimate_and_history(true) {
         init();
         add_loggables();
     }
 
-    /// Construct a GE object based on a given history. The shape of the
-    /// current histogram is set based on the shape of the history.
+    /// Construct a GE object based on a given estimate and given history. The
+    /// shape of the current histogram is set based on the shape of the history.
     ///
-    /// \param lnG The lnG used to construct the current estimate with. This is
-    ///            also used for setting the weights.
-    /// \param lnG_support The support of the estimated lnG.
+    /// \param estimate The initial value of the estimate.
     /// \param history The initial history.
     /// \param estimator A pointer to the Estimator to be used.
     /// \param updatescheme A pointer to the UpdateScheme to be used.
@@ -153,20 +151,27 @@ public:
     /// \param statisticslogger A pointer to the StatisticsLogger (if set to
     ///                         null no statistics will be logged).
     /// \param receives_ownership Whether the CE class takes ownership of the
-    ///                           Estimator, UpdateScheme, WeighScheme,
-    ///                           StatisticsLogger and History objects. If set
-    ///                           to true, these will be delete when the GE
+    ///                           Estimate, History, Estimator, UpdateScheme,
+    ///                           WeighScheme and StatisticsLogger objects. If
+    ///                           set to true, these will be delete when the GE
     ///                           object is deleted.
-    GE(const DArray &lnG, const BArray &lnG_support, History *history, Estimator *estimator, UpdateScheme *updatescheme, WeightScheme *weightscheme,  const Binner *binner=NULL, StatisticsLogger *statisticslogger=NULL, bool receives_ownership=false) :
+    GE(Estimate *estimate, History *history, Estimator *estimator, UpdateScheme *updatescheme, WeightScheme *weightscheme,  const Binner *binner=NULL, StatisticsLogger *statisticslogger=NULL, bool receives_ownership=false) :
         current(newvector<unsigned int>(0)),
         history(history),
-        estimate(estimator->new_estimate(lnG, lnG_support, *history, binner)),
+        estimate(estimate),
         estimator(estimator),
         updatescheme(updatescheme),
         weightscheme(weightscheme),
         statisticslogger(statisticslogger),
         has_ownership(receives_ownership),
-        has_ownership_history(receives_ownership) {
+        has_ownership_estimate_and_history(receives_ownership) {
+
+        // Check the shape of the estimate and history
+        if(!(estimate->get_shape().size()==1 && estimate->get_shape()[0]==history->get_shape()[0])) {
+            throw MessageException("The shape of estimate and the history given to the GE constructor must match each other and have dimension one.");
+        }
+
+        // Initialize the class
         init();
         add_loggables();
 
@@ -179,11 +184,10 @@ public:
     /// Estimator, UpdateScheme, WeightScheme and StatisticsLogger objects are
     /// also deleted.
     virtual ~GE() {
-        if (has_ownership_history) {
+        if (has_ownership_estimate_and_history) {
         	delete history;
+        	delete estimate;
         }
-
-        delete estimate;
 
         if (has_ownership) {
             delete estimator;
@@ -336,7 +340,7 @@ private:
     StatisticsLogger *statisticslogger;
 
     bool has_ownership;                 ///< Whether this GE object owns the Estimator, UpdateScheme, WeighScheme and StatisticsLogger objects.
-    bool has_ownership_history;         ///< Whether this GE object owns the History object.
+    bool has_ownership_estimate_and_history;         ///< Whether this GE object owns the History object.
 
     int total_iterations;               ///< The total number of iterations recorded by the GE class, including observations dropped from the history.
     bool new_weights_variable;          ///< This variable is set to true, when the UpdateScheme says it is time to estimate new weights.
@@ -353,6 +357,7 @@ private:
         if (statisticslogger!=NULL) {
             statisticslogger->add_loggable(history);
             statisticslogger->add_loggable(estimate);
+            statisticslogger->add_loggable(updatescheme);
         }
     }
 

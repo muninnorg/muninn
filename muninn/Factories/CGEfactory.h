@@ -42,6 +42,12 @@ std::istream &operator>>(std::istream &input, GeEnum &g);
 /// Output operator for a GeEnum.
 std::ostream &operator<<(std::ostream &o, const GeEnum &g);
 
+/// Input operator of a StatisticsLogger::Mode from string.
+std::istream &operator>>(std::istream &input, StatisticsLogger::Mode &m);
+
+/// Output operator for a StatisticsLogger::Mode
+std::ostream &operator<<(std::ostream &o, const StatisticsLogger::Mode &m);
+
 /// A factory for creating a CGE object based on a local settings object.
 /// The factory function creates a new CGE class, and all additional classes will be
 /// created automatically and transparently.
@@ -85,6 +91,10 @@ public:
         /// Muninn log mode (current|all). See Muninn::StatisticsLogger::Mode
         /// for details.
         Muninn::StatisticsLogger::Mode log_mode;
+
+        /// The precision (number of significant digits) used when writing
+        /// floating point values to the log file.
+        int log_precision;
 
         /// The filename for reading the Muninn statistics logfile. If the
         /// value difference from the empty string (""), this log file is read
@@ -131,6 +141,7 @@ public:
         /// \param initial_width_is_max_right See documentation for Settings::initial_width_is_max_right.
         /// \param statistics_log_filename See documentation for Settings::statistics_log_filename.
         /// \param log_mode See documentation for Settings::log_mode.
+        /// \param log_precision See documentation for log_precision.
         /// \param read_statistics_log_filename See documentation for Settings::read_statistics_log_filename.
         /// \param initial_max  See documentation for Settings::initial_max.
         /// \param memory See documentation for Settings::memory.
@@ -152,6 +163,7 @@ public:
                  bool initial_width_is_max_right=false,
                  std::string statistics_log_filename = "muninn.txt",
                  Muninn::StatisticsLogger::Mode log_mode = Muninn::StatisticsLogger::ALL,
+                 int log_precision = 10,
                  std::string read_statistics_log_filename = "",
                  unsigned int initial_max = 5000,
                  unsigned int memory = 40,
@@ -173,6 +185,7 @@ public:
           initial_width_is_max_right(initial_width_is_max_right),
           statistics_log_filename(statistics_log_filename),
           log_mode(log_mode),
+          log_precision(log_precision),
           read_statistics_log_filename(read_statistics_log_filename),
           initial_max(initial_max),
           memory(memory),
@@ -205,7 +218,8 @@ public:
             o << "initial_width_is_max_left" << settings.separator << settings.initial_width_is_max_left << std::endl;
             o << "initial_width_is_max_right" << settings.separator << settings.initial_width_is_max_right << std::endl;
             o << "statistics_log_filename" << settings.separator << settings.statistics_log_filename << std::endl;
-            o << "log_mode" << settings.separator << Muninn::StatisticsLogger::ModeNames[settings.log_mode] << std::endl;
+            o << "log_mode" << settings.separator << settings.log_mode << std::endl;
+            o << "log_precision" << settings.separator << settings.log_precision << std::endl;
             o << "read_statistics_log_filename" << settings.separator << settings.read_statistics_log_filename << std::endl;
             o << "initial_max" << settings.separator << settings.initial_max << std::endl;
             o << "memory" << settings.separator << settings.memory << std::endl;

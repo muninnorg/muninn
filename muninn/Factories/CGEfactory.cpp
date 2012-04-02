@@ -32,6 +32,7 @@
 
 #include "muninn/utils/StatisticsLogReader.h"
 #include "muninn/utils/ArrayAligner.h"
+#include "muninn/utils/TArrayUtils.h"
 
 namespace Muninn {
 
@@ -45,6 +46,18 @@ CGE* CGEfactory::new_CGE(const Settings& settings) {
     if (settings.read_statistics_log_filename!="") {
         MessageLogger::get().info("Reading statistics log file");
     	statistics_log_reader = new StatisticsLogReader(settings.read_statistics_log_filename, settings.memory);
+
+    	// Check that the logger contains adequate information
+        if (statistics_log_reader->get_Ns().size()==0 ||
+            statistics_log_reader->get_lnws().size()==0 ||
+            statistics_log_reader->get_lnGs().size()==0 ||
+            statistics_log_reader->get_lnG_supports().size()==0 ||
+            statistics_log_reader->get_binnings().size()==0 ||
+            statistics_log_reader->get_free_energies().size()==0 ||
+            statistics_log_reader->get_this_maxs().size()==0 ||
+            statistics_log_reader->get_x_zeros().size()==0) {
+            throw(CGEfactorySettingsException("Error: The given log file does not contains adequate information."));
+        }
     }
 
     // Allocate the estimator
@@ -57,7 +70,7 @@ CGE* CGEfactory::new_CGE(const Settings& settings) {
     	initial_max = settings.initial_max;
     }
     else {
-    	initial_max = statistics_log_reader->get_Ns().back().second.sum();
+    	initial_max = statistics_log_reader->get_this_maxs().back().second(0);
     	MessageLogger::get().debug("Settings initial_max to "+to_string(initial_max)+".");
     }
 
@@ -101,7 +114,7 @@ CGE* CGEfactory::new_CGE(const Settings& settings) {
     }
 
     // Allocate the logger
-    StatisticsLogger* statistics_logger = new StatisticsLogger(settings.statistics_log_filename, settings.log_mode);
+    StatisticsLogger* statistics_logger = new StatisticsLogger(settings.statistics_log_filename, settings.log_mode, settings.log_precision);
 
     // Create the CGE object
     CGE* cge = NULL;
@@ -110,7 +123,8 @@ CGE* CGEfactory::new_CGE(const Settings& settings) {
     	cge = new CGE(estimator, update_scheme, weight_scheme, binner, statistics_logger, settings.initial_beta, true);
     }
     else {
-    	History* history = estimator->new_history(statistics_log_reader->get_Ns().back().second.get_shape());
+        // Reconstruct the history
+        History* history = estimator->new_history(statistics_log_reader->get_Ns().back().second.get_shape());
 
     	for (unsigned int i = 0; i < statistics_log_reader->get_Ns().size(); ++i) {
     		const DArray& current_binning = statistics_log_reader->get_binnings()[i].second;
@@ -128,7 +142,15 @@ CGE* CGEfactory::new_CGE(const Settings& settings) {
     		}
     	}
 
-    	cge = new CGE(statistics_log_reader->get_lnGs().back().second, statistics_log_reader->get_lnG_supports().back().second, history, estimator, update_scheme, weight_scheme, binner, statistics_logger, true);
+    	// Construct a new estimate
+    	Estimate* estimate = estimator->new_estimate(statistics_log_reader->get_lnGs().back().second,
+                                                     statistics_log_reader->get_lnG_supports().back().second,
+                                                     TArray_to_vector<Index>(statistics_log_reader->get_x_zeros().back().second),
+                                                     statistics_log_reader->get_free_energies().back().second,
+                                                     *history, binner);
+
+    	// Construct the CGE object
+    	cge = new CGE(estimate, history, estimator, update_scheme, weight_scheme, binner, statistics_logger, true);
     }
 
     return cge;
@@ -151,6 +173,25 @@ std::istream &operator>>(std::istream &input, GeEnum &g) {
 std::ostream &operator<<(std::ostream &o, const GeEnum &g) {
      o << GeEnumNames[static_cast<unsigned int>(g)];
      return o;
+}
+
+/// Input operator of a StatisticsLogger::Mode from string.
+std::istream &operator>>(std::istream &input, StatisticsLogger::Mode &m) {
+    std::string raw_string;
+    input >> raw_string;
+
+    for (unsigned int i=0; i<StatisticsLogger::SIZE; ++i) {
+         if (raw_string == StatisticsLogger::ModeNames[i]) {
+              m = StatisticsLogger::Mode(i);
+         }
+    }
+    return input;
+}
+
+/// Output operator for a StatisticsLogger::Mode
+std::ostream &operator<<(std::ostream &o, const StatisticsLogger::Mode &m) {
+    o << StatisticsLogger::ModeNames[static_cast<unsigned int>(m)];
+    return o;
 }
 
 } // namespace Muninn

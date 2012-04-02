@@ -116,15 +116,48 @@ public:
         return bin_widths;
     }
 
-private:
-    unsigned int max_hist;                                      ///< The maximal this number of entries from the log file, starting from the beginning of the file.
+    /// Get a vector containing the read ids and free energy arrays.
+    ///
+    /// \return A vector of ids and free energy. The i'th
+    ///         entry in the vector, free_energies[i], contains the id
+    ///         (free_energy[i].first) and the array (bin_widths[i].second)
+    ///         for the i'th free energy array.
+    const std::vector<std::pair<std::string,DArray> >& get_free_energies() const {
+        return free_energies;
+    }
 
-    std::vector<std::pair<std::string,CArray> > Ns;             ///< The read vector of ids and histograms.
-    std::vector<std::pair<std::string,DArray> > lnws;           ///< The read vector of ids and log weights.
-    std::vector<std::pair<std::string,DArray> > lnGs;           ///< The read vector of ids and entropy estimates.
-    std::vector<std::pair<std::string,BArray> > lnG_supports;   ///< The read vector of ids and support of the entropy estimates.
-    std::vector<std::pair<std::string,DArray> > binnings;       ///< The read vector of ids and bin edge arrays.
-    std::vector<std::pair<std::string,DArray> > bin_widths;     ///< The read vector of ids and bin width arrays.
+    /// Get a vector containing the read ids and this_max values.
+    ///
+    /// \return A vector of ids and this_max values. The i'th
+    ///         entry in the vector, this_maxs[i], contains the id
+    ///         (this_maxs[i].first) and the array (this_maxs[i].second)
+    ///         for the i'th this_maxs value.
+    const std::vector<std::pair<std::string,CArray> >& get_this_maxs() const {
+        return this_maxs;
+    }
+
+    /// Get a vector containing the read ids and the x0 value.
+    ///
+    /// \return A vector of ids and x0 values. The i'th
+    ///         entry in the vector, x_zeros[i], contains the id
+    ///         (x_zero[i].first) and the array (x_zero[i].second)
+    ///         for the i'th x0 value.
+    const std::vector<std::pair<std::string,TArray<Index> > >& get_x_zeros() const {
+        return x_zeros;
+    }
+
+private:
+    unsigned int max_hist;                                       ///< The maximal this number of entries from the log file, starting from the beginning of the file.
+
+    std::vector<std::pair<std::string,CArray> > Ns;              ///< The read vector of ids and histograms.
+    std::vector<std::pair<std::string,DArray> > lnws;            ///< The read vector of ids and log weights.
+    std::vector<std::pair<std::string,DArray> > lnGs;            ///< The read vector of ids and entropy estimates.
+    std::vector<std::pair<std::string,BArray> > lnG_supports;    ///< The read vector of ids and support of the entropy estimates.
+    std::vector<std::pair<std::string,DArray> > binnings;        ///< The read vector of ids and bin edge arrays.
+    std::vector<std::pair<std::string,DArray> > bin_widths;      ///< The read vector of ids and bin width arrays.
+    std::vector<std::pair<std::string,DArray> > free_energies;   ///< The read vector of ids and free energy arrays.
+    std::vector<std::pair<std::string,CArray> > this_maxs;       ///< The read vector of ids and this_max values.
+    std::vector<std::pair<std::string,TArray<Index> > > x_zeros; ///< The read vector of ids and x0 value.
 
     /// Read the arrays for an input stream.
     ///

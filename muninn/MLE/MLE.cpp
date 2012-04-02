@@ -82,7 +82,7 @@ void MLE::estimate(const History &base_history, Estimate &base_estimate, const B
             std::vector<unsigned int> new_x0 = arg_max(sum_N);
 
             if (estimate.get_x0().size()!=0) {
-                std::cout << "Moving x0 from " << estimate.get_x0() << " to " << new_x0 << std::endl;
+                MessageLogger::get().info("Moving x0 from " + to_string(estimate.get_x0()) + " to " + to_string(new_x0));
             }
 
             estimate.set_x0(new_x0);
@@ -137,6 +137,7 @@ void MLE::estimate(const History &base_history, Estimate &base_estimate, const B
 
         // Clear the old estimated free energies and set the new estimates
         estimate.free_energies.clear();
+        estimate.free_energies_array = free_energies;
 
         for (unsigned int set=0; set<history.get_size(); set++) {
             estimate.free_energies[&history[set]] = free_energies(set);
@@ -263,77 +264,27 @@ void MLE::calc_lnG_accumulated(const MultiHistogramHistory &history, const CArra
     }
 }
 
-Estimate* MLE::new_estimate(const DArray &lnG, const BArray &lnG_support, const History &base_history, const Binner *binner) {
+Estimate* MLE::new_estimate(const DArray &lnG, const BArray &lnG_support, const std::vector<unsigned int> &x0, const DArray &free_energies, const History &base_history, const Binner *binner) {
 	assert(lnG.same_shape(lnG_support) && lnG.has_shape(base_history.get_shape()));
 
     // Cast the history and estimate to be the MLE type
     const MultiHistogramHistory& history = MultiHistogramHistory::cast_from_base(base_history, "The MLE estimator is only compatible with the MultiHistogramHistory.");
+    assert(free_energies.get_ndims()==1 && free_energies.get_shape(0)==history.get_size());
 
 	// Make a new MLE estimate
-	MLEestimate *estimate = new MLEestimate(lnG.get_shape());
-
-	// Set the reference bin, as the bin where lnG is closed to zero.
-	// Check if the reference bin is set in the estimate and it has support
-	std::vector<unsigned int> x0 = arg_min(TArray_abs<DArray>(lnG), lnG_support);
-
-	if (history.get_sum_N()(x0)<min_count) {
-    	x0 = arg_max(history.get_sum_N());
-    }
-
-	estimate->set_x0(x0);
+	MLEestimate *estimate = new MLEestimate(lnG, lnG_support, x0);
 
 	// Calculate the support for the individual histogram in the history as the
 	// intersection between lnG_support and the history
 	std::vector<CArray> supports(history.get_size());
 
-	// Calculate a crude estimate of the free energy based on the lnG estimate
-	// and lnG_support
-	// TODO: Take into account n_out?
-	// TODO: Improve the estimate
-    if (restricted_individual_support) {
-    	BArray support = history.get_sum_N()>=min_count && lnG_support;
+	// Set the free energy
+	estimate->free_energies_array = free_energies;
 
-    	for (MultiHistogramHistory::const_iterator set=history.begin(); set!=history.end(); ++set) {
-    		// Calculate the partition function within the area with support as given by equation (A.5) in [JFB02].
-    		DArray summands(history.get_shape());
-
-    		for (BArray::constwheretrueiterator it = support.get_constwheretrueiterator(); it(); ++it) {
-    			summands(it) = lnG(it) + (*set)->get_lnw()(it);
-    		}
-
-    		double lnZ = log_sum_exp(summands, support);
-    		estimate->free_energies[*set] = -lnZ;
-    	}
+	for (MultiHistogramHistory::const_iterator set=history.begin(); set!=history.end(); ++set) {
+        unsigned int i = set - history.begin();
+        estimate->free_energies[*set] = free_energies(i);
     }
-    else {
-		CArray sum_N(history.get_shape());
-
-		for (MultiHistogramHistory::const_reverse_iterator set=history.rbegin(); set!=history.rend(); ++set) {
-			for (unsigned int bin=0; bin < sum_N.get_asize(); ++bin) {
-				sum_N(bin) += (*set)->get_N()(bin);
-			}
-
-			BArray support = sum_N>min_count && lnG_support;
-
-    		// Calculate the partition function within the area with support as given by equation (A.5) in [JFB02].
-    		DArray summands(history.get_shape());
-
-    		for (BArray::constwheretrueiterator it = support.get_constwheretrueiterator(); it(); ++it) {
-    			summands(it) = lnG(it) + (*set)->get_lnw()(it);
-    		}
-
-    		double lnZ = log_sum_exp(summands, support);
-    		estimate->free_energies[*set] = -lnZ;
-		}
-    }
-
-    // Copy the free energies to an array and print them. This is inefficient
-    // but the easiest way to make the printing consistent with the estimator.
-    //    DArray free_energies(history.get_size());
-    //    for (unsigned int set=0; set<history.get_size(); set++) {
-    //    	free_energies(set) = estimate->free_energies[&history[set]];
-    //    }
-    //    MessageLogger::get().debug("MLE estimated free energies are: " + free_energies.write(3, false, false));
 
     // Get an accurate estimate of the free energies (the estimate is set
     // automatically by the estimate function).

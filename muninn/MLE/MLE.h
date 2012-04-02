@@ -72,8 +72,21 @@ public:
         return new MLEestimate(shape);
     }
 
-    // Implementation of Estimator interface (see base class for documentation).
-    virtual Estimate* new_estimate(const DArray &lnG, const BArray &lnG_support, const History &base_history,  const Binner *binner=NULL);
+
+    /// Make a new MLEestimate based on values of lnG, lnG support, a reference
+    /// bin, free energies and a given history. The Estimate is compatible with
+    /// the MLE estimator.
+    ///
+    /// \param lnG The entropy to construct the estimate from.
+    /// \param lnG_support The support for the estimated entropy.
+    /// \param x0 There reference bin the estimate is based on.
+    /// \param free_energies The estimated free energies for the histograms in
+    ///                      the history. The energies should be in the same
+    ///                      order as the histograms has in the history.
+    /// \param base_history The history to make the estimate from.
+    /// \param binner If a Binner has been use, it can be passed to the estimator.
+    /// \return A new empty Estimate.
+    virtual Estimate* new_estimate(const DArray &lnG, const BArray &lnG_support, const std::vector<unsigned int> &x0, const DArray &free_energies, const History &base_history, const Binner *binner=NULL);
 
 private:
     const Count min_count;                           ///< The minimal number of counts in a bin in order to have support in a bin.

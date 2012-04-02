@@ -1,3 +1,42 @@
+2012-04-02  Jes Frellsen  <frellsen@binf>
+
+	* bin/examples/normal.cpp: Added the log_mode option.
+
+	* muninn/CGE.h: One of the constructors now takes an Estimate as
+	an argument rather than values for lnG and lnG_support.
+
+	* muninn/Estimator.h: The function Estimator::new_estimate with
+	lnG and lnG_support arguments were removed from the interface.
+
+	* muninn/GE.h: One of the constructors now takes an Estimate as an
+	argument rather than values for lnG and lnG_support.
+
+	* muninn/UpdateScheme.h: Added function add_statistics_to_log to
+	implement the Loggable interface.
+	
+	* muninn/Factories/CGEfactory.h: Added the setting log_precision
+	and stream operators for StatisticsLogger::Mode.
+
+	* muninn/Factories/CGEfactory.cpp: Adapted the factory to use the
+	new values written in log files and the new MLE::new_estimate
+	function.
+
+	* muninn/MLE/MLE.h: Changed the prototype for the
+	MLE::new_estimate function.
+	
+	* muninn/MLE/MLE.cpp: The MLE::new_estimate function now
+	constructs a new estimated based on also a value of x0 and values
+	for the free energies.
+	
+	* muninn/UpdateSchemes/IncreaseFactorScheme.h: Added function
+	add_statistics_to_log to implement the Loggable interface.
+	 
+	* muninn/utils/StatisticsLogReader.h: Added methods for getting
+	free_energies, this_maxs and x_zeros.
+	
+	* muninn/utils/StatisticsLogReader.cpp: Added functionality for
+	reading free_energies, this_maxs and x_zeros.
+	
 2012-04-01  Jes Frellsen  <frellsen@binf>
 
 	* muninn/Makefile.am: Updated with Loggable.h. 

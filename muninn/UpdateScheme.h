@@ -30,6 +30,7 @@
 #include "muninn/History.h"
 #include "muninn/Histogram.h"
 #include "muninn/Histories/MultiHistogramHistory.h"
+#include "muninn/utils/StatisticsLogger.h"
 
 namespace Muninn {
 
@@ -39,7 +40,7 @@ namespace Muninn {
 ///
 /// All update schemes must have an initial_max, this is number of iterations used
 /// by the GE for the for the collection of the first histogram.
-class UpdateScheme {
+class UpdateScheme : public Loggable {
 public:
 
     /// Default constructor for an update scheme
@@ -82,6 +83,12 @@ public:
     virtual void reset_prolonging()=0;
 
     // TODO: A more elegant alternative to prolong and unprolong should be introduced.
+
+    /// Add an entries to the statistics log. This function implements the
+    /// Loggable interface.
+    ///
+    /// \param statistics_logger The logger to add an entry to.
+    virtual void add_statistics_to_log(StatisticsLogger& statistics_logger) const {}
 
 private:
     const Count initial_max; ///< The maximal number of iterations the first (initial) histogram.

@@ -128,6 +128,17 @@ public:
         return this_max;
     }
 
+    /// Add an entries to the statistics log. This function implements the
+    /// Loggable interface.
+    ///
+    /// \param statistics_logger The logger to add an entry to.
+    virtual void add_statistics_to_log(StatisticsLogger& statistics_logger) const {
+        UpdateScheme::add_statistics_to_log(statistics_logger);
+        CArray this_max_array(1);
+        this_max_array(0) = this_max;
+        statistics_logger.add_entry("this_max", this_max_array);
+    }
+
 private:
     Count this_max;          ///< The required number of iterations required for completing the current round.
     Count prolonging;        ///< Number of iterations the current round is prolonged by.
