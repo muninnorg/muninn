@@ -48,7 +48,7 @@ void GE::estimate_new_weights(const Binner *binner) {
         estimator->estimate(*history, *estimate, binner);
 
         // Log the current statistics
-        force_statistics_log(binner);
+        force_statistics_log();
 
         // Make a new empty current histogram, with the newly estimated weights
         DArray new_weights = weightscheme->get_weights(*estimate, *history, binner);

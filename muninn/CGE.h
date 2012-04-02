@@ -76,7 +76,9 @@ public:
             has_ownership(receives_ownership),
             initial_max(updatescheme->get_initial_max()),
             initial_collection(true),
-            initial_beta(initial_beta) {}
+            initial_beta(initial_beta) {
+        add_loggables(statisticslogger);
+    }
 
 	/// Construct a CGE object based on a given history and an estimate of the
     /// statistical weight, lnG. The shape of the history and the weights must
@@ -86,6 +88,8 @@ public:
     /// WeighScheme, Binner and History objects. The class can take ownership
     /// of these objects and delete them upon destruction of the CGE object.
     ///
+    /// \param lnG An initial value for the entropy (lnG).
+    /// \param lnG_support An initial value for the support of the entropy (lnG).
     /// \param history The initial history.
     /// \param estimator A pointer to the Estimator to be used.
     /// \param updatescheme A pointer to the UpdateScheme to be used.
@@ -126,6 +130,8 @@ public:
     	if(!(history->get_shape().size()==1 && history->get_shape()[0]==binner->get_nbins())) {
     		throw MessageException("The shape of the history given to the GE constructor must match the number of bins represented in the binner.");
     	}
+
+    	add_loggables(statisticslogger);
     }
 
     /// Constructor based on reference of the Estimator, UpdateScheme and
@@ -150,7 +156,9 @@ public:
             has_ownership(false),
             initial_max(updatescheme.get_initial_max()),
             initial_collection(true),
-            initial_beta(initial_beta) {}
+            initial_beta(initial_beta) {
+        add_loggables(statisticslogger);
+    }
 
     /// Destructor for the CGE class. If has_ownership is set to true, the
     /// Estimator, UpdateScheme, WeightScheme, Binner and StatisticsLogger
@@ -242,7 +250,7 @@ public:
 
     /// Force the current statistics to be logged with the logger.
     inline void force_statistics_log() {
-        ge.force_statistics_log(binner);
+        ge.force_statistics_log();
     }
 
     /// Getter for the used binner
@@ -312,6 +320,15 @@ private:
             bin = binner->calc_bin_validated(energy);
         }
         return static_cast<unsigned int>(bin.first);
+    }
+
+    /// Private function adding loggable classes to the statisticslogger.
+    ///
+    /// \param statisticslogger A pointer to the StatisticsLogger (may be NULL).
+    void add_loggables(StatisticsLogger *statisticslogger=NULL) {
+        if (statisticslogger!=NULL) {
+            statisticslogger->add_loggable(binner);
+        }
     }
 };
 

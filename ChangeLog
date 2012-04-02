@@ -1,3 +1,48 @@
+2012-04-01  Jes Frellsen  <frellsen@binf>
+
+	* bin/examples/normal.cpp: Added extra options, and corrected the
+	settings for the StatisticsLogger.
+
+	* muninn/Binner.h: Added function add_statistics_to_log to
+	implement the Loggable interface.
+
+	* muninn/CGE.h: Added function add_loggables to added Loggable
+	objects to the StatisticsLogger.
+
+	* muninn/Estimate.h: Added function add_statistics_to_log to
+	implement the Loggable interface.
+
+	* muninn/Estimator.h: Updated doxygen documentation for the
+	new_estimate function.
+
+	* muninn/GE.cpp: The function force_statistics_log no longer takes
+	a binner as argument.
+
+	* muninn/GE.h: Added function add_loggables to added Loggable
+	objects to the StatisticsLogger.
+
+	* muninn/Histogram.h: Added function add_statistics_to_log to
+	implement the Loggable interface.
+
+	* muninn/History.h: History now inherents from Loggable.
+
+	* muninn/Histories/MultiHistogramHistory.cpp: Added function
+	add_statistics_to_log to implement the Loggable interface.
+
+	* muninn/Histories/MultiHistogramHistory.h: Added function
+	add_statistics_to_log to implement the Loggable interface.
+
+	* muninn/MLE/MLEestimate.h: Added function add_statistics_to_log
+	to implement the Loggable interface.
+
+	* muninn/utils/Loggable.h: Added the Loggable interface for
+	classes that can be logged.
+
+	* muninn/utils/StatisticsLogger.h: Changed the StatisticsLogger to
+	use the Loggable interface for logging.
+
+	* muninn/utils/TArray.h: Corrected error in a comment.
+
 2012-03-20  Jes Frellsen  <frellsen@bind>
 
 	* muninn/utils/nonlinear/newton/LineSearchAlgorithm.h: Added the

@@ -43,6 +43,8 @@ int main(int argc, char *argv[]) {
     parser.add_option("-l", "statistics_log", "The Muninn statics log file", "Muninn.txt");
     parser.add_option("-s", "mcmc_steps", "Number of MCMC steps", "1E7");
     parser.add_option("-S", "seed", "The seed for the normal sampler, by default the time is used");
+    parser.add_option("-r", "read_statistics_log", "Read a Muninn statics log file", "");
+    parser.add_option("-R", "restart", "Enable restarts", "0", "1");
     parser.parse_args(argc, argv);
 
     // Set the random seed
@@ -58,17 +60,23 @@ int main(int argc, char *argv[]) {
     // Set number of MCMC steps
     const unsigned long long int mcmc_steps = static_cast<unsigned long long int>(parser.get_as<double>("mcmc_steps"));
 
+    // Set the restart options
+    bool restart = parser.get_as<bool>("restart");
+
     // Print settings
     std::cout << "Seed: " << seed << std::endl;
     std::cout << "MCMC steps: " << mcmc_steps << std::endl;
+    std::cout << "Restart: " << restart << std::endl;
 
     // Setup the MCMC
     Muninn::CGEfactory::Settings settings;
 
     settings.weight_scheme = Muninn::GE_MULTICANONICAL;
     settings.initial_width_is_max_right = true;
-    Muninn::StatisticsLogger statisticslogger(parser.get("statistics_log"), Muninn::StatisticsLogger::ALL);
-    Muninn::MessageLogger::get().set_verbose(3);
+    settings.statistics_log_filename = parser.get("statistics_log");
+    settings.log_mode = Muninn::StatisticsLogger::CURRENT;
+    settings.read_statistics_log_filename = parser.get("read_statistics_log");
+    settings.verbose = 3;
 
     Muninn::CGE *cge = Muninn::CGEfactory::new_CGE(settings);
 
@@ -107,15 +115,12 @@ int main(int argc, char *argv[]) {
             cge->estimate_new_weights();
 
             // Restart every 4th time
-            if (updatecounter % 4 == 0) {
+            if (restart && updatecounter % 4 == 0) {
                 ns.sample_first();
                 curr_state = ns.energy();
             }
         }
     }
-
-    // Close output file
-    cge->estimate_new_weights();
 
     // Clean up
     delete cge;

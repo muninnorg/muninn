@@ -78,6 +78,7 @@ public:
         has_ownership(receives_ownership),
         has_ownership_history(true) {
         init();
+        add_loggables();
     }
 
     /// Two dimensional constructor for the GE class.
@@ -107,6 +108,7 @@ public:
         has_ownership(receives_ownership),
         has_ownership_history(true) {
         init();
+        add_loggables();
     }
 
     /// Multidimensional constructor for the GE class.
@@ -133,6 +135,7 @@ public:
         has_ownership(receives_ownership),
         has_ownership_history(true) {
         init();
+        add_loggables();
     }
 
     /// Construct a GE object based on a given history. The shape of the
@@ -165,6 +168,7 @@ public:
         has_ownership(receives_ownership),
         has_ownership_history(receives_ownership) {
         init();
+        add_loggables();
 
         // Set the weights correctly
         DArray new_weights = weightscheme->get_weights(*estimate, *history, binner);
@@ -264,13 +268,10 @@ public:
     /// Force the GE class to write stastics to the log (using the
     /// StatisticsLogger). If a Binner is passed, the state of the binner
     /// is also logged.
-    ///
-    /// \param binner If a Binner is passed, the state of the binner is also
-    ///               logged. This should normaly be done, if the binning of
-    ///               the histogram is non-uniform.
-    inline void force_statistics_log(const Binner *binner=NULL) {
-        if (statisticslogger)
-            statisticslogger->log(current, *history, *estimate, binner);
+    inline void force_statistics_log() {
+        if (statisticslogger) {
+            statisticslogger->log();
+        }
     }
 
     /// Function for extending the shape of the GE object.
@@ -340,12 +341,21 @@ private:
     int total_iterations;               ///< The total number of iterations recorded by the GE class, including observations dropped from the history.
     bool new_weights_variable;          ///< This variable is set to true, when the UpdateScheme says it is time to estimate new weights.
 
-    /// Private method of initializing the class
+    /// Private function for initializing the class
     void init() {
         // Setup other variables
         total_iterations = 0;
         new_weights_variable = false;
     }
+
+    /// Private function adding loggable classes to the statisticslogger.
+    void add_loggables() {
+        if (statisticslogger!=NULL) {
+            statisticslogger->add_loggable(history);
+            statisticslogger->add_loggable(estimate);
+        }
+    }
+
 };
 
 } // namespace Muninn

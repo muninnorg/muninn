@@ -48,15 +48,25 @@ public:
     /// Construct an empty estimate with a given shape.
     ///
     /// \param shape The shape of the empty estimate.
-    MLEestimate(const std::vector<unsigned int> &nbins) : Estimate(nbins) {}
+    MLEestimate(const std::vector<unsigned int> &shape) : Estimate(shape) {}
 
     /// Empty virtual destructor
     virtual ~MLEestimate() {}
+
+    /// Add an entries to the statistics log. This function implements the
+    /// Loggable interface.
+    ///
+    /// \param statistics_logger The logger to add an entry to.
+    virtual void add_statistics_to_log(StatisticsLogger& statistics_logger) const {
+        Estimate::add_statistics_to_log(statistics_logger);
+        statistics_logger.add_entry("free_energies", free_energies_array);
+    }
 
     friend class MLE;
 
 private:
     std::map<const Histogram*, double> free_energies;   ///< The estimated free energies for each histogram.
+    DArray free_energies_array;                         ///< The estimated free energies in an array (only used for writing to log)
 };
 
 } // namespace Muninn

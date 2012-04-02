@@ -28,13 +28,14 @@
 
 #include "muninn/common.h"
 #include "muninn/Histogram.h"
+#include "muninn/utils/StatisticsLogger.h"
 
 namespace Muninn {
 
 /// The History abstract class is the interface for classes implementing the
 /// history of histograms. The history of a simulation is stored in an History
 /// objects. The type of the History object may depend on the Estimator class.
-class History {
+class History : public Loggable {
 public:
 
     /// Default virtual destructor.

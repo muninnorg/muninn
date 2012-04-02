@@ -26,7 +26,9 @@
 
 #include "muninn/common.h"
 #include "muninn/utils/TArray.h"
+#include "muninn/utils/TArrayUtils.h"
 #include "muninn/utils/utils.h"
+#include "muninn/utils/StatisticsLogger.h"
 
 namespace Muninn {
 
@@ -34,7 +36,7 @@ namespace Muninn {
 /// (lnG). An the Estimator::estimate() function will take an old estimate as
 /// an argument and update this estimate based on the current history and
 /// weights.
-class Estimate {
+class Estimate : public Loggable {
 public:
     /// Constructor using values of the entropy, support and reference bin.
     ///
@@ -130,6 +132,16 @@ public:
         if (x0.size()>0)
             x0 = add_vectors(add_under, x0);
         shape = lnG.get_shape();
+    }
+
+    /// Add an entries to the statistics log. This function implements the
+    /// Loggable interface.
+    ///
+    /// \param statistics_logger The logger to add an entry to.
+    virtual void add_statistics_to_log(StatisticsLogger& statistics_logger) const {
+        statistics_logger.add_entry("lnG", lnG);
+        statistics_logger.add_entry("lnG_support", lnG_support);
+        statistics_logger.add_entry("x_zero", vector_to_TArray<Index>(x0));
     }
 
 private:

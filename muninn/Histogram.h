@@ -31,6 +31,7 @@
 #include "muninn/common.h"
 #include "muninn/utils/TArray.h"
 #include "muninn/utils/utils.h"
+#include "muninn/utils/StatisticsLogger.h"
 
 namespace Muninn {
 
@@ -129,6 +130,15 @@ public:
     // Define output strem operator as friend
     friend std::ostream &operator<<(std::ostream &output, const Histogram &histogram);
 
+    /// Add an entries to the statistics log. This function implements the
+    /// Loggable interface.
+    ///
+    /// \param statistics_logger The logger to add an entry to.
+    virtual void add_statistics_to_log(StatisticsLogger& statistics_logger) const {
+        statistics_logger.add_entry("N", N);
+        statistics_logger.add_entry("lnw", lnw);
+    }
+
 private:
     CArray N;                        ///< The counts/observations.
     DArray lnw;                      ///< The weights used for collecting the histogram.
@@ -141,7 +151,7 @@ inline std::ostream &operator<<(std::ostream &output, const Histogram &histogram
     output << "[Histogram]\n";
     output << "N = " << histogram.N << std::endl;
     output << "lnw = " << histogram.lnw << std::endl;
-    output << "n = " << histogram.lnw << std::endl;
+    output << "n = " << histogram.n << std::endl;
     return output;
 }
 

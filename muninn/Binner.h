@@ -31,6 +31,7 @@
 #include "muninn/utils/TArray.h"
 #include "muninn/Estimate.h"
 #include "muninn/History.h"
+#include "muninn/utils/StatisticsLogger.h"
 
 namespace Muninn {
 
@@ -40,7 +41,7 @@ namespace Muninn {
 ///
 /// Note that binners currently only supports a one dimensional reaction
 /// coordinate/energy.
-class Binner {
+class Binner : public Loggable {
 public:
     /// The constructor of the Binner base class.
     Binner(unsigned int nbins, bool uniform) : nbins(nbins), uniform(uniform) {};
@@ -124,6 +125,15 @@ public:
     ///         uniform.
     inline bool is_uniform() const {
         return uniform;
+    }
+
+    /// Add an entries to the statistics log. This function implements the
+    /// Loggable interface.
+    ///
+    /// \param statistics_logger The logger to add an entry to.
+    virtual void add_statistics_to_log(StatisticsLogger& statistics_logger) const {
+        statistics_logger.add_entry("binning", get_binning());
+        statistics_logger.add_entry("bin_widths", get_bin_widths());
     }
 
 protected:

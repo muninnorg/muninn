@@ -25,18 +25,15 @@
 #define MUNINN_STATISTICS_LOGGER_H
 
 #include <iostream>
-#include <iomanip>
 #include <fstream>
 #include <string>
 #include <vector>
+#include <map>
+#include <utility>
 
 #include "muninn/common.h"
 #include "muninn/utils/TArray.h"
-#include "muninn/Histogram.h"
-#include "muninn/History.h"
-#include "muninn/Histories/MultiHistogramHistory.h"
-#include "muninn/Estimate.h"
-#include "muninn/Binner.h"
+#include "muninn/utils/Loggable.h"
 
 namespace Muninn {
 
@@ -61,103 +58,82 @@ public:
     /// \param precision The precision (number of significant digits) used when
     ///                  writing floating point values to the log file.
     StatisticsLogger(const std::string &filename, Mode mode=CURRENT, int precision=10) :
-        filename(filename), mode(mode), precision(precision), counter(0) {
-        if (mode==ALL) {
-            outstream.open(filename.c_str());
-            outstream << std::setprecision(precision);
-        }
+        filename(filename), mode(mode), precision(precision), counter(0), loggables(), entry_queue() {
+
+        // Clear the output file
+        outstream.open(filename.c_str());
+        outstream.close();
     }
 
     /// Default destructor.
-    ~StatisticsLogger() {
-        if (mode==ALL)
-            outstream.close();
-    }
+    ~StatisticsLogger() {}
 
-    /// Write data to the logfile. In the mode Mode::ALL data is appended to
-    /// the file, while in Mode::CURRENT the file is rewritten at every call.
-    ///
-    /// The Mode::CURRENT mode assumes that the history is of type
-    /// MultiHistogramHistory, and write the full contents of the history
-    /// to the file, together with the newest entropy estimate and
-    /// and binning details (if present).
-    ///
-    /// The Mode::ALL mode does not use the history, it just appends the
-    /// newest collected histogram to the history, along with the nest entropy
-    /// estimate and binning details (if present).
-    ///
-    /// \param new_histogram The newest histogram that has just been added to
-    ///                      the history.
-    /// \param new_history_base The newest history, which has been used to make
-    ///                         a new estimate of the entropy.
-    /// \param new_estimate The newest estimate of the entropy (lnG)
-    /// \param binner A pointer to the binner that has been used. The bin edges
-    ///               and bin widths are written to the file (if the binner is
-    ///               not NULL).
-    void log(const Histogram &new_histogram, const History &new_history_base, const Estimate &new_estimate, const Binner *binner=NULL) {
+    /// Write entries for all Loggable objects. In the mode Mode::ALL data is
+    /// appended to the file, while in Mode::CURRENT the file is rewritten at
+    /// every call.
+    void log() {
+        // Collect entries of all Loggables.
+        for (std::vector<const Loggable*>::iterator it=loggables.begin(); it!=loggables.end(); ++it) {
+            (*it)->add_statistics_to_log(*this);
+        }
+
+        // Write the entries to file
+        write_entry_queue();
+
+        // Clear the queue and additional vector
+        entry_queue.clear();
+        last_entry_in_queue.clear();
+
+        // Set the value of the counter depending on the mode.
         if (mode==ALL) {
-            // Write the data
-            outstream << "N" << counter << " = " << new_histogram.get_N() <<  std::endl;
-            outstream << "lnw" << counter << " = " << new_histogram.get_lnw() << std::endl;
-            outstream << "lnG" << counter << " = " << new_estimate.get_lnG() << std::endl;
-            outstream << "lnG_support" << counter << " = " << new_estimate.get_lnG_support() << std::endl;
-
-            if (binner) {
-                outstream << "binning" << counter << " = " << binner->get_binning() << std::endl;
-                outstream << "bin_widths" << counter << " = " << binner->get_bin_widths() << std::endl;
-            }
-
-            // Flush the stream and update the counter
-            outstream << std::endl << std::flush;
             ++counter;
         }
-        else if(mode==CURRENT) {
-            // Cast the history to be a MultiHistogramHistory
-            const MultiHistogramHistory& new_history = MultiHistogramHistory::cast_from_base(new_history_base, "The StatisticsLogger only support MultiHistogramHistory in current mode");
-
-            // Open and clean the output file
-            outstream.open(filename.c_str());
-            outstream << std::setprecision(precision);
-
-            // Write the data
+        else {
             counter = 0;
-            for (MultiHistogramHistory::const_reverse_iterator it=new_history.rbegin(); it!=new_history.rend(); ++it) {
-                outstream << "N" << counter << " = " << (*it)->get_N() <<  std::endl;
-                outstream << "lnw" << counter << " = " << (*it)->get_lnw() << std::endl;
-                outstream << std::endl;
-                ++counter;
-            }
-
-            outstream << "lnG" << (counter-1) << " = " << new_estimate.get_lnG() << std::endl;
-            outstream << "lnG_support" << (counter-1) << " = " << new_estimate.get_lnG_support() << std::endl;
-            if (binner) {
-                outstream << "binning" << (counter-1) << " = " << binner->get_binning() << std::endl;
-                outstream << "bin_widths" << (counter-1) << " = " << binner->get_bin_widths() << std::endl;
-            }
-
-            // Close the file
-            outstream.close();
         }
     }
 
-    /// Input stream operator for the Mode types.
-    friend std::istream &operator>>(std::istream &input, Mode &mode) {
-         std::string raw_string;
-         input >> raw_string;
-
-         for (unsigned int i=0; i<SIZE; ++i) {
-              if (raw_string == ModeNames[i]) {
-                   mode = Mode(i);
-              }
-         }
-         return input;
+    /// Add an object to be logged to the StatisticsLogger. Every time the
+    /// function is called, the function Loggable::add_statistics_to_log() will
+    /// be called on added objects.
+    ///
+    /// \param loggable The loggable object to be added to the logger.
+    void add_loggable(const Loggable *loggable) {
+        if (loggable!=NULL) {
+            loggables.push_back(loggable);
+        }
     }
 
-    /// Output stream operator for the Mode types.
-    friend std::ostream &operator<<(std::ostream &o, const Mode &mode) {
-         o << Muninn::StatisticsLogger::ModeNames[static_cast<unsigned int>(mode)];
-         return o;
+
+    /// Add a entry to the log. This function is normally called by an object
+    /// of the Loggable class. The entry in the log file will look as follows:
+    ///
+    ///    [name][counter] = [array]
+    ///
+    /// \param name The name of the entry.
+    /// \param array The array for the entry.
+    template<typename T>
+    void add_entry(const std::string& name, const TArray<T>& array) {
+        if (mode==ALL) {
+            if (last_entry_in_queue.count(name) == 0) {
+                entry_queue.push_back(std::pair<std::string, std::string>(name + to_string(counter), array.write(precision)));
+                last_entry_in_queue[name] = entry_queue.size() - 1;
+            }
+            else {
+                entry_queue.at(last_entry_in_queue[name]) = std::pair<std::string, std::string>(name + to_string(counter), array.write(precision));
+            }
+        }
+        else {
+            if (last_entry_in_queue.count(name) > 0) {
+                ++counter;
+                last_entry_in_queue.clear();
+            }
+
+            entry_queue.push_back(std::pair<std::string, std::string>(name + to_string(counter), array.write(precision)));
+            last_entry_in_queue[name] = entry_queue.size() - 1;
+        }
     }
+
 
 private:
     const std::string filename;  ///< The filename of the file to write the log to.
@@ -165,6 +141,28 @@ private:
     const int precision;         ///< The precision (number of significant digits) used when writing floating point values to the log file.
     unsigned int counter;        ///< Counter for setting the entry number (update number) when writing to the log file.
     std::ofstream outstream;     ///< The output stream to write the log to.
+
+    std::vector<const Loggable*> loggables;                             ///< List of classes that should be logged
+    std::vector<std::pair<std::string, std::string> > entry_queue;      ///< Queued arrays waiting to be written
+    std::map<std::string, size_t> last_entry_in_queue;
+
+    /// Private method for writing the current contents of the queue to the
+    /// log file.
+    void write_entry_queue() {
+    	// TODO: Sort the output
+
+    	// Open the output file and set the pression
+    	std::ios_base::openmode open_mode = mode==ALL ? std::ios_base::app : std::ios_base::out;
+    	outstream.open(filename.c_str(), open_mode);
+
+    	// Write to the output file
+    	for (std::vector<std::pair<std::string, std::string> >::const_iterator it=entry_queue.begin(); it!=entry_queue.end(); ++it) {
+    		outstream << it->first << " = " << it->second <<  std::endl;
+    	}
+
+        outstream << std::endl << std::flush;
+        outstream.close();
+    }
 };
 
 } // namespace Muninn

@@ -170,6 +170,12 @@ void MultiHistogramHistory::remove_newest() {
     }
 }
 
+void MultiHistogramHistory::add_statistics_to_log(StatisticsLogger& statistics_logger) const {
+    for (const_reverse_iterator it=rbegin(); it!=rend(); ++it) {
+        (*it)->add_statistics_to_log(statistics_logger);
+    }
+}
+
 std::istream &operator>>(std::istream &input, MultiHistogramHistory::HistoryMode &mode) {
     std::string raw_string;
      input >> raw_string;

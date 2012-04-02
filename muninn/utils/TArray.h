@@ -1561,7 +1561,7 @@ inline std::ostream& TArray<T>::write(std::ostream &output, int precision, bool 
         output << "])";
     }
 
-    // Set back the precission
+    // Set back the precision
     if (precision>=0)
         output.precision(old_precision);
 

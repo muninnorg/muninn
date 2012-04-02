@@ -139,6 +139,12 @@ public:
     /// \return The number of histograms in the history.
     inline unsigned int get_size() const {return histograms.size();}
 
+    /// Add an entries to the statistics log. This function implements the
+    /// Loggable interface.
+    ///
+    /// \param statistics_logger The logger to add an entry to.
+    virtual void add_statistics_to_log(StatisticsLogger& statistics_logger) const;
+
     /// Type of forward iterator for the MultiHistogramHistory.
     typedef std::deque<Histogram*>::iterator iterator;
 
