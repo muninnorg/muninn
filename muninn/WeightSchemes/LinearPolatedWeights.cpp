@@ -39,7 +39,7 @@ namespace Muninn {
 
 DArray LinearPolatedWeigths::get_weights(const Estimate &estimate, const History &base_history, const Binner *binner) {
     // Get the weights from the underlying weight scheme
-    DArray weights = underlying_weight_scheme.get_weights(estimate, base_history, binner);
+    DArray weights = underlying_weight_scheme->get_weights(estimate, base_history, binner);
 
     // Cast the history to be a MultiHistogramHistory
     const MultiHistogramHistory& history = MultiHistogramHistory::cast_from_base(base_history, "The LinearPolatedWeigths weight scheme is only compatible with an estimator that uses a MultiHistogramHistory.");

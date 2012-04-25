@@ -1,3 +1,28 @@
+2012-04-25  frellsen  <frellsen@binf>
+
+	* muninn/Factories/CGEfactory.h: Added the setting
+	read_fixed_weights_filename.
+
+	* muninn/Factories/CGEfactory.cpp: Added functionality for setting
+	up a fixed weight scheme.
+
+	* muninn/WeightSchemes/FixedWeights.h: Added a weight scheme that
+	can fix the weight in a given set of bins.
+
+	* muninn/WeightSchemes/LinearPolatedInvK.h: Adjusted to match
+	changes to LinearPolatedWeights.h.
+
+	* muninn/WeightSchemes/LinearPolatedMulticanonical.h: Adjusted to
+	match changes to LinearPolatedWeights.h.
+
+	* muninn/WeightSchemes/LinearPolatedWeights.h: Changed
+	underlying_weight_scheme (in constructor and as member variable)
+	from a reference to a pointer. Added variable receives_ownership
+	to constructor and has_ownership as a member variable.
+
+	* muninn/WeightSchemes/LinearPolatedWeights.cpp: Adjusted
+	according to changes in header.
+
 2012-04-02  Jes Frellsen  <frellsen@binf>
 
 	* bin/examples/normal.cpp: Added the log_mode option.

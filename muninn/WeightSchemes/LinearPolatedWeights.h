@@ -98,18 +98,31 @@ public:
     ///                                case the slope in each bin is defined
     ///                                based on the two point estimate of the
     ///                                neighboring bin with lower energy.
-    LinearPolatedWeigths(WeightScheme &underlying_weight_scheme,
+    /// \param receives_ownership Whether the LinearPolatedWeigths class takes
+    ///                           ownership of the underlying_weight_scheme.
+    ///                           If set to true, the underlying_weight_scheme
+    ///                           will be delete when the LinearPolatedWeigths
+    ///                           object is deleted.
+    LinearPolatedWeigths(WeightScheme *underlying_weight_scheme,
             double slope_factor_up=0.3,
             double slope_factor_down=3.00,
             unsigned int sigma=20,
             double min_beta_extrapolation=-std::numeric_limits<double>::infinity(),
             double max_beta_extrapolation= std::numeric_limits<double>::infinity(),
             double min_beta_thermodynamics=-std::numeric_limits<double>::infinity(),
-            double max_beta_thermodynamics= std::numeric_limits<double>::infinity()) :
+            double max_beta_thermodynamics= std::numeric_limits<double>::infinity(),
+            bool receives_ownership=false) :
                 underlying_weight_scheme(underlying_weight_scheme),
                 slope_factor_up(slope_factor_up), slope_factor_down(slope_factor_down), sigma(sigma),
                 min_beta_extrapolation(min_beta_extrapolation), max_beta_extrapolation(max_beta_extrapolation),
-                min_beta_thermodynamics(min_beta_thermodynamics), max_beta_thermodynamics(max_beta_thermodynamics) {}
+                min_beta_thermodynamics(min_beta_thermodynamics), max_beta_thermodynamics(max_beta_thermodynamics),
+                has_ownership(receives_ownership) {}
+
+    virtual ~LinearPolatedWeigths() {
+        if (has_ownership) {
+            delete underlying_weight_scheme;
+        }
+    }
 
     /// This method returns a set of weights. First the weights are calculated
     /// according to the underlying weight scheme, and afterwards interpolation
@@ -173,7 +186,7 @@ public:
     }
 
 private:
-    WeightScheme &underlying_weight_scheme;  ///< The underlying weight scheme used for setting the weights on the support.
+    WeightScheme *underlying_weight_scheme;  ///< The underlying weight scheme used for setting the weights on the support.
 
     double slope_factor_up;                  ///< Slope factor used for the linear extrapolation of the weights, when the weights are increasing in the direction away from the main area of support.
     double slope_factor_down;                ///< Slope factor used for the linear extrapolation of the weights, when the weights are decreasing in the direction away from the main area of support.
@@ -186,6 +199,8 @@ private:
     std::pair<std::pair<unsigned int, double>, std::pair<unsigned int, double> > extrapolation_details;  ///< The last used extrapolation details returned by MLEutils::LinearPolator1d::extrapolate.
     double left_bound_center;                ///< The center value for the left bound bin in the last extrapolation details (the center value of the bin extrapolation_details.first.first)
     double right_bound_center;               ///< The center value for the left bound bin in the last extrapolation details (the center value of the bin extrapolation_details.second.first)
+
+    bool has_ownership;                      ///< Whether this object owns the underlying_weight_scheme object.
 
     /// Determines if at least min_support bins with lower bin index than bin0
     /// has support. It is assumed that bin0 < support.get_shape(0).
@@ -209,5 +224,4 @@ private:
 };
 
 } // namespace Muninn
-
 #endif /* LINEARPOLATEDWEIGHTS_H_ */

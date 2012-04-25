@@ -29,6 +29,7 @@
 #include "muninn/UpdateSchemes/IncreaseFactorScheme.h"
 #include "muninn/WeightSchemes/LinearPolatedMulticanonical.h"
 #include "muninn/WeightSchemes/LinearPolatedInvK.h"
+#include "muninn/WeightSchemes/FixedWeights.h"
 
 #include "muninn/utils/StatisticsLogReader.h"
 #include "muninn/utils/ArrayAligner.h"
@@ -79,12 +80,46 @@ CGE* CGEfactory::new_CGE(const Settings& settings) {
     // Allocate the weight scheme
     LinearPolatedWeigths *weight_scheme = NULL;
 
-    if (settings.weight_scheme == GE_MULTICANONICAL)
-        weight_scheme = new LinearPolatedMulticanonical(settings.slope_factor_up, settings.slope_factor_down);
-    else if (settings.weight_scheme == GE_INV_K)
-        weight_scheme = new LinearPolatedInvK(settings.slope_factor_up, settings.slope_factor_down);
+    if (settings.read_fixed_weights_filename=="") {
+        if (settings.weight_scheme == GE_MULTICANONICAL)
+            weight_scheme = new LinearPolatedMulticanonical(settings.slope_factor_up, settings.slope_factor_down);
+        else if (settings.weight_scheme == GE_INV_K)
+            weight_scheme = new LinearPolatedInvK(settings.slope_factor_up, settings.slope_factor_down);
+        else {
+            throw(CGEfactorySettingsException("Weight Scheme not set correctly."));
+        }
+    }
     else {
-        throw(CGEfactorySettingsException("Weight Scheme not set correctly."));
+        // Read the file containing the fixed weights
+        std::ifstream input(settings.read_fixed_weights_filename.c_str());
+        std::string line;
+        std::getline(input, line);
+        double reference_value = from_string<double>(line);
+        std::getline(input, line);
+        DArray fixed_weights = from_string<DArray>(line);
+        input.close();
+
+        // Check that an array with weight was read
+        if (!fixed_weights.nonempty()) {
+            throw(CGEfactorySettingsException("Could not read weights from file with fixed weights."));
+        }
+
+        // Setup the inner weight scheme
+        WeightScheme *inner_weight_scheme = NULL;
+
+        if (settings.weight_scheme == GE_MULTICANONICAL)
+            inner_weight_scheme = new Multicanonical;
+        else if (settings.weight_scheme == GE_INV_K)
+            inner_weight_scheme = new InvK;
+        else {
+            throw(CGEfactorySettingsException("Weight Scheme not set correctly."));
+        }
+
+        // Setup the fixed weights
+        WeightScheme *fixed_weight_scheme = new FixedWeights(reference_value, fixed_weights, inner_weight_scheme);
+
+        // Setup the linear polated weight scheme
+        weight_scheme = new LinearPolatedWeigths(fixed_weight_scheme, settings.slope_factor_up, settings.slope_factor_down, 20, -std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity(), -std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity(), true);
     }
 
     // Setup the minimum beta and maximum beta

@@ -101,6 +101,11 @@ public:
         /// and the history is set based on the content.
         std::string read_statistics_log_filename;
 
+        /// The filename for reading a set of fixed weights for a given region.
+        /// If the value difference from the empty string (""), this file is
+        /// read and the weights are fixed in the given region.
+        std::string read_fixed_weights_filename;
+
         /// Number of iterations used in first round of sampling.
         unsigned int initial_max;
 
@@ -143,6 +148,7 @@ public:
         /// \param log_mode See documentation for Settings::log_mode.
         /// \param log_precision See documentation for log_precision.
         /// \param read_statistics_log_filename See documentation for Settings::read_statistics_log_filename.
+        /// \param read_fixed_weights_filename See documentation for Settings::read_fixed_weights_filename.
         /// \param initial_max  See documentation for Settings::initial_max.
         /// \param memory See documentation for Settings::memory.
         /// \param min_count See documentation for Settings::min_count.
@@ -165,6 +171,7 @@ public:
                  Muninn::StatisticsLogger::Mode log_mode = Muninn::StatisticsLogger::ALL,
                  int log_precision = 10,
                  std::string read_statistics_log_filename = "",
+                 std::string read_fixed_weights_filename = "",
                  unsigned int initial_max = 5000,
                  unsigned int memory = 40,
                  unsigned int min_count = 30,
@@ -187,6 +194,7 @@ public:
           log_mode(log_mode),
           log_precision(log_precision),
           read_statistics_log_filename(read_statistics_log_filename),
+          read_fixed_weights_filename(read_fixed_weights_filename),
           initial_max(initial_max),
           memory(memory),
           min_count(min_count),
@@ -221,6 +229,7 @@ public:
             o << "log_mode" << settings.separator << settings.log_mode << std::endl;
             o << "log_precision" << settings.separator << settings.log_precision << std::endl;
             o << "read_statistics_log_filename" << settings.separator << settings.read_statistics_log_filename << std::endl;
+            o << "read_fixed_weights_filename" << settings.separator << settings.read_fixed_weights_filename << std::endl;
             o << "initial_max" << settings.separator << settings.initial_max << std::endl;
             o << "memory" << settings.separator << settings.memory << std::endl;
             o << "min_count" << settings.separator << settings.min_count << std::endl;
