@@ -1,16 +1,16 @@
 add_library(muninn 
-  CGE.cpp
   GE.cpp
+  CGE.cpp
   Factories/CGEfactory.cpp
   Histories/MultiHistogramHistory.cpp
   MLE/MLE.cpp
   tools/CanonicalAverager.cpp
-  utils/utils.cpp
-  utils/TArrayUtils.cpp
   utils/timer.cpp
-  utils/StatisticsLogger.cpp
   utils/MessageLogger.cpp
+  utils/TArrayUtils.cpp
+  utils/StatisticsLogger.cpp
   utils/StatisticsLogReader.cpp
+  utils/utils.cpp
   utils/nonlinear/newton.cpp
   WeightSchemes/LinearPolatedWeights.cpp
 )

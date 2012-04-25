@@ -1,5 +1,11 @@
 2012-04-25  frellsen  <frellsen@binf>
 
+	* muninn/CMakeLists.txt: Updated to accommodate new header files.
+
+	* muninn/Makefile.am: Updated to accommodate new header files.
+
+2012-04-25  frellsen  <frellsen@binf>
+
 	* muninn/Factories/CGEfactory.h: Added the setting
 	read_fixed_weights_filename.
 
