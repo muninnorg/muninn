@@ -55,7 +55,7 @@ public:
     ///              of the margin when using min_beta_thermodynamics and
     ///              max_beta_thermodynamics
     LinearPolatedInvK(double slope_factor_up=0.3, double slope_factor_down=3.0, unsigned int sigma=20) :
-        LinearPolatedWeigths(&this_weight_scheme, slope_factor_up, slope_factor_down, sigma) {}
+        LinearPolatedWeigths(&this_weight_scheme, slope_factor_up, slope_factor_down, sigma), this_weight_scheme() {}
 private:
     InvK this_weight_scheme; ///< The underlying InvK weight scheme.
 };

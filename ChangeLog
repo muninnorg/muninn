@@ -1,3 +1,78 @@
+2012-12-07  Jes Frellsen  <frellsen@binf>
+
+	* muninn/Makefile.am: Updated Makefiles.
+	
+2012-12-07  Jes Frellsen  <frellsen@binf>
+
+	* muninn/WeightSchemes/InvKP.h: Jan added file - Jes made minor
+	stylistic changes.
+	
+	* muninn/WeightSchemes/LinearPolatedInvK.h: Added explicit call to
+	this_weight_scheme constructor.
+	
+	* muninn/WeightSchemes/LinearPolatedInvKP.h: Jan added file - Jes
+	made minor stylistic changes.
+	
+	* muninn/WeightSchemes/LinearPolatedMulticanonical.h: Added
+	explicit call to this_weight_scheme constructor.
+
+2012-10-16  Jes Frellsen  <frellsen@binf>
+
+	* configure.ac: Changed version number to 0.411
+
+	* muninn/Factories/CGEfactory.h: Added settings increase_factor
+	and max_iterations_per_histogram.
+
+	* muninn/UpdateSchemes/IncreaseFactorScheme.h: Added argument
+	max_iterations_between_updates to constructor.
+	 
+2012-10-16  Jes Frellsen  <frellsen@binf>
+
+	* autogen.py: Insured that the external-folder and txt-files are included in the Makefile.am.
+
+2012-08-08  Jes Frellsen  <frellsen@binf>
+
+	* muninn/Factories/CGEfactory.cpp: Fixed problem with wrong index
+	offset in log file, when continuing a simulation.
+
+2012-07-09  Jes Frellsen  <frellsen@binf>
+
+	* muninn/utils/StatisticsLogger.h: Fixed problem with setting mode
+	to NONE.
+
+2012-06-05  Jes Frellsen  <frellsen@binf>
+
+	* muninn/Binners/UniformBinner.h: Fixed bug with min_value and
+	max_value.
+
+2012-05-30  Jes Frellsen  <frellsen@binf>
+
+	* muninn/Factories/CGEfactory.h: Added option
+	continue_statistics_log.
+	
+	* muninn/Factories/CGEfactory.cpp: Implemented the
+	continue_statistics_log option.
+	
+	* muninn/utils/StatisticsLogger.h: Added append_to_file and
+	counter_offset to constructor.
+
+2012-05-09  Jes Frellsen  <frellsen@binf>
+
+	* bin/tools/canonical_weights.cpp: Catching exception by
+	reference.
+	 
+	* muninn/CGE.h: Catching exceptions by references.
+	
+	* muninn/Histogram.h: Added virtual destructor.
+	
+	* muninn/Binners/NonUniformBinner.h: Added missing return
+	statement.
+	
+	* muninn/utils/Loggable.h: Added virtual destructor.
+	
+	* muninn/utils/nonlinear/NonlinearEquation.h: Added virtual
+	destructor.
+
 2012-04-25  frellsen  <frellsen@binf>
 
 	* muninn/CMakeLists.txt: Updated to accommodate new header files.

@@ -176,7 +176,7 @@ public:
             try {
                 bin = calc_bin_with_extention(energy);
             }
-            catch (MaximalNumberOfBinsExceed exception) {
+            catch (MaximalNumberOfBinsExceed& exception) {
                 MessageLogger::get().warning(exception.what());
                 return ge.new_weights();
             }
@@ -215,7 +215,7 @@ public:
                 try {
                     bin = calc_bin_with_extention(energy);
                 }
-                catch (MaximalNumberOfBinsExceed exception) {
+                catch (MaximalNumberOfBinsExceed& exception) {
                     MessageLogger::get().warning(exception.what());
                     return std::numeric_limits<double>::infinity();
                 }

@@ -100,8 +100,8 @@ public:
             }
 
             // Find the number of bins
-            double min_value = initial_values[0] - bin_width/2.0;
-            double max_value = initial_values[initial_values.size() - 1] + bin_width/2.0;
+            min_value = initial_values.front() - bin_width/2.0;
+            max_value = initial_values.back() + bin_width/2.0;
 
             nbins = static_cast<unsigned int>((max_value - min_value) / bin_width + 1);
         }

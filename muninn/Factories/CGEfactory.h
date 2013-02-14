@@ -31,10 +31,10 @@
 namespace Muninn {
 
 /// Define the different generalized ensembles (GE).
-enum GeEnum {GE_MULTICANONICAL=0, GE_INV_K=1, GE_ENUM_SIZE};
+enum GeEnum {GE_MULTICANONICAL=0, GE_INV_K=1, GE_INV_K_P=2, GE_ENUM_SIZE};
 
 /// Define the string names corresponding values of the GeEnum.
-static const std::string GeEnumNames[] = {"multicanonical", "invk"};
+static const std::string GeEnumNames[] = {"multicanonical", "invk", "invkp"};
 
 /// Input operator of a GeEnum from string.
 std::istream &operator>>(std::istream &input, GeEnum &g);
@@ -74,6 +74,9 @@ public:
         /// The initial beta value to be used.
         double initial_beta;
 
+        /// The p value for the invkp scheme
+        double p;
+
         /// The resolution for the non-uniform binner. The binning is set so
         /// that a uniform resolution, \f$ r \f$, in the weights
         /// is obtained, \f$ |ln w(E_j) - \ln w(E_{j+1})| \simeq r \f$.
@@ -96,6 +99,10 @@ public:
         /// floating point values to the log file.
         int log_precision;
 
+        /// The statistics log is first read from statistics_log_filename and
+        /// the result of the simulation is appended to this file.
+        bool continue_statistics_log;
+
         /// The filename for reading the Muninn statistics logfile. If the
         /// value difference from the empty string (""), this log file is read
         /// and the history is set based on the content.
@@ -108,6 +115,14 @@ public:
 
         /// Number of iterations used in first round of sampling.
         unsigned int initial_max;
+
+        /// The sampling time between consecutive histograms is multiplied with
+        /// this factor if the size of the support is not increased for the new
+        /// histogram.
+        double increase_factor;
+
+        /// The maximum sampling time (number of iteration) for each round of sampling.
+        unsigned int max_iterations_per_histogram;
 
         /// The number of consecutive histograms to keep in memory.
         unsigned int memory;
@@ -141,15 +156,19 @@ public:
         /// \param min_beta See documentation for Settings::min_beta.
         /// \param max_beta See documentation for Settings::max_beta.
         /// \param initial_beta See documentation for Settings::initial_beta.
+        /// \param p See documentation for Settings::p.
         /// \param resolution See documentation for Settings::resolution.
         /// \param initial_width_is_max_left See documentation for Settings::initial_width_is_max_left.
         /// \param initial_width_is_max_right See documentation for Settings::initial_width_is_max_right.
         /// \param statistics_log_filename See documentation for Settings::statistics_log_filename.
         /// \param log_mode See documentation for Settings::log_mode.
         /// \param log_precision See documentation for log_precision.
+        /// \param bool continue_statistics_log See documentation for continue_statistics_log.
         /// \param read_statistics_log_filename See documentation for Settings::read_statistics_log_filename.
         /// \param read_fixed_weights_filename See documentation for Settings::read_fixed_weights_filename.
         /// \param initial_max  See documentation for Settings::initial_max.
+        /// \param increase_factor  See documentation for Settings::increase_factor.
+        /// \param max_iterations_between_rounds  See documentation for Settings::max_iterations_between_rounds.
         /// \param memory See documentation for Settings::memory.
         /// \param min_count See documentation for Settings::min_count.
         /// \param restricted_individual_support See documentation for Settings::restricted_individual_support.
@@ -164,15 +183,19 @@ public:
                  double min_beta=-std::numeric_limits<double>::infinity(),
                  double max_beta=std::numeric_limits<double>::infinity(),
                  double initial_beta=0.0,
+                 double p=0.5,
                  double resolution = 0.2,
                  bool initial_width_is_max_left=true,
                  bool initial_width_is_max_right=false,
                  std::string statistics_log_filename = "muninn.txt",
                  Muninn::StatisticsLogger::Mode log_mode = Muninn::StatisticsLogger::ALL,
                  int log_precision = 10,
+                 bool continue_statistics_log = false,
                  std::string read_statistics_log_filename = "",
                  std::string read_fixed_weights_filename = "",
                  unsigned int initial_max = 5000,
+                 double increase_factor = 1.07,
+                 unsigned int max_iterations_per_histogram = std::numeric_limits<Count>::max(),
                  unsigned int memory = 40,
                  unsigned int min_count = 30,
                  bool restricted_individual_support=false,
@@ -187,15 +210,19 @@ public:
           min_beta(min_beta),
           max_beta(max_beta),
           initial_beta(initial_beta),
+          p(p),
           resolution(resolution),
           initial_width_is_max_left(initial_width_is_max_left),
           initial_width_is_max_right(initial_width_is_max_right),
           statistics_log_filename(statistics_log_filename),
           log_mode(log_mode),
           log_precision(log_precision),
+          continue_statistics_log(continue_statistics_log),
           read_statistics_log_filename(read_statistics_log_filename),
           read_fixed_weights_filename(read_fixed_weights_filename),
           initial_max(initial_max),
+          increase_factor(increase_factor),
+          max_iterations_per_histogram(max_iterations_per_histogram),
           memory(memory),
           min_count(min_count),
           restricted_individual_support(restricted_individual_support),
@@ -222,15 +249,19 @@ public:
             o << "min_beta" << settings.separator << settings.min_beta << std::endl;
             o << "max_beta" << settings.separator << settings.max_beta << std::endl;
             o << "initial_beta" << settings.separator << settings.initial_beta << std::endl;
+            o << "p" << settings.separator << settings.p << std::endl;
             o << "resolution" << settings.separator << settings.resolution << std::endl;
             o << "initial_width_is_max_left" << settings.separator << settings.initial_width_is_max_left << std::endl;
             o << "initial_width_is_max_right" << settings.separator << settings.initial_width_is_max_right << std::endl;
             o << "statistics_log_filename" << settings.separator << settings.statistics_log_filename << std::endl;
             o << "log_mode" << settings.separator << settings.log_mode << std::endl;
             o << "log_precision" << settings.separator << settings.log_precision << std::endl;
+            o << "continue_statistics_log" << settings.continue_statistics_log << std::endl;
             o << "read_statistics_log_filename" << settings.separator << settings.read_statistics_log_filename << std::endl;
             o << "read_fixed_weights_filename" << settings.separator << settings.read_fixed_weights_filename << std::endl;
             o << "initial_max" << settings.separator << settings.initial_max << std::endl;
+            o << "increase_factor" << settings.separator << settings.increase_factor << std::endl;
+            o << "max_iterations_per_histogram" << settings.separator << settings.max_iterations_per_histogram << std::endl;
             o << "memory" << settings.separator << settings.memory << std::endl;
             o << "min_count" << settings.separator << settings.min_count << std::endl;
             o << "restricted_individual_support" << settings.separator << settings.restricted_individual_support << std::endl;

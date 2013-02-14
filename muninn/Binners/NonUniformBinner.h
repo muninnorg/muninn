@@ -71,6 +71,7 @@ public:
     // Implementation of Binner interface (see base class for documentation).
     virtual std::pair<std::vector<unsigned int>, std::vector<unsigned int> > extend(double value, const Estimate &estimate, const History &history, const DArray &lnw) {
         assert(false);
+        return std::pair<std::vector<unsigned int>, std::vector<unsigned int> >();
     }
 
     // Implementation of Binner interface (see base class for documentation).

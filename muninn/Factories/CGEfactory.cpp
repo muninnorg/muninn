@@ -29,6 +29,7 @@
 #include "muninn/UpdateSchemes/IncreaseFactorScheme.h"
 #include "muninn/WeightSchemes/LinearPolatedMulticanonical.h"
 #include "muninn/WeightSchemes/LinearPolatedInvK.h"
+#include "muninn/WeightSchemes/LinearPolatedInvKP.h"
 #include "muninn/WeightSchemes/FixedWeights.h"
 
 #include "muninn/utils/StatisticsLogReader.h"
@@ -43,10 +44,18 @@ CGE* CGEfactory::new_CGE(const Settings& settings) {
 
     // Possibly read a statistics log file
     StatisticsLogReader *statistics_log_reader = NULL;
+    std::string read_statistics_log_filename = "";
 
-    if (settings.read_statistics_log_filename!="") {
+    if (settings.continue_statistics_log) {
+        read_statistics_log_filename = settings.statistics_log_filename;
+    }
+    else if (settings.read_statistics_log_filename!="") {
+        read_statistics_log_filename = settings.read_statistics_log_filename;
+    }
+
+    if (read_statistics_log_filename!="") {
         MessageLogger::get().info("Reading statistics log file");
-    	statistics_log_reader = new StatisticsLogReader(settings.read_statistics_log_filename, settings.memory);
+    	statistics_log_reader = new StatisticsLogReader(read_statistics_log_filename, settings.memory);
 
     	// Check that the logger contains adequate information
         if (statistics_log_reader->get_Ns().size()==0 ||
@@ -75,7 +84,7 @@ CGE* CGEfactory::new_CGE(const Settings& settings) {
     	MessageLogger::get().debug("Settings initial_max to "+to_string(initial_max)+".");
     }
 
-    IncreaseFactorScheme* update_scheme = new IncreaseFactorScheme(initial_max);
+    IncreaseFactorScheme* update_scheme = new IncreaseFactorScheme(initial_max, settings.increase_factor, settings.max_iterations_per_histogram);
 
     // Allocate the weight scheme
     LinearPolatedWeigths *weight_scheme = NULL;
@@ -85,6 +94,8 @@ CGE* CGEfactory::new_CGE(const Settings& settings) {
             weight_scheme = new LinearPolatedMulticanonical(settings.slope_factor_up, settings.slope_factor_down);
         else if (settings.weight_scheme == GE_INV_K)
             weight_scheme = new LinearPolatedInvK(settings.slope_factor_up, settings.slope_factor_down);
+        else if (settings.weight_scheme == GE_INV_K_P)
+            weight_scheme = new LinearPolatedInvKP(settings.slope_factor_up, settings.slope_factor_down, settings.p);
         else {
             throw(CGEfactorySettingsException("Weight Scheme not set correctly."));
         }
@@ -111,6 +122,8 @@ CGE* CGEfactory::new_CGE(const Settings& settings) {
             inner_weight_scheme = new Multicanonical;
         else if (settings.weight_scheme == GE_INV_K)
             inner_weight_scheme = new InvK;
+        else if (settings.weight_scheme == GE_INV_K_P)
+            inner_weight_scheme = new InvKP(settings.p);
         else {
             throw(CGEfactorySettingsException("Weight Scheme not set correctly."));
         }
@@ -149,7 +162,18 @@ CGE* CGEfactory::new_CGE(const Settings& settings) {
     }
 
     // Allocate the logger
-    StatisticsLogger* statistics_logger = new StatisticsLogger(settings.statistics_log_filename, settings.log_mode, settings.log_precision);
+    StatisticsLogger* statistics_logger;
+
+    if (settings.continue_statistics_log) {
+        unsigned int counter_offset = 0;
+        if (statistics_log_reader->get_Ns().size()>0) {
+            counter_offset = from_string<unsigned int>(statistics_log_reader->get_Ns().back().first.substr(1)) + 1;
+        }
+        statistics_logger = new StatisticsLogger(settings.statistics_log_filename, settings.log_mode, settings.log_precision, true, counter_offset);
+    }
+    else {
+        statistics_logger = new StatisticsLogger(settings.statistics_log_filename, settings.log_mode, settings.log_precision);
+    }
 
     // Create the CGE object
     CGE* cge = NULL;

@@ -45,8 +45,8 @@ int main(int argc, char *argv[]) {
     try {
         ca = new Muninn::CanonicalAveragerFromStatisticsLog(parser.get("statistics_log"));
     }
-    catch (Muninn::MessageException e) {
-        parser.parser_error(e.what());
+    catch (Muninn::MessageException& exception) {
+        parser.parser_error(exception.what());
     }
 
     // Open stream for stdin

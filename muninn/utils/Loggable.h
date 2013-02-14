@@ -37,6 +37,9 @@ class StatisticsLogger;
 class Loggable {
 public:
 
+    /// Default destructor
+    virtual ~Loggable() {}
+
     /// Add an entries to the statistics log. Inside the function entries
     /// can be added to the log file by calling add_entry on the
     /// statistics_logger class.

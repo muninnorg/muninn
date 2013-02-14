@@ -31,6 +31,10 @@ namespace Muninn {
 
 class NonlinearEquation {
 public:
+
+    /// Default destructor
+    virtual ~NonlinearEquation() {}
+
     ///  The nonlinear function, where both X and F must be one dimensional of shape (n).
     ///
     /// \param X The argument, which must be one dimensional and of shape (n).

@@ -57,12 +57,20 @@ public:
     /// \param mode The logging mode (see Mode for details).
     /// \param precision The precision (number of significant digits) used when
     ///                  writing floating point values to the log file.
-    StatisticsLogger(const std::string &filename, Mode mode=CURRENT, int precision=10) :
+    StatisticsLogger(const std::string &filename, Mode mode=CURRENT, int precision=10, bool append_to_file=false, unsigned int counter_offset=0) :
         filename(filename), mode(mode), precision(precision), counter(0), loggables(), entry_queue() {
 
         // Clear the output file
-        outstream.open(filename.c_str());
-        outstream.close();
+        if (!append_to_file && mode!=NONE) {
+            outstream.open(filename.c_str());
+            outstream.close();
+        }
+
+        // Set the counter off, if required
+        if (counter_offset>0 && mode==ALL) {
+            counter = counter_offset;
+        }
+
     }
 
     /// Default destructor.
@@ -72,24 +80,26 @@ public:
     /// appended to the file, while in Mode::CURRENT the file is rewritten at
     /// every call.
     void log() {
-        // Collect entries of all Loggables.
-        for (std::vector<const Loggable*>::iterator it=loggables.begin(); it!=loggables.end(); ++it) {
-            (*it)->add_statistics_to_log(*this);
-        }
+        if (mode != NONE) {
+            // Collect entries of all Loggables.
+            for (std::vector<const Loggable*>::iterator it=loggables.begin(); it!=loggables.end(); ++it) {
+                (*it)->add_statistics_to_log(*this);
+            }
 
-        // Write the entries to file
-        write_entry_queue();
+            // Write the entries to file
+            write_entry_queue();
 
-        // Clear the queue and additional vector
-        entry_queue.clear();
-        last_entry_in_queue.clear();
+            // Clear the queue and additional vector
+            entry_queue.clear();
+            last_entry_in_queue.clear();
 
-        // Set the value of the counter depending on the mode.
-        if (mode==ALL) {
-            ++counter;
-        }
-        else {
-            counter = 0;
+            // Set the value of the counter depending on the mode.
+            if (mode==ALL) {
+                ++counter;
+            }
+            else {
+                counter = 0;
+            }
         }
     }
 

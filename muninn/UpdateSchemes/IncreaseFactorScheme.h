@@ -59,6 +59,8 @@ public:
     /// \param increase_factor The sampling time is multiplied with this factor
     ///                        if the size of the support is not increased for
     ///                        the new histogram.
+    /// \param max_iterations_per_histogram The maximum sampling time (number of iteration) for
+    ///                                     each round of sampling.
     /// \param min_count The support of a histogram is defined as the bins with
     ///                  a least min_count observations.
     /// \param fraction If the number of new bins with support in the new histogram
@@ -67,8 +69,8 @@ public:
     ///                 the increase_factor. If the factor is negative, the
     ///                 simulation time is only increased if no new bins
     ///                 has gained support.
-    IncreaseFactorScheme(Count initial_max = 5000, double increase_factor = 1.07, Count min_count = 20, double fraction=0.05) :
-        UpdateScheme(initial_max), this_max(initial_max), prolonging(0), increase_factor(increase_factor), min_count(min_count), fraction(fraction) {}
+    IncreaseFactorScheme(Count initial_max = 5000, double increase_factor = 1.07, Count max_iterations_per_histogram = std::numeric_limits<Count>::max(), Count min_count = 20, double fraction=0.05) :
+        UpdateScheme(initial_max), this_max(initial_max), max_iterations_per_histogram(max_iterations_per_histogram), prolonging(0), increase_factor(increase_factor), min_count(min_count), fraction(fraction) {}
 
     /// Checks if the entropy estimate and the weights should be updated. An
     /// updated is required if the total number of observations in the
@@ -103,7 +105,7 @@ public:
             unsigned int new_observed_bins = number_of_true(new_observations);
 
             if (new_observed_bins<fraction*num_prev_observed || (new_observed_bins==0 && fraction<0) ) {
-                this_max = static_cast<Count>(this_max * increase_factor);
+                this_max = std::min(static_cast<Count>(this_max * increase_factor), max_iterations_per_histogram);
                 MessageLogger::get().debug("Settings this_max to "+to_string(this_max)+".");
             }
         }
@@ -141,6 +143,7 @@ public:
 
 private:
     Count this_max;          ///< The required number of iterations required for completing the current round.
+    Count max_iterations_per_histogram;      ///< The maximum number of iterations for any round.
     Count prolonging;        ///< Number of iterations the current round is prolonged by.
     double increase_factor;  ///< The factor this_max is increased by if the support has not grown more than fraction.
     Count min_count;         ///< The support of a histogram is defined as the bins with a least min_count observations.

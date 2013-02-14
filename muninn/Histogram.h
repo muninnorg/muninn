@@ -64,6 +64,9 @@ public:
     	assert(N.same_shape(lnw));
     }
 
+    /// Default destructor
+    virtual ~Histogram() {}
+
     /// Function for adding a one dimensional observation to the histogram.
     ///
     /// \param bin The bin index for the observation.

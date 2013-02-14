@@ -24,7 +24,7 @@ def write_to_file(text, file_name, writeoption='w'):
     f.write(text)
     f.close()
 
-def get_files(folders, filepatterns=['\w+\.h$', '\w+\.cpp$'], exclude=[]):
+def get_files(folders, filepatterns=['\w+\.h$', '\w+\.cpp$'], exclude_folders=[], exclude=[]):
     """
     Function for getting the name of files matching a given patter in
     a list of folders.
@@ -44,6 +44,31 @@ def get_files(folders, filepatterns=['\w+\.h$', '\w+\.cpp$'], exclude=[]):
             files.append(filename)
 
     return files
+
+
+def get_files_recursively(folder, filepatterns=['\w+\.h$', '\w+\.cpp$'], exclude=[], exclude_subfolders=None):
+    """
+    Function for getting the name of files matching a given patter in a folder and it's subfolders.
+    """
+
+    files = []
+
+    for root, dirnames, filenames in os.walk(folder):
+
+        if exclude_subfolders==None or exclude_subfolders not in root:
+            for filename in filenames:
+                fn = os.path.split(filename)[1]
+
+                match = False
+                for regexp in filepatterns:
+                    match = match or re.match(regexp, filename)
+
+                if match and filename not in exclude:
+                    files.append(root+"/"+filename)
+                
+    return files
+
+
 
 
 def set_varaible_in_makefile(makefilename, variable, value):
@@ -83,6 +108,14 @@ def set_function_arguments_in_cmakelists(cmakelistsfilename, function, first_arg
 if __name__ == "__main__":
     import os
 
+    # Set extra files for distribution
+    text_files = get_files_recursively(".", ['\w+\.txt$'], exclude_subfolders=".svn")
+    script_files = get_files_recursively("scripts", ['\w+\.py$'], exclude_subfolders=".svn")
+    eigen_files = get_files_recursively("external", ['[^.]+$','\w+\.cpp$', '\w+\.h$'], exclude_subfolders=".svn")
+
+    set_varaible_in_makefile("Makefile.am", "EXTRA_DIST", " ".join(text_files+script_files+eigen_files))
+
+
     # Go to the Muninn directory
     os.chdir("muninn")
 
@@ -96,7 +129,7 @@ if __name__ == "__main__":
                       "MLE/utils/",
                       "tools/",
                       "tools/phaistos/",
-                      "UpdateSchemes",
+                      "UpdateSchemes/",
                       "utils/",
                       "utils/nonlinear/",
                       "utils/nonlinear/nr/",
