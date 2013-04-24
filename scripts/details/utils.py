@@ -36,3 +36,13 @@ def pickle_to_file(obj, file_name, protocol=2):
     f = open(file_name, 'w')
     dump(obj, f, protocol)
     f.close()
+
+def unpickle_from_file(file_name):
+    """
+    Unpickle a file
+    """
+    f = open(file_name, 'r')
+    obj = load(f)
+    f.close()
+    return obj
+                    
