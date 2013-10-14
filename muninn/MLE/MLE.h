@@ -37,7 +37,7 @@ namespace Muninn {
 
 /// The maximum likelihood estimator (MLE)s. This estimator uses the
 /// generalized multihistogram (GMH) equations for estimating the entropy.
-class MLE: public Estimator {
+class MLE: public Estimator, public BaseConverter<Estimator, MLE> {
 public:
     /// Constructor for the MLE class.
     ///
@@ -52,7 +52,7 @@ public:
         MultiHistogramHistory::HistoryMode history_mode=MultiHistogramHistory::DROP_OLDEST,
         unsigned int sigma=20) :
             min_count(min_count), memory(memory), restricted_individual_support(restricted_individual_support),
-            history_mode(history_mode),    sigma(sigma) {}
+            history_mode(history_mode), sigma(sigma) {}
 
     virtual ~MLE() {}
 
@@ -63,6 +63,18 @@ public:
     virtual void extend_estimate(const History &extended_history, Estimate &estimate, const std::vector<unsigned int> &add_under, const std::vector<unsigned int> &add_over);
 
     // Implementation of Estimator interface (see base class for documentation).
+    virtual Histogram* new_histogram(const std::vector<unsigned int> &shape) {
+        return new Histogram(shape);
+    }
+
+    // Implementation of Estimator interface (see base class for documentation).
+    virtual Histogram* new_histogram(const DArray &lnw) {
+        return new Histogram(lnw);
+    }
+
+    // Implementation of Estimator interface (see base class for documentation).
+
+    // Implementation of Estimator interface (see base class for documentation).
     virtual History* new_history(const std::vector<unsigned int> &shape) {
         return new MultiHistogramHistory(shape, memory, min_count, history_mode);
     }
@@ -71,7 +83,6 @@ public:
     virtual Estimate* new_estimate(const std::vector<unsigned int> &shape) {
         return new MLEestimate(shape);
     }
-
 
     /// Make a new MLEestimate based on values of lnG, lnG support, a reference
     /// bin, free energies and a given history. The Estimate is compatible with

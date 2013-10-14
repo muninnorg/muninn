@@ -72,7 +72,8 @@ int main(int argc, char *argv[]) {
     // Setup the MCMC
     Muninn::CGEfactory::Settings settings;
 
-    settings.weight_scheme = Muninn::GE_MULTICANONICAL;
+    settings.weight_scheme = Muninn::GE_OPTIMIZED;
+    settings.estimator = Muninn::ESTIMATOR_DIFFUSION;
     settings.initial_width_is_max_right = true;
     settings.statistics_log_filename = parser.get("statistics_log");
     settings.log_mode = parser.get_as<Muninn::StatisticsLogger::Mode>("log_mode");

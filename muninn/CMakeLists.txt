@@ -13,4 +13,5 @@ add_library(muninn
   utils/StatisticsLogReader.cpp
   utils/nonlinear/newton.cpp
   WeightSchemes/LinearPolatedWeights.cpp
+  DiffusionOptimized/DiffusionEstimator.cpp
 )

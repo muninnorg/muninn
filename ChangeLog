@@ -1,3 +1,66 @@
+2013-10-14  Jes Frellsen  <frellsen@binf>
+
+	* bin/examples/normal.cpp: Changed the example to use
+	DiffusionEstimator and LinearPolatedDiffusionOptimizedWeights.
+
+	* muninn/CGE.cpp: Adopted the Estimator::new_histogram() function.
+
+	* muninn/Estimator.h: Added pure virtual functions
+	new_histogram(...).
+
+	* muninn/GE.cpp: Made histogram a pointer and adopted the
+	Estimator::new_histogram() function and the ownership rule for
+	add_histogram.
+
+	* muninn/GE.h: Made histogram a pointer and adopted the
+	Estimator::new_histogram() function and the ownership rule for
+	add_histogram.
+
+	* muninn/Histogram.h: Made add_observation virtual
+
+	* muninn/History.h: Made add_histogram take ownership of the
+	passed histogram.
+
+	* muninn/DiffusionOptimized/DiffusionEstimate.h: Added skeleton
+	for DeffusionEstimate with build in MLE estimate.
+
+	* muninn/DiffusionOptimized/DiffusionEstimator.cpp: Added
+	skeleton for DiffusionEstimation with build in MLE estimator.
+
+	* muninn/DiffusionOptimized/DiffusionEstimator.h: Added skeleton
+	for DiffusionEstimation with build in MLE estimator.
+
+	* muninn/DiffusionOptimized/DiffusionHistogram.h: Added skeleton
+	for DiffusionHistogram as specialization of the Histogram class.
+
+	* muninn/DiffusionOptimized/DiffusionOptimizedWeights.h: Added
+	skeleton for DiffusionOptimizedWeidhts (now multicanonical).
+
+	* muninn/DiffusionOptimized/LinearPolatedDiffusionOptimizedWeights.h:
+	Added class for extrapolation interpolation on
+	DiffusionOptimizedWeights.
+
+	* muninn/Factories/CGEfactory.cpp: Adopted the enum for the
+	estimator and added the optimized weights. Made use of the generic
+	enum stream operators.
+
+	* muninn/Factories/CGEfactory.h: Added a enum for the estimator
+	and added the optimized weights.
+
+	* muninn/Histories/MultiHistogramHistory.cpp: Made add_histogram
+	take ownership of the passed histogram.
+
+	* muninn/Histories/MultiHistogramHistory.h: Made add_histogram
+	take ownership of the passed histogram.
+
+	* muninn/MLE/MLE.h: Added new_histogram methods and inherence from
+	BaseConverter.
+
+	* muninn/utils/GenericEnumStreamOperators.h: Added file with
+	generic functions for making stream operators for enums.
+	
+	* autogen.py: Added folder muninn/DiffusionOptimized
+
 2013-04-24  Jes Frellsen  <frellsen@binf>
 
 	* scripts/details/utils.py: Added function unpickle_from_file.

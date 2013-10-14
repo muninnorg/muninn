@@ -32,9 +32,14 @@
 #include "muninn/WeightSchemes/LinearPolatedInvKP.h"
 #include "muninn/WeightSchemes/FixedWeights.h"
 
+#include "muninn/DiffusionOptimized/DiffusionEstimator.h"
+#include "muninn/DiffusionOptimized/LinearPolatedDiffusionOptimizedWeights.h"
+
 #include "muninn/utils/StatisticsLogReader.h"
 #include "muninn/utils/ArrayAligner.h"
 #include "muninn/utils/TArrayUtils.h"
+#include "muninn/utils/GenericEnumStreamOperators.h"
+
 
 namespace Muninn {
 
@@ -71,7 +76,18 @@ CGE* CGEfactory::new_CGE(const Settings& settings) {
     }
 
     // Allocate the estimator
-    MLE* estimator = new MLE(settings.min_count, settings.memory, settings.restricted_individual_support);
+    Estimator *estimator = NULL;
+
+    switch (settings.estimator) {
+    case ESTIMATOR_MLE :
+        estimator = new MLE(settings.min_count, settings.memory, settings.restricted_individual_support);
+        break;
+    case ESTIMATOR_DIFFUSION :
+        estimator = new DiffusionEstimator(settings.min_count, settings.memory, settings.restricted_individual_support);
+        break;
+    default :
+        throw(CGEfactorySettingsException("Estimator not set correctly."));
+    }
 
     // Allocate the update scheme
     unsigned int initial_max;
@@ -90,13 +106,20 @@ CGE* CGEfactory::new_CGE(const Settings& settings) {
     LinearPolatedWeigths *weight_scheme = NULL;
 
     if (settings.read_fixed_weights_filename=="") {
-        if (settings.weight_scheme == GE_MULTICANONICAL)
+        switch (settings.weight_scheme) {
+        case GE_MULTICANONICAL :
             weight_scheme = new LinearPolatedMulticanonical(settings.slope_factor_up, settings.slope_factor_down);
-        else if (settings.weight_scheme == GE_INV_K)
+            break;
+        case GE_INV_K :
             weight_scheme = new LinearPolatedInvK(settings.slope_factor_up, settings.slope_factor_down);
-        else if (settings.weight_scheme == GE_INV_K_P)
+            break;
+        case GE_INV_K_P :
             weight_scheme = new LinearPolatedInvKP(settings.slope_factor_up, settings.slope_factor_down, settings.p);
-        else {
+            break;
+        case GE_OPTIMIZED :
+            weight_scheme = new LinearPolatedDiffusionOptimizedWeights(settings.slope_factor_up, settings.slope_factor_down);
+            break;
+        default:
             throw(CGEfactorySettingsException("Weight Scheme not set correctly."));
         }
     }
@@ -194,19 +217,21 @@ CGE* CGEfactory::new_CGE(const Settings& settings) {
     			std::pair<unsigned int, unsigned int> offsets = ArrayAligner::calculate_alignment_offsets(final_binning, current_binning);
         		const CArray extended_Ns = statistics_log_reader->get_Ns()[i].second.extended(offsets.first, offsets.second);
         		const DArray extended_lnws = statistics_log_reader->get_lnws()[i].second.extended(offsets.first, offsets.second);
-        		history->add_histogram(Histogram(extended_Ns, extended_lnws));
+        		history->add_histogram(new Histogram(extended_Ns, extended_lnws));
     		}
     		else {
-        		history->add_histogram(Histogram(statistics_log_reader->get_Ns()[i].second, statistics_log_reader->get_lnws()[i].second));
+        		history->add_histogram(new Histogram(statistics_log_reader->get_Ns()[i].second, statistics_log_reader->get_lnws()[i].second));
     		}
     	}
 
     	// Construct a new estimate
-    	Estimate* estimate = estimator->new_estimate(statistics_log_reader->get_lnGs().back().second,
-                                                     statistics_log_reader->get_lnG_supports().back().second,
-                                                     TArray_to_vector<Index>(statistics_log_reader->get_x_zeros().back().second),
-                                                     statistics_log_reader->get_free_energies().back().second,
-                                                     *history, binner);
+    	MLE* mle_estimator = MLE::cast_from_base(estimator, "The history can only be loaded for the MLE estimator.");
+
+    	Estimate* estimate = mle_estimator->new_estimate(statistics_log_reader->get_lnGs().back().second,
+    	                                                 statistics_log_reader->get_lnG_supports().back().second,
+                                                         TArray_to_vector<Index>(statistics_log_reader->get_x_zeros().back().second),
+                                                         statistics_log_reader->get_free_energies().back().second,
+                                                         *history, binner);
 
     	// Construct the CGE object
     	cge = new CGE(estimate, history, estimator, update_scheme, weight_scheme, binner, statistics_logger, true);
@@ -217,40 +242,32 @@ CGE* CGEfactory::new_CGE(const Settings& settings) {
 
 // Input GeEnum from string
 std::istream &operator>>(std::istream &input, GeEnum &g) {
-     std::string raw_string;
-     input >> raw_string;
-
-     for (unsigned int i=0; i<GE_ENUM_SIZE; ++i) {
-          if (raw_string == GeEnumNames[i]) {
-               g = GeEnum(i);
-          }
-     }
-     return input;
+    return input_operator<GeEnum>(input, g, GE_ENUM_SIZE, GeEnumNames);
 }
 
 // Output GeEnum
-std::ostream &operator<<(std::ostream &o, const GeEnum &g) {
-     o << GeEnumNames[static_cast<unsigned int>(g)];
-     return o;
+std::ostream &operator<<(std::ostream &output, const GeEnum &g) {
+    return output_operator<GeEnum>(output, g, GE_ENUM_SIZE, GeEnumNames);
+}
+
+// Input EstimatorEnum from string
+std::istream &operator>>(std::istream &input, EstimatorEnum &e) {
+    return input_operator<EstimatorEnum>(input, e, ESTIMATOR_ENUM_SIZE, EstimatorEnumNames);
+}
+
+// Output EstimatorEnum
+std::ostream &operator<<(std::ostream &output, const EstimatorEnum &e) {
+    return output_operator<EstimatorEnum>(output, e, ESTIMATOR_ENUM_SIZE, EstimatorEnumNames);
 }
 
 /// Input operator of a StatisticsLogger::Mode from string.
 std::istream &operator>>(std::istream &input, StatisticsLogger::Mode &m) {
-    std::string raw_string;
-    input >> raw_string;
-
-    for (unsigned int i=0; i<StatisticsLogger::SIZE; ++i) {
-         if (raw_string == StatisticsLogger::ModeNames[i]) {
-              m = StatisticsLogger::Mode(i);
-         }
-    }
-    return input;
+    return input_operator<StatisticsLogger::Mode>(input, m, StatisticsLogger::SIZE, StatisticsLogger::ModeNames);
 }
 
 /// Output operator for a StatisticsLogger::Mode
-std::ostream &operator<<(std::ostream &o, const StatisticsLogger::Mode &m) {
-    o << StatisticsLogger::ModeNames[static_cast<unsigned int>(m)];
-    return o;
+std::ostream &operator<<(std::ostream &putput, const StatisticsLogger::Mode &m) {
+    return output_operator<StatisticsLogger::Mode>(putput, m, StatisticsLogger::SIZE, StatisticsLogger::ModeNames);
 }
 
 } // namespace Muninn

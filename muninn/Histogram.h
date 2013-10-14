@@ -70,7 +70,7 @@ public:
     /// Function for adding a one dimensional observation to the histogram.
     ///
     /// \param bin The bin index for the observation.
-    inline void add_observation(unsigned int bin) {
+    virtual inline void add_observation(unsigned int bin) {
         N(bin)++;
         n++;
     }
@@ -79,7 +79,7 @@ public:
     ///
     /// \param bin1 The first bin index of the observation to be added.
     /// \param bin2 The second bin index of the observation to be added.
-    inline void add_observation(unsigned int bin1, unsigned int bin2) {
+    virtual inline void add_observation(unsigned int bin1, unsigned int bin2) {
         N(bin1, bin2)++;
         n++;
     }
@@ -87,7 +87,7 @@ public:
     /// Function for adding multidimensional observations to the histogram.
     ///
     /// \param bin The multidimensional index of the bin for the observation.
-    inline void add_observation(std::vector<unsigned int> &bin) {
+    virtual inline void add_observation(std::vector<unsigned int> &bin) {
         N(bin)++;
         n++;
     }
@@ -96,7 +96,7 @@ public:
     ///
     /// \param add_under The number of bins to be added leftmost in all dimensions.
     /// \param add_over The number of bins to be added rightmost in all dimensions.
-    void extend(const std::vector<unsigned int> &add_under, const std::vector<unsigned int> &add_over) {
+    virtual void extend(const std::vector<unsigned int> &add_under, const std::vector<unsigned int> &add_over) {
         N = N.extended(add_under, add_over);
         lnw = lnw.extended(add_under, add_over);
         shape = add_vectors(shape, add_under, add_over);

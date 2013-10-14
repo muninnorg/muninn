@@ -43,8 +43,10 @@ public:
 
     /// Function for adding a histogram to the history.
     ///
+    /// Note that the History takes ownership of the passed histogram.
+    ///
     /// \param histogram The histogram to be added.
-    virtual void add_histogram(const Histogram &histogram) = 0;
+    virtual void add_histogram(Histogram *histogram) = 0;
 
     /// Function for extending the shape of the History.
     ///

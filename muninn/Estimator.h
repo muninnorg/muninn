@@ -65,6 +65,21 @@ public:
     ///                  the axis.
     virtual void extend_estimate(const History &extended_history, Estimate &estimate, const std::vector<unsigned int> &add_under, const std::vector<unsigned int> &add_over) = 0;
 
+    /// Make a new empty Histogram compatible with the Estimator. The
+    /// returned history may be a class derived from the Histogram base class.
+    ///
+    /// \param shape The shape of the new Histogram,
+    /// \return A new empty Histogram.
+    virtual Histogram* new_histogram(const std::vector<unsigned int> &shape) = 0;
+
+    /// Make a new empty Histogram compatible with the Estimator based on a set
+    /// of weights. The count histogram will be empty, but the histogram will
+    /// get the same shape as the weights.
+    ///
+    /// \param lnw The weights the histogram will be initialized with.
+    /// \return A new empty Histogram.
+    virtual Histogram* new_histogram(const DArray &lnw) = 0;
+
     /// Make a new empty History that is compatible with the Estimator. The
     /// returned history may be a class derived from the History base class.
     ///

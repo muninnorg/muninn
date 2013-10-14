@@ -136,6 +136,7 @@ if __name__ == "__main__":
                       "utils/nonlinear/newton/",
                       "utils/polation/",
                       "WeightSchemes/",
+                      "DiffusionOptimized/"
                       ]
 
     muninn_files = get_files(muninn_folders, ['\w+\.cpp$', '\w+\.f$'])
