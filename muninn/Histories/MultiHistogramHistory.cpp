@@ -33,12 +33,12 @@ namespace Muninn {
 
 const std::string MultiHistogramHistory::history_mode_names[] = {"drop-oldest", "drop-oldest-possible", "drop-any-possible"};
 
-void MultiHistogramHistory::add_histogram(const Histogram &histogram) {
+void MultiHistogramHistory::add_histogram(Histogram *histogram) {
     // Check that the histogram has the correct shape
-    assert(vector_equal(histogram.get_shape(), this->shape));
+    assert(vector_equal(histogram->get_shape(), this->shape));
 
     // Add the histogram to the deque
-    histograms.push_front(new Histogram(histogram));
+    histograms.push_front(histogram);
 
     // Update sum_N
     sum_N += histograms.front()->get_N();

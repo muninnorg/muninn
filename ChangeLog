@@ -1,3 +1,38 @@
+2013-10-14  Jes Frellsen  <frellsen@binf>
+
+	* muninn/CGE.cpp: Adopted the Estimator::new_histogram() function.
+
+	* muninn/Estimator.h: Added pure virtual functions
+	new_histogram(...).
+
+	* muninn/GE.cpp: Made histogram a pointer and adopted the
+	Estimator::new_histogram() function and the ownership rule for
+	add_histogram.
+
+	* muninn/GE.h: Made histogram a pointer and adopted the
+	Estimator::new_histogram() function and the ownership rule for
+	add_histogram.
+
+	* muninn/History.h: Made add_histogram take ownership of the
+	passed histogram.
+
+	* muninn/Factories/CGEfactory.cpp: Adopted the enum for the
+	estimator and made use of the generic enum stream operators.
+
+	* muninn/Factories/CGEfactory.h: Added a enum for the estimator.
+
+	* muninn/Histories/MultiHistogramHistory.cpp: Made add_histogram
+	take ownership of the passed histogram.
+
+	* muninn/Histories/MultiHistogramHistory.h: Made add_histogram
+	take ownership of the passed histogram.
+
+	* muninn/MLE/MLE.h: Added new_histogram methods and inherence from
+	BaseConverter.
+
+	* muninn/utils/GenericEnumStreamOperators.h: Added file with
+	generic functions for making stream operators for enums.
+	
 2013-10-15  Jes Frellsen  <frellsen@demeter.binf.ku.dk>
 
 	* muninn/CMakeLists.txt: Added -Wno-enum-compare compiler flag to

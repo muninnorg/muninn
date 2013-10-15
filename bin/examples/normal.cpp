@@ -73,6 +73,7 @@ int main(int argc, char *argv[]) {
     Muninn::CGEfactory::Settings settings;
 
     settings.weight_scheme = Muninn::GE_MULTICANONICAL;
+    settings.estimator = Muninn::ESTIMATOR_MLE;
     settings.initial_width_is_max_right = true;
     settings.statistics_log_filename = parser.get("statistics_log");
     settings.log_mode = parser.get_as<Muninn::StatisticsLogger::Mode>("log_mode");
