@@ -1,5 +1,8 @@
 2013-10-15  Jes Frellsen  <frellsen@demeter.binf.ku.dk>
 
+	* muninn/CMakeLists.txt: Added -Wno-enum-compare compiler flag to
+	suppress warning in Eigen on newer GCC compilers.
+
 	* CMakeLists.txt: Added -Wno-enum-compare compiler flag to
 	suppress warning in Eigen on newer GCC compilers.
 
