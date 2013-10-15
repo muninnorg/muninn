@@ -16,6 +16,9 @@ endif()
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 set(CMAKE_CXX_FLAGS_DEBUG "-O0 -ggdb")
 
+# Supress warnings from enum comparisons in Eigen
+add_definitions ("-Wno-enum-compare")
+
 # Require proper C++ code
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -ansi -pedantic -Wno-long-long")
 

@@ -1,3 +1,11 @@
+2013-10-15  Jes Frellsen  <frellsen@demeter.binf.ku.dk>
+
+	* CMakeLists.txt: Added -Wno-enum-compare compiler flag to
+	suppress warning in Eigen on newer GCC compilers.
+
+	* muninn/Makefile.am: Added -Wno-enum-compare compiler flag to
+	supress warning in Eigen on newer GCC compilers.
+
 2013-04-24  Jes Frellsen  <frellsen@binf>
 
 	* scripts/details/utils.py: Added function unpickle_from_file.
