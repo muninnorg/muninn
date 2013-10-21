@@ -1,7 +1,7 @@
 PROJECT_NAME        = Muninn
 OUTPUT_DIRECTORY    = doc/html
 WARNINGS            = YES
-INPUT               = muninn
+INPUT               = muninn bin
 RECURSIVE           = YES
 EXCLUDE             = muninn/OLDMLE
 FILE_PATTERNS       = *.cpp *.h

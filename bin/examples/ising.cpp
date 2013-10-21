@@ -22,11 +22,10 @@
 // specific prior written permission.
 
 #include <iostream>
-#include <ctime>
 
 #include "muninn/Factories/CGEfactory.h"
 
-#include "NormalSampler.h"
+#include "Ising2dSampler.h"
 
 #include "details/random_utils.h"
 #include "../details/OptionParser.h"
@@ -34,12 +33,16 @@
 int main(int argc, char *argv[]) {
     // Setup the option parser
     OptionParser parser("An example of using Muninn to sample from a normal distribution.");
-    parser.add_option("-l", "statistics_log", "The Muninn statics log file", "muninn.txt");
-    parser.add_option("-L", "log_mode", "The mode for the logger (options are ALL or CURRENT)", "all");
+    parser.add_option("-N", "ising_size", "The size of the side of the Ising system", "48");
     parser.add_option("-s", "mcmc_steps", "Number of MCMC steps", "1E7");
     parser.add_option("-S", "seed", "The seed for the normal sampler, by default the time is used");
+    parser.add_option("-W", "weight_scheme", "The Muninn weight scheme (multicanonical|invk)", "multicanonical");
+    parser.add_option("-E", "estimator", "The Muninn estimator (MLE)", "MLE");
+    parser.add_option("-w", "bin_width", "The Muninn bin width", "4.0");
+    parser.add_option("-l", "statistics_log", "The Muninn statics log file", "muninn.txt");
+    parser.add_option("-L", "log_mode", "The mode for the logger (options are ALL or CURRENT)", "all");
     parser.add_option("-r", "read_statistics_log", "Read a Muninn statics log file", "");
-    parser.add_option("-R", "restart", "Enable restarts", "0", "1");
+
     parser.parse_args(argc, argv);
 
     // Set the random seed
@@ -52,23 +55,21 @@ int main(int argc, char *argv[]) {
     }
     srand(seed);
 
-    // Set number of MCMC steps
+    // Set number of MCMC steps and Ising system size
     const unsigned long long int mcmc_steps = static_cast<unsigned long long int>(parser.get_as<double>("mcmc_steps"));
-
-    // Set the restart options
-    bool restart = parser.get_as<bool>("restart");
+    const unsigned int ising_size = parser.get_as<unsigned int>("ising_size");
 
     // Print settings
-    std::cout << "Seed: " << seed << std::endl;
+    std::cout << "Ising size: " << ising_size << std::endl;
     std::cout << "MCMC steps: " << mcmc_steps << std::endl;
-    std::cout << "Restart: " << restart << std::endl;
+    std::cout << "Seed: " << seed << std::endl;
 
     // Setup the MCMC
     Muninn::CGEfactory::Settings settings;
-
-    settings.weight_scheme = Muninn::GE_MULTICANONICAL;
-    settings.estimator = Muninn::ESTIMATOR_MLE;
-    settings.initial_width_is_max_right = true;
+    settings.weight_scheme = parser.get_as<Muninn::GeEnum>("weight_scheme");
+    settings.estimator = parser.get_as<Muninn::EstimatorEnum>("estimator");
+    settings.use_dynamic_binning = false;
+    settings.bin_width = parser.get_as<double>("bin_width");
     settings.statistics_log_filename = parser.get("statistics_log");
     settings.log_mode = parser.get_as<Muninn::StatisticsLogger::Mode>("log_mode");
     settings.read_statistics_log_filename = parser.get("read_statistics_log");
@@ -78,45 +79,34 @@ int main(int argc, char *argv[]) {
 
     Muninn::CGE *cge = Muninn::CGEfactory::new_CGE(settings);
 
-    // Sample the initial candidate
-    NormalSampler ns(0, 1, 10);
+    // Setup the sampler
+	Ising2dSampler<int> ising_sampler(ising_size);
 
-    double curr_state = ns.energy();
-    double next_state;
-
-    int updatecounter = 0;
+	double curr_energy = ising_sampler.get_E();
 
     // The MCMC loop
-    for (unsigned long long int step=0; step<mcmc_steps; ++step) {
+	for (unsigned long long int step=0; step<mcmc_steps; ++step) {
         if (step % 10000 == 0)
             printf("\n########## MCMC STEP %llu (%.1f%%) ##########\n\n", step, 100.0*step/mcmc_steps);
 
         // Sample next
-        ns.sample();
-        next_state = ns.energy();
+        ising_sampler.move();
+        double next_energy = ising_sampler.get_E();
 
         // See if we should accept or reject candidate
-        if (randomD() < exp(cge->get_lnweights(next_state) - cge->get_lnweights(curr_state)) + ns.log_bias()) {
-            curr_state = next_state;
+        if (randomD() < exp(cge->get_lnweights(next_energy) - cge->get_lnweights(curr_energy))) {
+            curr_energy = next_energy;
         } else {
-            ns.step_one_back();
+        	ising_sampler.undo();
         }
 
         // Add the observation to the GE object
-        cge->add_observation(curr_state);
+        cge->add_observation(curr_energy);
 
         // See if it's time for new weights
         if (cge->new_weights()) {
-            updatecounter++;
-
             // Calculate new estimate of the free energy surface
             cge->estimate_new_weights();
-
-            // Restart every 4th time
-            if (restart && updatecounter % 4 == 0) {
-                ns.sample_first();
-                curr_state = ns.energy();
-            }
         }
     }
 

@@ -57,6 +57,9 @@ public:
     /// \param mode The logging mode (see Mode for details).
     /// \param precision The precision (number of significant digits) used when
     ///                  writing floating point values to the log file.
+    /// \param append_to_file Weather the output should be appended to the log file. If false the log file is overwritten.
+    /// \param counter_offset The start value (offset) for the counter setting the entry number.
+
     StatisticsLogger(const std::string &filename, Mode mode=CURRENT, int precision=10, bool append_to_file=false, unsigned int counter_offset=0) :
         filename(filename), mode(mode), precision(precision), counter(0), loggables(), entry_queue() {
 
