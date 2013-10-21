@@ -68,10 +68,10 @@ public:
     /// Local settings class
     class Settings {
     public:
-        /// Weight-scheme to use: invk|multicanonical
+        /// Weight-scheme to use: invk|multicanonical|invkp
         GeEnum weight_scheme;
 
-        /// Estimator to use: MLE|diffusion|invkp|optimized
+        /// Estimator to use: MLE|diffusion
         EstimatorEnum estimator;
 
         /// Slope factor used for the linear extrapolation of the weights, when the weights are increasing in the direction away from the main area of support.
@@ -166,6 +166,7 @@ public:
         /// Constructor that sets the default values for the settings.
         ///
         /// \param weight_scheme See documentation for Settings::weight_scheme.
+        /// \param estimator See documentation for Settings::estimator.
         /// \param slope_factor_up See documentation for Settings::slope_factor_up.
         /// \param slope_factor_down See documentation for Settings::slope_factor_down
         /// \param min_beta See documentation for Settings::min_beta.
@@ -178,12 +179,12 @@ public:
         /// \param statistics_log_filename See documentation for Settings::statistics_log_filename.
         /// \param log_mode See documentation for Settings::log_mode.
         /// \param log_precision See documentation for log_precision.
-        /// \param bool continue_statistics_log See documentation for continue_statistics_log.
+        /// \param continue_statistics_log See documentation for continue_statistics_log.
         /// \param read_statistics_log_filename See documentation for Settings::read_statistics_log_filename.
         /// \param read_fixed_weights_filename See documentation for Settings::read_fixed_weights_filename.
         /// \param initial_max  See documentation for Settings::initial_max.
         /// \param increase_factor  See documentation for Settings::increase_factor.
-        /// \param max_iterations_between_rounds  See documentation for Settings::max_iterations_between_rounds.
+        /// \param max_iterations_per_histogram See documentation for Settings::max_iterations_between_rounds.
         /// \param memory See documentation for Settings::memory.
         /// \param min_count See documentation for Settings::min_count.
         /// \param restricted_individual_support See documentation for Settings::restricted_individual_support.

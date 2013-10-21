@@ -1,4 +1,40 @@
-2013-10-15  Jes Frellsen  <frellsen@demeter.binf.ku.dk>
+2013-10-22  Jes Frellsen  <frellsen@binf>
+
+	* bin/examples/ising.cpp: Added executable for simulating 2D Ising
+	model.
+
+	* bin/examples/Ising2dSampler.h: Added a sampler for 2D Ising
+	model.
+
+	* bin/examples/Makefile.am: Added ising model files and
+	details/random_utils.h
+
+	* bin/examples/normal.cpp: Adopted the random generators from
+	random_utils.h
+
+	* bin/examples/details/random_utils.h: Collected simple random
+	generators in one file.
+
+	* muninn/Factories/CGEfactory.h: Added missing doxygen
+	documentation.
+
+	* muninn/utils/StatisticsLogger.h: Added missing doxygen
+	documentation of append_to_file and counter_offset in constructor.
+
+	* muninn/utils/TArray.h: Added missing initializers in copy
+	constructor and renamed dublicate_shape(...) ->
+	duplicate_shape(...)
+
+	* muninn/WeightSchemes/LinearPolatedInvKP.h: Added missing doxygen
+	doxygen documentation of p in constructor.
+
+	* muninn/WeightSchemes/LinearPolatedWeights.h: Added missing
+	initializers of extrapolation_details, left_bound_center and
+	right_bound_center.
+	
+	* Doxyfile: Added doxygen of bin folder.
+	
+2013-10-15  Jes Frellsen  <frellsen@binf>
 
 	* muninn/CMakeLists.txt: Added -Wno-enum-compare compiler flag to
 	suppress warning in Eigen on newer GCC compilers.
@@ -270,7 +306,7 @@
 
 	* muninn/utils/TArray.h: Corrected error in a comment.
 
-2012-03-20  Jes Frellsen  <frellsen@bind>
+2012-03-20  Jes Frellsen  <frellsen@binf>
 
 	* muninn/utils/nonlinear/newton/LineSearchAlgorithm.h: Added the
 	return value function_not_finite for linesearch.

@@ -116,6 +116,7 @@ public:
                 slope_factor_up(slope_factor_up), slope_factor_down(slope_factor_down), sigma(sigma),
                 min_beta_extrapolation(min_beta_extrapolation), max_beta_extrapolation(max_beta_extrapolation),
                 min_beta_thermodynamics(min_beta_thermodynamics), max_beta_thermodynamics(max_beta_thermodynamics),
+                extrapolation_details(), left_bound_center(), right_bound_center(),
                 has_ownership(receives_ownership) {}
 
     virtual ~LinearPolatedWeigths() {
