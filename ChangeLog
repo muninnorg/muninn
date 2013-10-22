@@ -1,5 +1,13 @@
 2013-10-22  Jes Frellsen  <frellsen@binf>
 
+	* autogen.py: Excluded the build folder.
+
+	* CMakeLists.txt: Updated version number.
+
+	* configure.ac: Updated version number.
+	
+2013-10-22  Jes Frellsen  <frellsen@binf>
+
 	* bin/examples/CMakeLists.txt: Added ising.cpp
 
 2013-10-22  Jes Frellsen  <frellsen@binf>

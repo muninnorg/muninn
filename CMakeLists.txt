@@ -2,7 +2,7 @@
 project (muninn)
 
 # Set version number
-set (VERSION 0.411)
+set (VERSION 0.412)
 
 # Minimum required version of cmake
 cmake_minimum_required (VERSION 2.6.2)
