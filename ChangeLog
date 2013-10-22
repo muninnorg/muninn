@@ -1,5 +1,9 @@
 2013-10-22  Jes Frellsen  <frellsen@binf>
 
+	* bin/examples/CMakeLists.txt: Added ising.cpp
+
+2013-10-22  Jes Frellsen  <frellsen@binf>
+
 	* bin/examples/ising.cpp: Added executable for simulating 2D Ising
 	model.
 
