@@ -1,5 +1,9 @@
 2013-10-23  Jes Frellsen  <frellsen@binf>
 
+	* muninn/CGE.cpp: Fixed memeory leak.
+
+2013-10-23  Jes Frellsen  <frellsen@binf>
+
 	* muninn/Binner.h: Added todos
 	
 	* muninn/Estimate.h: Added specification for a zero-size x0.

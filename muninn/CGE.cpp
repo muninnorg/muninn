@@ -41,6 +41,7 @@ void CGE::estimate_new_weights(){
         for (DArray::flatiterator it=lnw.get_flatiterator(); it(); ++it)
             *it = -initial_beta * bin_centers(it);
 
+	delete ge.current;
         ge.current = ge.estimator->new_histogram(lnw);
 
         // Add the observations to the histogram
