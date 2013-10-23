@@ -45,22 +45,24 @@ public:
     ///
     /// \param shape The shape of the histogram.
     Histogram(const std::vector<unsigned int> &shape) :
-        N(shape), lnw(shape), n(0), shape(shape) {}
+        N(shape), lnw(shape), lnw_support(shape), n(0), shape(shape) {}
 
     /// Constructor for an histogram with a set of weights. The count histogram
     /// will be empty, but the histogram will get the same shape as the weights.
     ///
     /// \param lnw The weights the histogram will be initialized with.
-    Histogram(const DArray &lnw) :
-        N(lnw.get_shape()), lnw(lnw), n(0), shape(lnw.get_shape()) {}
+    /// \param lnw_support The support used when defining the weights.
+    Histogram(const DArray &lnw, const BArray &lnw_support) :
+        N(lnw.get_shape()), lnw(lnw), lnw_support(lnw_support), n(0), shape(lnw.get_shape()) {}
 
     /// Constructor for an histogram with a initial set of counts and a set of
     /// corresponding weights. The count histogram.
     ///
     /// \param N The initial set of counts.
     /// \param lnw The weights the histogram will be initialized with.
-    Histogram(const CArray &N, const DArray &lnw) :
-        N(N), lnw(lnw), n(N.sum()), shape(N.get_shape()) {
+    /// \param lnw_support The support used when defining the weights.
+    Histogram(const CArray &N, const DArray &lnw, const BArray &lnw_support) :
+        N(N), lnw(lnw), lnw_support(lnw_support), n(N.sum()), shape(N.get_shape()) {
     	assert(N.same_shape(lnw));
     }
 
@@ -104,9 +106,11 @@ public:
 
     /// Set the weights used to collect the histogram.
     ///
-    /// \param new_lnw The log weights.
-    void set_lnw(const DArray &new_lnw) {
-        assert(lnw.has_shape(shape));
+    /// \param new_lnw The new log weights.
+    /// \param lnw_support The support used when defining the new weights.
+    void set_lnw(const DArray &new_lnw, const DArray &new_lnw_support) {
+        assert(new_lnw.has_shape(shape));
+        assert(new_lnw_support.has_shape(shape));
         lnw=new_lnw;
     }
 
@@ -117,8 +121,13 @@ public:
 
     /// Getter for the weights used to collect the histogram.
     ///
-    /// \return The weights used to collect the histogram
+    /// \return The weights used to collect the histogram.
     inline const DArray& get_lnw() const {return lnw;}
+
+    /// Getter the support used to define the weights used to collect the histogram.
+    ///
+    /// \return The support used to define the weights.
+    inline const DArray& get_lnw_support() const {return lnw_support;}
 
     /// Getter for the total number of counts collected in the histogram.
     ///
@@ -140,11 +149,13 @@ public:
     virtual void add_statistics_to_log(StatisticsLogger& statistics_logger) const {
         statistics_logger.add_entry("N", N);
         statistics_logger.add_entry("lnw", lnw);
+        statistics_logger.add_entry("lnw_support", lnw_support);
     }
 
 private:
     CArray N;                        ///< The counts/observations.
     DArray lnw;                      ///< The weights used for collecting the histogram.
+    BArray lnw_support;              ///< The support that was used when defining the weights
     Count n;                         ///< The total number of observations.
     std::vector<unsigned int> shape; ///< The shape of the histogram.
 };
@@ -154,6 +165,7 @@ inline std::ostream &operator<<(std::ostream &output, const Histogram &histogram
     output << "[Histogram]\n";
     output << "N = " << histogram.N << std::endl;
     output << "lnw = " << histogram.lnw << std::endl;
+    output << "lnw_support = " << histogram.lnw_support << std::endl;
     output << "n = " << histogram.n << std::endl;
     return output;
 }

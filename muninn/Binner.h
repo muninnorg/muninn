@@ -68,6 +68,7 @@ public:
     ///         The is utilized in the function Binner::calc_bin_validated().
     virtual int calc_bin(double value) const = 0;
 
+    // TODO: Replace the pair with a class in return value
     ///  Function for extending the binned region to include a new energy value.
     ///
     /// \param value This energy value should now be included in the binned region.
@@ -100,6 +101,7 @@ public:
     ///         the total number of bins (Binner#nbins).
     virtual DArray get_bin_widths() const = 0;
 
+    // TODO: Replace the pair with a class in return value
     /// Function for checking if a given values fall within the binned region.
     ///
     /// \param value The energy value, which may or may not be outside the

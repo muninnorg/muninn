@@ -44,6 +44,7 @@ public:
     /// Define the modes for handling the history with respected to deletion of
     /// old histograms. A string representation is given by #history_mode_names.
     enum HistoryMode {
+    	DROP_NONE,            ///< Do not drop any histogram.
         DROP_OLDEST,          ///< Always drop the oldest histogram outside the memory size.
         DROP_OLDEST_POSSIBLE, ///< Drop the oldest histograms outside the memory size, if this does not decrease the size of the support.
         DROP_ANY_POSSIBLE,    ///< Drop any of the oldest histograms outside the memory size, if this does not does not decrease the size of the support.
@@ -98,10 +99,10 @@ public:
     /// \return The i'th histogram.
     inline const Histogram& operator[](unsigned int i) const {return *histograms.at(i);}
 
-    /// Function for the sum of counts in each bin, called the sum histogram.
-    /// The returned array has the same shape as the individual histograms,
-    /// and the \f$ i \f$'th bin of the sum histogram \f$ \mathrm{sum\_n} \f$
-    /// is
+    /// Function for getting the sum of counts in each bin, called the sum
+    /// histogram. The returned array has the same shape as the individual
+    /// histograms, and the \f$ i \f$'th bin of the sum histogram
+    /// \f$ \mathrm{sum\_n} \f$ is
     ///
     /// \f[
     ///  \mathrm{sum\_n}[i] = \sum_j N_j[i]
