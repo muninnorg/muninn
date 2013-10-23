@@ -118,14 +118,14 @@ public:
     /// function is called.
     ///
     /// \return A vector of pointer to count arrays.
-    std::vector<const CArray*> get_Ns() const;
+//    std::vector<const CArray*> get_Ns() const;
 
     /// Get a vector containing pointer to the individual weight arrays from
     /// the list of histograms. Note that a new vector constructed each time
     /// the function is called.
     ///
     /// \return A vector of pointer to weight arrays.
-    std::vector<const DArray*> get_lnws() const;
+//    std::vector<const DArray*> get_lnws() const;
 
     /// Get a vector containing the sum of counts in the individual histograms.
     /// Note that a new vector constructed each time the function is called, but
@@ -133,7 +133,7 @@ public:
     ///
     /// \return A vector containing the sum of counts in the individual
     ///         histograms.
-    std::vector<Count> get_ns() const;
+//    std::vector<Count> get_ns() const;
 
     /// Get the number of Histograms in the history.
     ///

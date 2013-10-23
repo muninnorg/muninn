@@ -80,6 +80,7 @@ void GE::extend(const std::vector<unsigned int> &add_under, const std::vector<un
     estimator->extend_estimate(*history, *estimate, add_under, add_over);
 
     // Set the new weights based on the new estimate
+    // TODO: !! Add extra argument to function
     current.set_lnw(weightscheme->get_weights(*estimate, *history, binner));
 }
 

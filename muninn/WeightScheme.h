@@ -49,6 +49,17 @@ public:
     /// \param binner If the binning is not even, a binner should also be passed.
     /// \return Weights according to the weight scheme.
     virtual DArray get_weights(const Estimate &estimate, const History &history, const Binner *binner=NULL) = 0;
+
+    /// This returns an array reflecting where the bins where there is the
+    /// statistical support for a set of weights according to the implemented
+    /// weight scheme, given an estimate, a history and possibly a binner.
+    ///
+    /// \param estimate The estimate of the entropy (lnG).
+    /// \param history The history used for estimating the entropy.
+    /// \param binner If the binning is not even, a binner should also be passed.
+    /// \return The statistical support.
+    virtual DArray get_weights(const Estimate &estimate, const History &history, const Binner *binner=NULL) = 0;
+
 };
 
 } // namespace Muninn
