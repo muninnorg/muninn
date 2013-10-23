@@ -1,3 +1,15 @@
+2013-10-23  Jes Frellsen  <frellsen@binf>
+
+	* muninn/Binner.h: Added todos
+	
+	* muninn/Estimate.h: Added specification for a zero-size x0.
+	
+	* muninn/Histories/MultiHistogramHistory.cpp: Added HistoryMode
+	DROP_NONE.
+	
+	* muninn/Histories/MultiHistogramHistory.h: Added HistoryMode
+	DROP_NONE.
+
 2013-10-22  Jes Frellsen  <frellsen@binf>
 
 	* autogen.py: Excluded the build folder.
@@ -381,3 +393,6 @@
 	* muninn/UpdateSchemes/IncreaseFactorScheme.h: Corrected
 	const-correctness for get_this_max().
 
+
+	 LocalWords:  todos
+	

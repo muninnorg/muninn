@@ -71,7 +71,8 @@ public:
     /// \return The support.
     inline const BArray& get_lnG_support() const {return lnG_support;}
 
-    /// Getter for the reference bin
+    /// Getter for the reference bin. A zero-size vector means that the
+    /// reference bin is undefined.
     ///
     /// \return The reference bin.
     inline const std::vector<Index>& get_x0() const {return x0;}
@@ -114,7 +115,9 @@ public:
         lnG_support = new_lnG_support;
     }
 
-    /// Setter for the reference bin.
+    /// Setter for the reference bin. A zero size vector means that the reference
+    /// bin is undefined.
+    ///
     /// \param new_x0 New value for the refernce bin.
     inline void set_x0(const std::vector<Index> &new_x0) {
         assert(new_x0.size() == 0 || new_x0.size() == shape.size());
@@ -147,7 +150,7 @@ public:
 private:
     DArray lnG;                ///< The estimated entropy.
     BArray lnG_support;        ///< The support for the estimate of the entropy.
-    std::vector<Index> x0;     ///< The index of the reference bin for the entropy (the entropy has a fixed value in this bin).
+    std::vector<Index> x0;     ///< The index of the reference bin for the entropy (the entropy has a fixed value in this bin). A zero size vector means that the reference bin is undefined.
     std::vector<Index> shape;  ///< The shape of the estimate.
 };
 
