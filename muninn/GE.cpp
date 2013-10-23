@@ -31,17 +31,18 @@ namespace Muninn {
 void GE::estimate_new_weights(const Binner *binner) {
     // Inform that new weights will be estimated
     MessageLogger::get().info("Estimating new weights.");
-    MessageLogger::get().debug("Histogram shape: " + to_string<std::vector<unsigned int> >(current.get_shape()));
+    MessageLogger::get().debug("Histogram shape: " + to_string<std::vector<unsigned int> >(current->get_shape()));
 
     // Bookkeeping
-    total_iterations += current.get_n();
+    total_iterations += current->get_n();
 
     // Tell the update scheme that the history is to be updated
     // TODO: Find a more elegant way of doing this.
-    updatescheme->updating_history(current, *history);
+    updatescheme->updating_history(*current, *history);
 
-    // Put the current histogram into the history
+    // Put the current histogram into the history.
     history->add_histogram(current);
+    current = NULL;
 
     try {
         // Estimate lnG from the data
@@ -52,7 +53,7 @@ void GE::estimate_new_weights(const Binner *binner) {
 
         // Make a new empty current histogram, with the newly estimated weights
         DArray new_weights = weightscheme->get_weights(*estimate, *history, binner);
-        current = Histogram(new_weights); // TODO: Is this the best way of making an empty histogram?
+        current = estimator->new_histogram(new_weights);
 
         // TODO: Find a more elegant way of doing this.
         updatescheme->reset_prolonging();
@@ -73,7 +74,7 @@ void GE::extend(const std::vector<unsigned int> &add_under, const std::vector<un
     // TODO: Check that a maximum number of bins has not been exceeded
 
     // Extend the the current histogram and the history
-    current.extend(add_under, add_over);
+    current->extend(add_under, add_over);
     history->extend(add_under, add_over);
 
     // Extend the estimate
@@ -81,7 +82,7 @@ void GE::extend(const std::vector<unsigned int> &add_under, const std::vector<un
 
     // Set the new weights based on the new estimate
     // TODO: !! Add extra argument to function
-    current.set_lnw(weightscheme->get_weights(*estimate, *history, binner));
+    current->set_lnw(weightscheme->get_weights(*estimate, *history, binner));
 }
 
 } // namespace Muninn

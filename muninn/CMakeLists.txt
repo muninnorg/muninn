@@ -1,3 +1,6 @@
+# Supress warnings from enum comparisons in Eigen
+add_definitions ("-Wno-enum-compare")
+
 add_library(muninn 
   CGE.cpp
   GE.cpp

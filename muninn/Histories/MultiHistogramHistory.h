@@ -74,8 +74,10 @@ public:
     /// always added to the front of the internal deque
     /// MultiHistogramHistory::histograms.
     ///
+    /// Note that the History takes ownership of the passed histogram.
+    ///
     /// \param histogram The histogram to be added.
-    virtual void add_histogram(const Histogram &histogram);
+    virtual void add_histogram(Histogram *histogram);
 
     /// Function for extending the shape of the History. When this functions is
     /// called all histograms in the internal deque MultiHistogramHistory::histograms

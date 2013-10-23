@@ -1,4 +1,4 @@
-AC_INIT([Muninn], [0.411], [frellsen@binf.ku.dk])
+AC_INIT([Muninn], [0.412], [frellsen@binf.ku.dk])
 AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 AC_CONFIG_MACRO_DIR([m4])
 

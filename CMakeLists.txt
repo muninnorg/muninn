@@ -2,7 +2,7 @@
 project (muninn)
 
 # Set version number
-set (VERSION 0.411)
+set (VERSION 0.412)
 
 # Minimum required version of cmake
 cmake_minimum_required (VERSION 2.6.2)
@@ -17,7 +17,7 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 set(CMAKE_CXX_FLAGS_DEBUG "-O0 -ggdb")
 
 # Require proper C++ code
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -ansi -pedantic -Wno-long-long")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -ansi -pedantic -Wno-long-long -Wno-enum-compare")
 
 # Create all libraries in lib
 set(LIBRARY_OUTPUT_PATH ${muninn_BINARY_DIR}/libs)

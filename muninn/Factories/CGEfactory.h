@@ -31,16 +31,28 @@
 namespace Muninn {
 
 /// Define the different generalized ensembles (GE).
-enum GeEnum {GE_MULTICANONICAL=0, GE_INV_K=1, GE_INV_K_P=2, GE_ENUM_SIZE};
+enum GeEnum {GE_MULTICANONICAL=0, GE_INV_K, GE_INV_K_P, GE_ENUM_SIZE};
 
-/// Define the string names corresponding values of the GeEnum.
+/// Define the string names corresponding to the values of GeEnum.
 static const std::string GeEnumNames[] = {"multicanonical", "invk", "invkp"};
+
+/// Define the different estimators
+enum EstimatorEnum {ESTIMATOR_MLE=0, ESTIMATOR_ENUM_SIZE};
+
+/// Define the string names corresponding to the values of EstimatorEnum
+static const std::string EstimatorEnumNames[] = {"MLE"};
 
 /// Input operator of a GeEnum from string.
 std::istream &operator>>(std::istream &input, GeEnum &g);
 
 /// Output operator for a GeEnum.
 std::ostream &operator<<(std::ostream &o, const GeEnum &g);
+
+/// Input operator of a EstimatorEnum from string.
+std::istream &operator>>(std::istream &input, EstimatorEnum &g);
+
+/// Output operator for a EstimatorEnum.
+std::ostream &operator<<(std::ostream &o, const EstimatorEnum &g);
 
 /// Input operator of a StatisticsLogger::Mode from string.
 std::istream &operator>>(std::istream &input, StatisticsLogger::Mode &m);
@@ -56,8 +68,11 @@ public:
     /// Local settings class
     class Settings {
     public:
-        /// Weight-scheme to use: invk|multicanonical
+        /// Weight-scheme to use: invk|multicanonical|invkp
         GeEnum weight_scheme;
+
+        /// Estimator to use: MLE
+        EstimatorEnum estimator;
 
         /// Slope factor used for the linear extrapolation of the weights, when the weights are increasing in the direction away from the main area of support.
         double slope_factor_up;
@@ -151,6 +166,7 @@ public:
         /// Constructor that sets the default values for the settings.
         ///
         /// \param weight_scheme See documentation for Settings::weight_scheme.
+        /// \param estimator See documentation for Settings::estimator.
         /// \param slope_factor_up See documentation for Settings::slope_factor_up.
         /// \param slope_factor_down See documentation for Settings::slope_factor_down
         /// \param min_beta See documentation for Settings::min_beta.
@@ -163,12 +179,12 @@ public:
         /// \param statistics_log_filename See documentation for Settings::statistics_log_filename.
         /// \param log_mode See documentation for Settings::log_mode.
         /// \param log_precision See documentation for log_precision.
-        /// \param bool continue_statistics_log See documentation for continue_statistics_log.
+        /// \param continue_statistics_log See documentation for continue_statistics_log.
         /// \param read_statistics_log_filename See documentation for Settings::read_statistics_log_filename.
         /// \param read_fixed_weights_filename See documentation for Settings::read_fixed_weights_filename.
         /// \param initial_max  See documentation for Settings::initial_max.
         /// \param increase_factor  See documentation for Settings::increase_factor.
-        /// \param max_iterations_between_rounds  See documentation for Settings::max_iterations_between_rounds.
+        /// \param max_iterations_per_histogram See documentation for Settings::max_iterations_between_rounds.
         /// \param memory See documentation for Settings::memory.
         /// \param min_count See documentation for Settings::min_count.
         /// \param restricted_individual_support See documentation for Settings::restricted_individual_support.
@@ -178,6 +194,7 @@ public:
         /// \param separator See documentation for Settings::separator.
         /// \param verbose See documentation for Settings::verbose.
         Settings(GeEnum weight_scheme=GE_MULTICANONICAL,
+                 EstimatorEnum estimator=ESTIMATOR_MLE,
                  double slope_factor_up = 0.3,
                  double slope_factor_down = 3.0,
                  double min_beta=-std::numeric_limits<double>::infinity(),
@@ -205,6 +222,7 @@ public:
                  std::string separator=":",
                  int verbose=3)
         : weight_scheme(weight_scheme),
+          estimator(estimator),
           slope_factor_up(slope_factor_up),
           slope_factor_down(slope_factor_down),
           min_beta(min_beta),
@@ -244,6 +262,7 @@ public:
         /// Output operator
         friend std::ostream &operator<<(std::ostream &o, const Settings &settings) {
             o << "weight_scheme" << settings.separator << settings.weight_scheme << std::endl;
+            o << "estimator" << settings.separator << settings.estimator << std::endl;
             o << "slope_factor_up" << settings.separator << settings.slope_factor_up << std::endl;
             o << "slope_factor_down" << settings.separator << settings.slope_factor_down << std::endl;
             o << "min_beta" << settings.separator << settings.min_beta << std::endl;

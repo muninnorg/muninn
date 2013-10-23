@@ -10,6 +10,100 @@
 	* muninn/Histories/MultiHistogramHistory.h: Added HistoryMode
 	DROP_NONE.
 
+2013-10-22  Jes Frellsen  <frellsen@binf>
+
+	* autogen.py: Excluded the build folder.
+
+	* CMakeLists.txt: Updated version number.
+
+	* configure.ac: Updated version number.
+	
+2013-10-22  Jes Frellsen  <frellsen@binf>
+
+	* bin/examples/CMakeLists.txt: Added ising.cpp
+
+2013-10-22  Jes Frellsen  <frellsen@binf>
+
+	* bin/examples/ising.cpp: Added executable for simulating 2D Ising
+	model.
+
+	* bin/examples/Ising2dSampler.h: Added a sampler for 2D Ising
+	model.
+
+	* bin/examples/Makefile.am: Added ising model files and
+	details/random_utils.h
+
+	* bin/examples/normal.cpp: Adopted the random generators from
+	random_utils.h
+
+	* bin/examples/details/random_utils.h: Collected simple random
+	generators in one file.
+
+	* muninn/Factories/CGEfactory.h: Added missing doxygen
+	documentation.
+
+	* muninn/utils/StatisticsLogger.h: Added missing doxygen
+	documentation of append_to_file and counter_offset in constructor.
+
+	* muninn/utils/TArray.h: Added missing initializers in copy
+	constructor and renamed dublicate_shape(...) ->
+	duplicate_shape(...)
+
+	* muninn/WeightSchemes/LinearPolatedInvKP.h: Added missing doxygen
+	doxygen documentation of p in constructor.
+
+	* muninn/WeightSchemes/LinearPolatedWeights.h: Added missing
+	initializers of extrapolation_details, left_bound_center and
+	right_bound_center.
+	
+	* Doxyfile: Added doxygen of bin folder.
+
+2013-10-14  Jes Frellsen  <frellsen@binf>
+
+	* muninn/CGE.cpp: Adopted the Estimator::new_histogram() function.
+
+	* muninn/Estimator.h: Added pure virtual functions
+	new_histogram(...).
+
+	* muninn/GE.cpp: Made histogram a pointer and adopted the
+	Estimator::new_histogram() function and the ownership rule for
+	add_histogram.
+
+	* muninn/GE.h: Made histogram a pointer and adopted the
+	Estimator::new_histogram() function and the ownership rule for
+	add_histogram.
+
+	* muninn/History.h: Made add_histogram take ownership of the
+	passed histogram.
+
+	* muninn/Factories/CGEfactory.cpp: Adopted the enum for the
+	estimator and made use of the generic enum stream operators.
+
+	* muninn/Factories/CGEfactory.h: Added a enum for the estimator.
+
+	* muninn/Histories/MultiHistogramHistory.cpp: Made add_histogram
+	take ownership of the passed histogram.
+
+	* muninn/Histories/MultiHistogramHistory.h: Made add_histogram
+	take ownership of the passed histogram.
+
+	* muninn/MLE/MLE.h: Added new_histogram methods and inherence from
+	BaseConverter.
+
+	* muninn/utils/GenericEnumStreamOperators.h: Added file with
+	generic functions for making stream operators for enums.
+	
+2013-10-15  Jes Frellsen  <frellsen@binf>
+
+	* muninn/CMakeLists.txt: Added -Wno-enum-compare compiler flag to
+	suppress warning in Eigen on newer GCC compilers.
+
+	* CMakeLists.txt: Added -Wno-enum-compare compiler flag to
+	suppress warning in Eigen on newer GCC compilers.
+
+	* muninn/Makefile.am: Added -Wno-enum-compare compiler flag to
+	supress warning in Eigen on newer GCC compilers.
+
 2013-04-24  Jes Frellsen  <frellsen@binf>
 
 	* scripts/details/utils.py: Added function unpickle_from_file.
@@ -208,7 +302,7 @@
 
 	* muninn/utils/TArray.h: Corrected error in a comment.
 
-2012-03-20  Jes Frellsen  <frellsen@bind>
+2012-03-20  Jes Frellsen  <frellsen@binf>
 
 	* muninn/utils/nonlinear/newton/LineSearchAlgorithm.h: Added the
 	return value function_not_finite for linesearch.

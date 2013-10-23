@@ -48,7 +48,8 @@ public:
     ///                          of the weights, when the weights are decreasing
     ///                          in the direction away from the main area of
     ///                          support.
-    /// \param sigma The standard deviation (measured in number of bins with
+    /// \param p The value of p in the InvKP weights.
+	/// \param sigma The standard deviation (measured in number of bins with
     ///              support) of the Gaussian kernel used when calculating the
     ///              the weighted mean slope of the weights on the two outer
     ///              boundaries of the support. Also used for setting the size

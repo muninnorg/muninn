@@ -55,7 +55,7 @@ def get_files_recursively(folder, filepatterns=['\w+\.h$', '\w+\.cpp$'], exclude
 
     for root, dirnames, filenames in os.walk(folder):
 
-        if exclude_subfolders==None or exclude_subfolders not in root:
+        if exclude_subfolders==None or not reduce(lambda v, folder: (folder in root) or v, exclude_subfolders, False):
             for filename in filenames:
                 fn = os.path.split(filename)[1]
 
@@ -109,9 +109,9 @@ if __name__ == "__main__":
     import os
 
     # Set extra files for distribution
-    text_files = get_files_recursively(".", ['\w+\.txt$'], exclude_subfolders=".svn")
-    script_files = get_files_recursively("scripts", ['\w+\.py$'], exclude_subfolders=".svn")
-    eigen_files = get_files_recursively("external", ['[^.]+$','\w+\.cpp$', '\w+\.h$'], exclude_subfolders=".svn")
+    text_files = get_files_recursively(".", ['\w+\.txt$'], exclude_subfolders=[".svn", "build"])
+    script_files = get_files_recursively("scripts", ['\w+\.py$'], exclude_subfolders=[".svn", "build"])
+    eigen_files = get_files_recursively("external", ['[^.]+$','\w+\.cpp$', '\w+\.h$'], exclude_subfolders=[".svn", "build"])
 
     set_varaible_in_makefile("Makefile.am", "EXTRA_DIST", " ".join(text_files+script_files+eigen_files))
 

@@ -226,7 +226,7 @@ private:
     bool array_ownership;  ///< Weather the object owns memory allocated for the internal array.
 
     // Private methods
-    template<typename U> inline void dublicate_shape(const TArray<U> &right);
+    template<typename U> inline void duplicate_shape(const TArray<U> &right);
     template<typename U> void assert_same_size(const TArray<U> &other) const throw(TArrayMismatchSizeException);
 
 
@@ -360,8 +360,8 @@ TArray<T>::TArray(const std::vector<Index> &newshape, T *storage) : array(storag
 ///
 /// \param right The array to be copied.
 template<typename T>
-TArray<T>::TArray(const TArray<T> &right) : array_ownership(true) {
-    dublicate_shape(right);
+TArray<T>::TArray(const TArray<T> &right) : array(NULL), asize(0), ndims(0), shape(NULL), stride(NULL), array_ownership(true) {
+    duplicate_shape(right);
     for (Index i = 0; i < asize; i++)
         array[i] = right.array[i];
 }
@@ -481,7 +481,7 @@ inline const TArray<T>& TArray<T>::operator=(const TArray<T> &right) {
             delete[] stride;
 
             // Copy the new values
-            dublicate_shape(right);
+            duplicate_shape(right);
         }
 
         // Copy data
@@ -728,7 +728,7 @@ inline TArray<T> TArray<T>::operator+(const TArray<T> &right) const throw(TArray
     assert_same_size(right);
 
     TArray<T> result;
-    result.dublicate_shape(*this);
+    result.duplicate_shape(*this);
 
     for (Index i = 0; i < asize; i++) {
         result.array[i] = array[i] + right.array[i];
@@ -745,7 +745,7 @@ inline TArray<T> TArray<T>::operator-(const TArray<T> &right) const throw(TArray
     assert_same_size(right);
 
     TArray<T> result;
-    result.dublicate_shape(*this);
+    result.duplicate_shape(*this);
 
     for (Index i = 0; i < asize; i++) {
         result.array[i] = array[i] - right.array[i];
@@ -762,7 +762,7 @@ inline TArray<T> TArray<T>::operator*(const TArray<T> &right) const throw(TArray
     assert_same_size(right);
 
     TArray<T> result;
-    result.dublicate_shape(*this);
+    result.duplicate_shape(*this);
 
     for (Index i = 0; i < asize; i++) {
         result.array[i] = array[i] * right.array[i];
@@ -779,7 +779,7 @@ inline TArray<T> TArray<T>::operator/(const TArray<T> &right) const throw(TArray
     assert_same_size(right);
 
     TArray<T> result;
-    result.dublicate_shape(*this);
+    result.duplicate_shape(*this);
 
     for (Index i = 0; i < asize; i++) {
         result.array[i] = array[i] / right.array[i];
@@ -795,7 +795,7 @@ template<typename T>
 inline TArray<bool> TArray<T>::operator<(const TArray<T> &right) const throw(TArrayMismatchSizeException) {
     assert_same_size(right);
     TArray<bool> result;
-    result.dublicate_shape(*this);
+    result.duplicate_shape(*this);
     for (Index i = 0; i < asize; i++) {
         result.array[i] = array[i] < right.array[i];
     }
@@ -809,7 +809,7 @@ inline TArray<bool> TArray<T>::operator<(const TArray<T> &right) const throw(TAr
 template<typename T>
 inline TArray<bool> TArray<T>::operator<(const T &right) const {
     TArray<bool> result;
-    result.dublicate_shape(*this);
+    result.duplicate_shape(*this);
     for (Index i = 0; i < asize; i++) {
         result.array[i] = array[i] < right;
     }
@@ -824,7 +824,7 @@ template<typename T>
 inline TArray<bool> TArray<T>::operator>(const TArray<T> &right) const throw(TArrayMismatchSizeException) {
     assert_same_size(right);
     TArray<bool> result;
-    result.dublicate_shape(*this);
+    result.duplicate_shape(*this);
     for (Index i = 0; i < asize; i++) {
         result.array[i] = array[i] > right.array[i];
     }
@@ -838,7 +838,7 @@ inline TArray<bool> TArray<T>::operator>(const TArray<T> &right) const throw(TAr
 template<typename T>
 inline TArray<bool> TArray<T>::operator>(const T &right) const {
     TArray<bool> result;
-    result.dublicate_shape(*this);
+    result.duplicate_shape(*this);
     for (Index i = 0; i < asize; i++) {
         result.array[i] = array[i] > right;
     }
@@ -853,7 +853,7 @@ template<typename T>
 inline TArray<bool> TArray<T>::operator<=(const TArray<T> &right) const throw(TArrayMismatchSizeException) {
     assert_same_size(right);
     TArray<bool> result;
-    result.dublicate_shape(*this);
+    result.duplicate_shape(*this);
     for (Index i = 0; i < asize; i++) {
         result.array[i] = array[i] <= right.array[i];
     }
@@ -867,7 +867,7 @@ inline TArray<bool> TArray<T>::operator<=(const TArray<T> &right) const throw(TA
 template<typename T>
 inline TArray<bool> TArray<T>::operator<=(const T &right) const {
     TArray<bool> result;
-    result.dublicate_shape(*this);
+    result.duplicate_shape(*this);
     for (Index i = 0; i < asize; i++) {
         result.array[i] = array[i] <= right;
     }
@@ -882,7 +882,7 @@ template<typename T>
 inline TArray<bool> TArray<T>::operator>=(const TArray<T> &right) const throw(TArrayMismatchSizeException) {
     assert_same_size(right);
     TArray<bool> result;
-    result.dublicate_shape(*this);
+    result.duplicate_shape(*this);
     for (Index i = 0; i < asize; i++) {
         result.array[i] = array[i] >= right.array[i];
     }
@@ -896,7 +896,7 @@ inline TArray<bool> TArray<T>::operator>=(const TArray<T> &right) const throw(TA
 template<typename T>
 inline TArray<bool> TArray<T>::operator>=(const T &right) const {
     TArray<bool> result;
-    result.dublicate_shape(*this);
+    result.duplicate_shape(*this);
     for (Index i = 0; i < asize; i++) {
         result.array[i] = array[i] >= right;
     }
@@ -911,7 +911,7 @@ template<typename T>
 inline TArray<bool> TArray<T>::operator==(const TArray<T> &right) const throw(TArrayMismatchSizeException) {
     assert_same_size(right);
     TArray<bool> result;
-    result.dublicate_shape(*this);
+    result.duplicate_shape(*this);
     for (Index i = 0; i < asize; i++) {
         result.array[i] = array[i] == right.array[i];
     }
@@ -925,7 +925,7 @@ inline TArray<bool> TArray<T>::operator==(const TArray<T> &right) const throw(TA
 template<typename T>
 inline TArray<bool> TArray<T>::operator==(const T &right) const {
     TArray<bool> result;
-    result.dublicate_shape(*this);
+    result.duplicate_shape(*this);
     for (Index i = 0; i < asize; i++) {
         result.array[i] = array[i] == right;
     }
@@ -941,7 +941,7 @@ inline TArray<bool> TArray<T>::operator&&(const TArray<T> &right) const throw(TA
     assert_same_size(right);
 
     TArray<bool> result;
-    result.dublicate_shape(*this);
+    result.duplicate_shape(*this);
 
     for (Index i = 0; i < asize; i++) {
         result.array[i] = array[i] && right.array[i];
@@ -958,7 +958,7 @@ inline TArray<bool> TArray<T>::operator||(const TArray<T> &right) const throw(TA
     assert_same_size(right);
 
     TArray<bool> result;
-    result.dublicate_shape(*this);
+    result.duplicate_shape(*this);
 
     for (Index i = 0; i < asize; i++) {
         result.array[i] = array[i] || right.array[i];
@@ -972,7 +972,7 @@ inline TArray<bool> TArray<T>::operator||(const TArray<T> &right) const throw(TA
 template<typename T>
 inline TArray<bool> TArray<T>::operator!() const {
     TArray<bool> result;
-    result.dublicate_shape(*this);
+    result.duplicate_shape(*this);
 
     for (Index i = 0; i < asize; i++) {
         result.array[i] = !array[i];
@@ -1451,7 +1451,7 @@ inline void TArray<T>::reset_shape(const std::vector<Index> &newshape) {
 /// \tparam U The type of the contents for the other array.
 template<typename T>
 template<typename U>
-inline void TArray<T>::dublicate_shape(const TArray<U> &right) {
+inline void TArray<T>::duplicate_shape(const TArray<U> &right) {
     // NOTE THAT ARRAY AND SHAPE IS NOT FREED
     ndims = right.ndims;
     asize = right.asize;
