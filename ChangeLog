@@ -1,3 +1,19 @@
+2013-10-28  Jes Frellsen  <frellsen@binf>
+
+	* muninn/GE.cpp: Fixed bug that caused current to be NULL if the
+	estimation failed.
+
+	* muninn/GE.h: Changed total_iterations to be of type Count
+
+	* muninn/History.h: The remove_newest method now also returns the
+	histogram.
+
+	* muninn/Histories/MultiHistogramHistory.cpp: Adapted changes to
+	History interface.
+
+	* muninn/Histories/MultiHistogramHistory.h: Adapted changes to
+	History interface.
+
 2013-10-23  Jes Frellsen  <frellsen@binf>
 
 	* muninn/Binner.h: Added todos

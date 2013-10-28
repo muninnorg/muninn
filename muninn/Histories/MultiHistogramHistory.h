@@ -87,10 +87,14 @@ public:
     /// \param add_over The number of bins to be added rightmost in all dimensions.
     virtual void extend(const std::vector<unsigned int> &add_under, const std::vector<unsigned int> &add_over);
 
-    /// Remove the newest histogram from the history. In this case, the
+    /// Remove and returns newest histogram from the history. In this case, the
     /// histogram in front of the internal deque MultiHistogramHistory::histograms
     /// is removed.
-    virtual void remove_newest();
+    ///
+    /// Note that ownership is passed along with the histogram.
+    ///
+    /// \return The newest histogram from history.
+    virtual Histogram* remove_newest();
 
     /// This function overloads the []-operator and gives access to the
     /// individual histograms. The function is safe in the sense, that it uses

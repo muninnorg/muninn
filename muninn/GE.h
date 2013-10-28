@@ -347,7 +347,7 @@ private:
     bool has_ownership;                 ///< Whether this GE object owns the Estimator, UpdateScheme, WeighScheme and StatisticsLogger objects.
     bool has_ownership_estimate_and_history;         ///< Whether this GE object owns the History object.
 
-    int total_iterations;               ///< The total number of iterations recorded by the GE class, including observations dropped from the history.
+    Count total_iterations;             ///< The total number of iterations recorded by the GE class, including observations dropped from the history.
     bool new_weights_variable;          ///< This variable is set to true, when the UpdateScheme says it is time to estimate new weights.
 
     /// Private function for initializing the class
