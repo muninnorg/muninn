@@ -104,9 +104,9 @@ public:
 
     /// Set the weights used to collect the histogram.
     ///
-    /// \param new_lnw The log weights.
+    /// \param new_lnw The new log weights.
     void set_lnw(const DArray &new_lnw) {
-        assert(lnw.has_shape(shape));
+        assert(new_lnw.has_shape(shape));
         lnw=new_lnw;
     }
 
@@ -117,7 +117,7 @@ public:
 
     /// Getter for the weights used to collect the histogram.
     ///
-    /// \return The weights used to collect the histogram
+    /// \return The weights used to collect the histogram.
     inline const DArray& get_lnw() const {return lnw;}
 
     /// Getter for the total number of counts collected in the histogram.

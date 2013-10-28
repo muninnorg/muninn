@@ -31,7 +31,7 @@
 
 namespace Muninn {
 
-const std::string MultiHistogramHistory::history_mode_names[] = {"drop-oldest", "drop-oldest-possible", "drop-any-possible"};
+const std::string MultiHistogramHistory::history_mode_names[] = {"drop-none", "drop-oldest", "drop-oldest-possible", "drop-any-possible"};
 
 void MultiHistogramHistory::add_histogram(Histogram *histogram) {
     // Check that the histogram has the correct shape
@@ -44,6 +44,9 @@ void MultiHistogramHistory::add_histogram(Histogram *histogram) {
     sum_N += histograms.front()->get_N();
 
     switch (history_mode) {
+    case DROP_NONE : {}
+    break;
+
     case DROP_OLDEST : {
         // Check if the last histogram should be removed
         while (histograms.size() > memory) {
