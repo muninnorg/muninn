@@ -162,15 +162,19 @@ void MultiHistogramHistory::remove_last_histogram() {
     histograms.pop_back();
 }
 
-void MultiHistogramHistory::remove_newest() {
-    if (histograms.size() > 0) {
+Histogram* MultiHistogramHistory::remove_newest() {
+     Histogram *newest = NULL;
+
+     if (histograms.size() > 0) {
         // Update sum_N
         sum_N -= histograms.front()->get_N();
 
         // Remove the histogram
-        delete histograms.front();
+        newest = histograms.front();
         histograms.pop_front();
-    }
+     }
+
+     return newest;
 }
 
 void MultiHistogramHistory::add_statistics_to_log(StatisticsLogger& statistics_logger) const {

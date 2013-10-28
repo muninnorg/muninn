@@ -65,7 +65,7 @@ void GE::estimate_new_weights(const Binner *binner) {
 
         // Clean up the history and prolong the simulation time
         // TODO: Find a more elegant way of doing this.
-        history->remove_newest();
+        current = history->remove_newest();
         updatescheme->prolong();
     }
 }
