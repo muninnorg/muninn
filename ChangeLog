@@ -1,3 +1,7 @@
+2013-10-29  Jes Frellsen  <frellsen@demeter>
+
+	* bin/examples/Ising2dSampler.h: Corrected comment
+
 2013-10-28  Jes Frellsen  <frellsen@binf>
 
 	* muninn/GE.cpp: Fixed bug that caused current to be NULL if the
