@@ -75,6 +75,9 @@ public:
     TArray(const std::vector<Index> &newshape, T *storage);
 
     // Copy constructor
+    TArray(const TArray<T> &right);
+
+    // Copy constructor - for arbitrary array type
     template <typename T2>
     TArray(const TArray<T2> &right);
 
@@ -357,7 +360,18 @@ TArray<T>::TArray(const std::vector<Index> &newshape, T *storage) : array(storag
     }
 }
 
-/// Copy constructor.
+
+// /// Copy constructor.
+// ///
+// /// \param right The array to be copied.
+// template<typename T>
+// TArray<T>::TArray(const TArray<T> &right) : array(NULL), asize(0), ndims(0), shape(NULL), stride(NULL), array_ownership(true) {
+//     duplicate_shape(right);
+//     for (Index i = 0; i < asize; i++)
+//         array[i] = right.array[i];
+// }
+
+/// Copy constructor for for arbitrary array type
 ///
 /// \param right The array to be copied.
 template<typename T1>
