@@ -1,3 +1,20 @@
+2014-04-30  Jes Frellsen  <frellsen@cam>
+
+	* bin/examples/Makefile.am: LDFLAGS -> AM_LDFLAGS
+
+	* bin/tools/Makefile.am: LDFLAGS -> AM_LDFLAGS
+
+	* configure.ac: Added fix for automake 1.12 and later.
+
+	* muninn/Binners/UniformBinner.h: Corrected error in initialising
+	std_bins in one of the constructors.
+
+	* muninn/Exceptions/MaximalNumberOfBinsExceed.h: Added getters for
+	max_number_of_bins and requested_number_of_bins.
+
+	* muninn/utils/nonlinear/newton/LineSearchAlgorithm.h: Removed
+	warning for binary operator with parentheses.
+
 2013-10-29  Jes Frellsen  <frellsen@demeter>
 
 	* bin/examples/Ising2dSampler.h: Corrected comment
@@ -25,12 +42,12 @@
 2013-10-23  Jes Frellsen  <frellsen@binf>
 
 	* muninn/Binner.h: Added todos
-	
+
 	* muninn/Estimate.h: Added specification for a zero-size x0.
-	
+
 	* muninn/Histories/MultiHistogramHistory.cpp: Added HistoryMode
 	DROP_NONE.
-	
+
 	* muninn/Histories/MultiHistogramHistory.h: Added HistoryMode
 	DROP_NONE.
 
@@ -41,7 +58,7 @@
 	* CMakeLists.txt: Updated version number.
 
 	* configure.ac: Updated version number.
-	
+
 2013-10-22  Jes Frellsen  <frellsen@binf>
 
 	* bin/examples/CMakeLists.txt: Added ising.cpp
@@ -79,7 +96,7 @@
 	* muninn/WeightSchemes/LinearPolatedWeights.h: Added missing
 	initializers of extrapolation_details, left_bound_center and
 	right_bound_center.
-	
+
 	* Doxyfile: Added doxygen of bin folder.
 
 2013-10-14  Jes Frellsen  <frellsen@binf>
@@ -116,7 +133,7 @@
 
 	* muninn/utils/GenericEnumStreamOperators.h: Added file with
 	generic functions for making stream operators for enums.
-	
+
 2013-10-15  Jes Frellsen  <frellsen@binf>
 
 	* muninn/CMakeLists.txt: Added -Wno-enum-compare compiler flag to
@@ -135,18 +152,18 @@
 2012-12-07  Jes Frellsen  <frellsen@binf>
 
 	* muninn/Makefile.am: Updated Makefiles.
-	
+
 2012-12-07  Jes Frellsen  <frellsen@binf>
 
 	* muninn/WeightSchemes/InvKP.h: Jan added file - Jes made minor
 	stylistic changes.
-	
+
 	* muninn/WeightSchemes/LinearPolatedInvK.h: Added explicit call to
 	this_weight_scheme constructor.
-	
+
 	* muninn/WeightSchemes/LinearPolatedInvKP.h: Jan added file - Jes
 	made minor stylistic changes.
-	
+
 	* muninn/WeightSchemes/LinearPolatedMulticanonical.h: Added
 	explicit call to this_weight_scheme constructor.
 
@@ -159,7 +176,7 @@
 
 	* muninn/UpdateSchemes/IncreaseFactorScheme.h: Added argument
 	max_iterations_between_updates to constructor.
-	 
+ 
 2012-10-16  Jes Frellsen  <frellsen@binf>
 
 	* autogen.py: Insured that the external-folder and txt-files are included in the Makefile.am.
@@ -183,10 +200,10 @@
 
 	* muninn/Factories/CGEfactory.h: Added option
 	continue_statistics_log.
-	
+
 	* muninn/Factories/CGEfactory.cpp: Implemented the
 	continue_statistics_log option.
-	
+
 	* muninn/utils/StatisticsLogger.h: Added append_to_file and
 	counter_offset to constructor.
 
@@ -194,16 +211,16 @@
 
 	* bin/tools/canonical_weights.cpp: Catching exception by
 	reference.
-	 
+
 	* muninn/CGE.h: Catching exceptions by references.
-	
+
 	* muninn/Histogram.h: Added virtual destructor.
-	
+
 	* muninn/Binners/NonUniformBinner.h: Added missing return
 	statement.
-	
+
 	* muninn/utils/Loggable.h: Added virtual destructor.
-	
+
 	* muninn/utils/nonlinear/NonlinearEquation.h: Added virtual
 	destructor.
 
@@ -253,7 +270,7 @@
 
 	* muninn/UpdateScheme.h: Added function add_statistics_to_log to
 	implement the Loggable interface.
-	
+
 	* muninn/Factories/CGEfactory.h: Added the setting log_precision
 	and stream operators for StatisticsLogger::Mode.
 
@@ -263,26 +280,26 @@
 
 	* muninn/MLE/MLE.h: Changed the prototype for the
 	MLE::new_estimate function.
-	
+
 	* muninn/MLE/MLE.cpp: The MLE::new_estimate function now
 	constructs a new estimated based on also a value of x0 and values
 	for the free energies.
-	
+
 	* muninn/UpdateSchemes/IncreaseFactorScheme.h: Added function
 	add_statistics_to_log to implement the Loggable interface.
-	 
+
 	* muninn/utils/StatisticsLogReader.h: Added methods for getting
 	free_energies, this_maxs and x_zeros.
-	
+
 	* muninn/utils/StatisticsLogReader.cpp: Added functionality for
 	reading free_energies, this_maxs and x_zeros.
-	
+
 2012-04-01  Jes Frellsen  <frellsen@binf>
 
-	* muninn/Makefile.am: Updated with Loggable.h. 
-	
+	* muninn/Makefile.am: Updated with Loggable.h.
+
 2012-04-01  Jes Frellsen  <frellsen@binf>
- 
+
 	* bin/examples/normal.cpp: Added extra options, and corrected the
 	settings for the StatisticsLogger.
 
@@ -330,7 +347,7 @@
 
 	* muninn/utils/nonlinear/newton/LineSearchAlgorithm.h: Added the
 	return value function_not_finite for linesearch.
-	
+
 	* muninn/utils/nonlinear/newton/NewtonRootFinder.h: Added handling
 	of the return value function_not_finite from linesearch and added
 	missing break.
@@ -392,22 +409,22 @@
 
 	* muninn/Binners/NonUniformDynamicBinner.h: Added the
 	max_number_of_bins option.
-	
+
 	* muninn/Exceptions/MaximalNumberOfBinsExceed.h: Added the
 	MaximalNumberOfBinsExceed exception.
-	
+
 	* muninn/Exceptions/MessageException.h: Added doxygen comments
-	
+
 	* muninn/Factories/CGEfactory.cpp: Using max_number_of_bins when
 	constructing the NonUniformDynamicBinner.
-	
+
 	* muninn/Factories/CGEfactory.h: Added max_number_of_bins and
 	separator settings.
-	 
+ 
 2012-02-08  Jes Frellsen  <frellsen@binf>
 
 	* README.txt: Minor correction.
-	
+
 2012-02-08  Jes Frellsen  <frellsen@binf>
 
 	* muninn/CGE.h (CGE.~CGE): Corrected bug in deleting the binner.
@@ -419,4 +436,4 @@
 
 
 	 LocalWords:  todos
-	
+

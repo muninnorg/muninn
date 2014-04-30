@@ -1,8 +1,12 @@
 AC_INIT([Muninn], [0.412], [frellsen@binf.ku.dk])
-AM_INIT_AUTOMAKE([-Wall -Werror foreign])
+AM_INIT_AUTOMAKE([-Wall -Werror foreign subdir-objects])
 AC_CONFIG_MACRO_DIR([m4])
 
 AC_PROG_CXX
+
+# Fix for automake 1.12, for details see
+# http://lists.gnu.org/archive/html/automake/2012-05/msg00015.html
+m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
 
 # Turn off shared libraries during beta-testing, since they make the
 # build process take too long.

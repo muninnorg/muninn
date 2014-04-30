@@ -1,4 +1,4 @@
-LDFLAGS = -static
+AM_LDFLAGS = -static
 
 bin_PROGRAMS = normal ising
 
