@@ -217,7 +217,7 @@ public:
                  unsigned int initial_max = 5000,
                  double increase_factor = 1.07,
                  unsigned int max_iterations_per_histogram = std::numeric_limits<Count>::max(),
-                 unsigned int memory = 40,
+                 unsigned int memory = 20,
                  unsigned int min_count = 30,
                  bool restricted_individual_support=false,
                  bool use_dynamic_binning=true,

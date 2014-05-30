@@ -1,5 +1,11 @@
 2014-05-30  frellsen  <frellsen@cam>
 
+	* bin/examples/ising.cpp: Added memory option.
+
+	* muninn/Factories/CGEfactory.h: Set default memory to 20
+
+2014-05-30  frellsen  <frellsen@cam>
+
 	* bin/examples/ising.cpp: Added option to simulate multiple
 	threads.
 

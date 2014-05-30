@@ -34,6 +34,7 @@ int main(int argc, char *argv[]) {
     // Setup the option parser
     OptionParser parser("An example of using Muninn to sample from a normal distribution.");
     parser.add_option("-N", "ising_size", "The size of the side of the Ising system", "48");
+    parser.add_option("-m", "memory", "The number of consecutive histograms to keep in memory.", "20");
     parser.add_option("-s", "mcmc_steps", "Number of MCMC steps", "1E7");
     parser.add_option("-S", "seed", "The seed for the normal sampler, by default the time is used");
     parser.add_option("-W", "weight_scheme", "The Muninn weight scheme (multicanonical|invk)", "multicanonical");
@@ -67,6 +68,7 @@ int main(int argc, char *argv[]) {
 
     // Setup the MCMC
     Muninn::CGEfactory::Settings settings;
+    settings.memory = parser.get_as<unsigned int>("memory");
     settings.weight_scheme = parser.get_as<Muninn::GeEnum>("weight_scheme");
     settings.estimator = parser.get_as<Muninn::EstimatorEnum>("estimator");
     settings.use_dynamic_binning = false;
