@@ -46,6 +46,16 @@ public:
     /// Virtual destructor
     virtual ~MaximalNumberOfBinsExceed() throw() {}
 
+    /// Getter for the maximal number of bins
+    unsigned int get_max_number_of_bins() {
+        return max_number_of_bins;
+    }
+
+    /// Getter for the requested number of bins
+    unsigned int get_requested_number_of_bins() {
+        return requested_number_of_bins;
+    }
+
 private:
     unsigned int max_number_of_bins;       ///< The maximal number of bins the binner can use.
     unsigned int requested_number_of_bins; ///< The number of bins requested by the binner.

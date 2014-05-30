@@ -128,30 +128,29 @@ void MultiHistogramHistory::extend(const std::vector<unsigned int> &add_under, c
     sum_N = sum_N.extended(add_under, add_over);
 }
 
-// TODO: ! Find solution to these methods beeing removed
-//std::vector<const CArray*> MultiHistogramHistory::get_Ns() const {
-//    std::vector<const CArray*> Ns;
-//    for(std::deque<Histogram*>::const_iterator it = histograms.begin(); it != histograms.end(); it++) {
-//        Ns.push_back(&((*it)->get_N()));
-//    }
-//    return Ns;
-//}
-//
-//std::vector<const DArray*> MultiHistogramHistory::get_lnws() const {
-//    std::vector<const DArray*> lnws;
-//    for(std::deque<Histogram*>::const_iterator it = histograms.begin(); it != histograms.end(); it++) {
-//        lnws.push_back(&((*it)->get_lnw()));
-//    }
-//    return lnws;
-//}
-//
-//std::vector<Count> MultiHistogramHistory::get_ns() const {
-//    std::vector<Count> ns;
-//    for(std::deque<Histogram*>::const_iterator it = histograms.begin(); it != histograms.end(); it++) {
-//        ns.push_back((*it)->get_n());
-//    }
-//    return ns;
-//}
+std::vector<const CArray*> MultiHistogramHistory::get_Ns() const {
+    std::vector<const CArray*> Ns;
+    for(std::deque<Histogram*>::const_iterator it = histograms.begin(); it != histograms.end(); it++) {
+        Ns.push_back(&((*it)->get_N()));
+    }
+    return Ns;
+}
+
+std::vector<const DArray*> MultiHistogramHistory::get_lnws() const {
+    std::vector<const DArray*> lnws;
+    for(std::deque<Histogram*>::const_iterator it = histograms.begin(); it != histograms.end(); it++) {
+        lnws.push_back(&((*it)->get_lnw()));
+    }
+    return lnws;
+}
+
+std::vector<Count> MultiHistogramHistory::get_ns() const {
+    std::vector<Count> ns;
+    for(std::deque<Histogram*>::const_iterator it = histograms.begin(); it != histograms.end(); it++) {
+        ns.push_back((*it)->get_n());
+    }
+    return ns;
+}
 
 
 void MultiHistogramHistory::remove_last_histogram() {
@@ -163,15 +162,19 @@ void MultiHistogramHistory::remove_last_histogram() {
     histograms.pop_back();
 }
 
-void MultiHistogramHistory::remove_newest() {
-    if (histograms.size() > 0) {
+Histogram* MultiHistogramHistory::remove_newest() {
+     Histogram *newest = NULL;
+
+     if (histograms.size() > 0) {
         // Update sum_N
         sum_N -= histograms.front()->get_N();
 
         // Remove the histogram
-        delete histograms.front();
+        newest = histograms.front();
         histograms.pop_front();
-    }
+     }
+
+     return newest;
 }
 
 void MultiHistogramHistory::add_statistics_to_log(StatisticsLogger& statistics_logger) const {

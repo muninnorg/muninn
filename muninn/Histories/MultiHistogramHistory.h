@@ -87,10 +87,14 @@ public:
     /// \param add_over The number of bins to be added rightmost in all dimensions.
     virtual void extend(const std::vector<unsigned int> &add_under, const std::vector<unsigned int> &add_over);
 
-    /// Remove the newest histogram from the history. In this case, the
+    /// Remove and returns newest histogram from the history. In this case, the
     /// histogram in front of the internal deque MultiHistogramHistory::histograms
     /// is removed.
-    virtual void remove_newest();
+    ///
+    /// Note that ownership is passed along with the histogram.
+    ///
+    /// \return The newest histogram from history.
+    virtual Histogram* remove_newest();
 
     /// This function overloads the []-operator and gives access to the
     /// individual histograms. The function is safe in the sense, that it uses
@@ -120,14 +124,14 @@ public:
     /// function is called.
     ///
     /// \return A vector of pointer to count arrays.
-//    std::vector<const CArray*> get_Ns() const;
+    std::vector<const CArray*> get_Ns() const;
 
     /// Get a vector containing pointer to the individual weight arrays from
     /// the list of histograms. Note that a new vector constructed each time
     /// the function is called.
     ///
     /// \return A vector of pointer to weight arrays.
-//    std::vector<const DArray*> get_lnws() const;
+    std::vector<const DArray*> get_lnws() const;
 
     /// Get a vector containing the sum of counts in the individual histograms.
     /// Note that a new vector constructed each time the function is called, but
@@ -135,7 +139,7 @@ public:
     ///
     /// \return A vector containing the sum of counts in the individual
     ///         histograms.
-//    std::vector<Count> get_ns() const;
+    std::vector<Count> get_ns() const;
 
     /// Get the number of Histograms in the history.
     ///

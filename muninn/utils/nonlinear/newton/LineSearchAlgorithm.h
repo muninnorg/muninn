@@ -102,7 +102,7 @@ public:
         Scalar g_prime_0 = gradient_x_old.dot(delta);
 
         // Check that the function is decreasing in the direction of delta
-        if (! g_prime_0 < 0) {
+        if (! (g_prime_0 < 0) ) {
             return function_encreasing_in_delta_direction;
         }
 

@@ -65,7 +65,7 @@ void GE::estimate_new_weights(const Binner *binner) {
 
         // Clean up the history and prolong the simulation time
         // TODO: Find a more elegant way of doing this.
-        history->remove_newest();
+        current = history->remove_newest();
         updatescheme->prolong();
     }
 }
@@ -81,7 +81,6 @@ void GE::extend(const std::vector<unsigned int> &add_under, const std::vector<un
     estimator->extend_estimate(*history, *estimate, add_under, add_over);
 
     // Set the new weights based on the new estimate
-    // TODO: !! Add extra argument to function
     current->set_lnw(weightscheme->get_weights(*estimate, *history, binner));
 }
 

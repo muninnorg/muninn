@@ -1,4 +1,4 @@
-// NormalSampler.h
+// Ising2dSampler.h
 // Copyright (c) 2010-2012 Jes Frellsen
 //
 // This file is part of Muninn.

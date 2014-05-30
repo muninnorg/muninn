@@ -37,6 +37,7 @@
 #include "muninn/utils/TArrayUtils.h"
 #include "muninn/utils/GenericEnumStreamOperators.h"
 
+
 namespace Muninn {
 
 CGE* CGEfactory::new_CGE(const Settings& settings) {

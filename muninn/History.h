@@ -63,8 +63,12 @@ public:
         return shape;
     }
 
-    /// Remove the newest histogram from the history
-    virtual void remove_newest() = 0;
+    /// Remove and returns newest histogram from the history.
+    ///
+    /// Note that ownership is passed along with the histogram.
+    ///
+    /// \return The newest histogram from history.
+    virtual Histogram* remove_newest() = 0;
 
 protected:
     /// Construct that sets the shape of the history.

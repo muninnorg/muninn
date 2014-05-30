@@ -67,7 +67,7 @@ public:
     /// \param extend_nbins The number of bins used as additional padding when
     ///                     extending the binned region.
     UniformBinner(double min_value, double max_value, unsigned int nbins, unsigned int extend_nbins=20) :
-        Binner(nbins, true), std_bins(std_bins), extend_nbins(extend_nbins),
+        Binner(nbins, true), std_bins(0), extend_nbins(extend_nbins),
         min_value(min_value), max_value(max_value) {
         bin_width = (max_value - min_value) / static_cast<double>(nbins);
     };
