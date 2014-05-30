@@ -67,8 +67,9 @@ public:
     ///                           StatisticsLogger objects. If set to true,
     ///                           these will be delete when the GE object is
     ///                           deleted.
-    GE(unsigned int nbins, Estimator *estimator, UpdateScheme *updatescheme, WeightScheme *weightscheme, StatisticsLogger *statisticslogger=NULL, bool receives_ownership=false) :
-        current(NULL),
+    GE(unsigned int nbins, Estimator *estimator, UpdateScheme *updatescheme, WeightScheme *weightscheme, StatisticsLogger *statisticslogger=NULL, bool receives_ownership=false, unsigned int nthreads=1) :
+        current_sum(NULL),
+        current_histograms(),
         history(estimator->new_history(newvector(nbins))),
         estimate(estimator->new_estimate(newvector(nbins))),
         estimator(estimator),
@@ -76,39 +77,12 @@ public:
         weightscheme(weightscheme),
         statisticslogger(statisticslogger),
         has_ownership(receives_ownership),
-        has_ownership_estimate_and_history(true) {
-        current = estimator->new_histogram(newvector(nbins));
-        init();
-        add_loggables();
-    }
-
-    /// Two dimensional constructor for the GE class.
-    ///
-    /// \param nbins1 The (initial) number of bins in the first dimension (0
-    ///               is also allowed).
-    /// \param nbins2 The (initial) number of bins in the second dimension (0
-    ///               is also allowed).
-    /// \param estimator A pointer to the Estimator to be used.
-    /// \param updatescheme A pointer to the UpdateScheme to be used.
-    /// \param weightscheme A pointer to the WeightScheme to be used.
-    /// \param statisticslogger A pointer to the StatisticsLogger (if set to
-    ///                         null no statistics will be logged).
-    /// \param receives_ownership Whether the CE class takes ownership of the
-    ///                           Estimator, UpdateScheme, WeighScheme and
-    ///                           StatisticsLogger objects. If set to true,
-    ///                           these will be delete when the GE object is
-    ///                           deleted.
-    GE(unsigned int nbins1, unsigned int nbins2, Estimator *estimator, UpdateScheme *updatescheme, WeightScheme *weightscheme, StatisticsLogger *statisticslogger=NULL, bool receives_ownership=false) :
-        current(NULL),
-        history(estimator->new_history(newvector(nbins1, nbins2))),
-        estimate(estimator->new_estimate(newvector(nbins1, nbins2))),
-        estimator(estimator),
-        updatescheme(updatescheme),
-        weightscheme(weightscheme),
-        statisticslogger(statisticslogger),
-        has_ownership(receives_ownership),
-        has_ownership_estimate_and_history(true) {
-        current = estimator->new_histogram(newvector(nbins1, nbins2));
+        has_ownership_estimate_and_history(true),
+        nthreads(nthreads) {
+        current_sum = estimator->new_histogram(newvector(nbins));
+        for (unsigned int thread_id=0; thread_id<nthreads; ++thread_id) {
+            current_histograms.push_back(estimator->new_histogram(newvector(nbins)));
+        }
         init();
         add_loggables();
     }
@@ -126,8 +100,9 @@ public:
     ///                           StatisticsLogger objects. If set to true,
     ///                           these will be delete when the GE object is
     ///                           deleted.
-    GE(const std::vector<unsigned int> &shape, Estimator *estimator, UpdateScheme *updatescheme, WeightScheme *weightscheme, StatisticsLogger *statisticslogger=NULL, bool receives_ownership=false) :
-        current(NULL),
+    GE(const std::vector<unsigned int> &shape, Estimator *estimator, UpdateScheme *updatescheme, WeightScheme *weightscheme, StatisticsLogger *statisticslogger=NULL, bool receives_ownership=false, unsigned int nthreads=1) :
+        current_sum(NULL),
+        current_histograms(),
         history(estimator->new_history(shape)),
         estimate(estimator->new_estimate(shape)),
         estimator(estimator),
@@ -135,8 +110,12 @@ public:
         weightscheme(weightscheme),
         statisticslogger(statisticslogger),
         has_ownership(receives_ownership),
-        has_ownership_estimate_and_history(true) {
-        current = estimator->new_histogram(shape);
+        has_ownership_estimate_and_history(true),
+        nthreads(nthreads) {
+        current_sum = estimator->new_histogram(shape);
+        for (unsigned int thread_id=0; thread_id<nthreads; ++thread_id) {
+            current_histograms.push_back(estimator->new_histogram(shape));
+        }
         init();
         add_loggables();
     }
@@ -158,8 +137,9 @@ public:
     ///                           WeighScheme and StatisticsLogger objects. If
     ///                           set to true, these will be delete when the GE
     ///                           object is deleted.
-    GE(Estimate *estimate, History *history, Estimator *estimator, UpdateScheme *updatescheme, WeightScheme *weightscheme,  const Binner *binner=NULL, StatisticsLogger *statisticslogger=NULL, bool receives_ownership=false) :
-        current(NULL),
+    GE(Estimate *estimate, History *history, Estimator *estimator, UpdateScheme *updatescheme, WeightScheme *weightscheme,  const Binner *binner=NULL, StatisticsLogger *statisticslogger=NULL, bool receives_ownership=false, unsigned int nthreads=1) :
+        current_sum(NULL),
+        current_histograms(),
         history(history),
         estimate(estimate),
         estimator(estimator),
@@ -167,7 +147,8 @@ public:
         weightscheme(weightscheme),
         statisticslogger(statisticslogger),
         has_ownership(receives_ownership),
-        has_ownership_estimate_and_history(receives_ownership) {
+        has_ownership_estimate_and_history(receives_ownership),
+        nthreads(nthreads) {
 
         // Check the shape of the estimate and history
         if(!(estimate->get_shape().size()==1 && estimate->get_shape()[0]==history->get_shape()[0])) {
@@ -180,14 +161,21 @@ public:
 
         // Set the weights correctly
         DArray new_weights = weightscheme->get_weights(*estimate, *history, binner);
-        current = estimator->new_histogram(new_weights);
+        current_sum = estimator->new_histogram(new_weights);
+        for (unsigned int thread_id=0; thread_id<nthreads; ++thread_id) {
+            current_histograms.push_back(estimator->new_histogram(new_weights));
+        }
     }
 
     /// Destructor for the GE class. If has_ownership is set to true, the
     /// Estimator, UpdateScheme, WeightScheme and StatisticsLogger objects are
     /// also deleted.
     virtual ~GE() {
-        delete current;
+        delete current_sum;
+
+        for (unsigned int thread_id=0; thread_id<current_histograms.size(); ++thread_id) {
+            delete current_histograms.at(thread_id);
+        }
 
         if (has_ownership_estimate_and_history) {
         	delete history;
@@ -205,21 +193,12 @@ public:
     /// Function for adding a one dimensional observation.
     ///
     /// \param bin The bin index of the observation.
+    /// \param thread_id The thread index for the observation.
     /// \return Returns true if new weights should be estimated.
-    inline bool add_observation(unsigned int bin) {
-        current->add_observation(bin);
-        new_weights_variable = updatescheme->update_required(*current, *history);
-        return new_weights_variable;
-    }
-
-    /// Function for adding a two dimensional observation.
-    ///
-    /// \param bin1 The first bin index of the observation to be added.
-    /// \param bin2 The second bin index of the observation to be added.
-    /// \return Returns true if new weights should be estimated.
-    inline bool add_observation(unsigned int bin1, unsigned int bin2) {
-        current->add_observation(bin1, bin2);
-        new_weights_variable = updatescheme->update_required(*current, *history);
+    inline bool add_observation(unsigned int bin, unsigned int thread_id) {
+        current_sum->add_observation(bin);
+        current_histograms.at(thread_id)->add_observation(bin);
+        new_weights_variable = updatescheme->update_required(*current_sum, *history);
         return new_weights_variable;
     }
 
@@ -228,9 +207,10 @@ public:
     /// \param bin The multidimensional index of the bin for the observation
     ///            to be added.
     /// \return Returns true if new weights should be estimated.
-    inline bool add_observation(std::vector<unsigned int> &bin) {
-        current->add_observation(bin);
-        new_weights_variable = updatescheme->update_required(*current, *history);
+    inline bool add_observation(std::vector<unsigned int> &bin, unsigned int thread_id) {
+        current_sum->add_observation(bin);
+        current_histograms.at(thread_id)->add_observation(bin);
+        new_weights_variable = updatescheme->update_required(*current_sum, *history);
         return new_weights_variable;
     }
 
@@ -239,15 +219,7 @@ public:
     /// \param bin The bin index.
     /// \return Returns the log weigh associated with the bin.
     inline double get_lnweights(int bin) {
-        return current->get_lnw()(bin);
-    }
-    /// Get the weigh associated with a bin, using a two dimensional index.
-    ///
-    /// \param bin1 The first dimension of the bin index.
-    /// \param bin2 The second dimension of the bin index.
-    /// \return Returns the log weigh associated with the bin.
-    inline double get_lnweights(int bin1, int bin2) {
-        return current->get_lnw()(bin1, bin2);
+        return current_sum->get_lnw()(bin);
     }
 
     /// Get the weigh associated with a bin, using a multidimensional index.
@@ -255,7 +227,7 @@ public:
     /// \param bin The multidimensional bin index.
     /// \return Returns the log weigh associated with the bin.
     inline double get_lnweights(std::vector<unsigned int> &bin) {
-        return current->get_lnw()(bin);
+        return current_sum->get_lnw()(bin);
     }
 
     /// Method for determine if new weight should be estimated. Note that the
@@ -301,10 +273,10 @@ public:
     /// \return A constant reference to the current history.
     inline const History& get_history() const {return *history;}
 
-    /// Getter for the current Histogram.
+    /// Getter for the current sum Histogram.
     ///
     /// \return A constant reference to the current histogram.
-    inline const Histogram& get_current_histogram() const {return *current;}
+    inline const Histogram& get_current_sum_histogram() const {return *current_sum;}
 
     /// Getter for the Estimator used by the GE object.
     ///
@@ -334,7 +306,8 @@ public:
     friend class CGE;
 
 private:
-    Histogram *current;                 ///< The current histogram.
+    Histogram *current_sum;             ///< The current sum histogram.
+    std::vector<Histogram*> current_histograms;      ///< The current histograms.
     History *history;                   ///< The history of histograms (has ownership unless it's null)
     Estimate *estimate;                 ///< The current estimate of the density of states.
 
@@ -349,6 +322,8 @@ private:
 
     Count total_iterations;             ///< The total number of iterations recorded by the GE class, including observations dropped from the history.
     bool new_weights_variable;          ///< This variable is set to true, when the UpdateScheme says it is time to estimate new weights.
+
+    unsigned int nthreads;              ///< The number of threads
 
     /// Private function for initializing the class
     void init() {

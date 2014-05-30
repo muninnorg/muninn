@@ -1,5 +1,34 @@
 2014-05-30  frellsen  <frellsen@cam>
 
+	* bin/examples/ising.cpp: Added option to simulate multiple
+	threads.
+
+	* bin/examples/normal.cpp: Added option to simulate multiple
+	threads.
+
+	* muninn/CGE.cpp: See CGE.h
+
+	* muninn/CGE.h: Added support for multiple threads, so now
+	add_observation has an additional argument thread_id.
+
+	* muninn/common.h: Defined MUNINN_MULTITHREADED
+
+	* muninn/GE.cpp: See GE.h
+
+	* muninn/GE.h: Added support for multiple threads, which means
+	that the current histogram is replaced by current_sum and
+	current_histograms.
+
+	* muninn/Factories/CGEfactory.cpp: Added nthreads argument to CGE
+	constructor.
+
+	* muninn/Factories/CGEfactory.h: Added nthreads setting.
+
+	* muninn/tools/CanonicalAverager.cpp: Adjusted to reflect changes
+	in GE class.
+
+2014-05-30  frellsen  <frellsen@cam>
+
 	* muninn/GE.h (GE): Fixed an indention error.
 
 2014-04-30  Jes Frellsen  <frellsen@cam>

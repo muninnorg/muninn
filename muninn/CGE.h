@@ -69,8 +69,9 @@ public:
         Binner *binner,
         StatisticsLogger *statisticslogger=NULL,
         double initial_beta=0,
-        bool receives_ownership=false) :
-            ge(0u, estimator, updatescheme, weightscheme, statisticslogger, receives_ownership),
+        bool receives_ownership=false,
+        unsigned int nthreads=1) :
+            ge(0u, estimator, updatescheme, weightscheme, statisticslogger, receives_ownership, nthreads),
             binner(binner),
             extrapolated_weightscheme(dynamic_cast<ExtrapolatedWeightScheme*>(weightscheme)),
             has_ownership(receives_ownership),
@@ -108,8 +109,9 @@ public:
         WeightScheme *weightscheme,
         Binner *binner,
         StatisticsLogger *statisticslogger=NULL,
-        bool receives_ownership=false) :
-            ge(estimate, history, estimator, updatescheme, weightscheme, binner, statisticslogger, receives_ownership),
+        bool receives_ownership=false,
+        unsigned int nthreads=1) :
+            ge(estimate, history, estimator, updatescheme, weightscheme, binner, statisticslogger, receives_ownership, nthreads),
             binner(binner),
             extrapolated_weightscheme(dynamic_cast<ExtrapolatedWeightScheme*>(weightscheme)),
             has_ownership(receives_ownership),
@@ -140,8 +142,9 @@ public:
         WeightScheme &weightscheme,
         Binner &binner,
         StatisticsLogger *statisticslogger=NULL,
-        double initial_beta=0) :
-            ge(0u, &estimator, &updatescheme, &weightscheme, statisticslogger, false),
+        double initial_beta=0,
+        unsigned int nthreads=1) :
+            ge(0u, &estimator, &updatescheme, &weightscheme, statisticslogger, false, nthreads),
             binner(&binner),
             extrapolated_weightscheme(dynamic_cast<ExtrapolatedWeightScheme*>(&weightscheme)),
             has_ownership(false),
@@ -165,8 +168,9 @@ public:
     /// Add a observation of an energy.
     ///
     /// \param energy The energy to be added.
+    /// \param thread_id The thread index for the energy.
     /// \return Returns true if new weights should be estimated.
-    inline bool add_observation(double energy) {
+    inline bool add_observation(double energy, unsigned int thread_id) {
         if (initial_collection) {
             initial_observations.push_back(energy);
             return initial_new_weights();
@@ -180,7 +184,7 @@ public:
                 MessageLogger::get().warning(exception.what());
                 return ge.new_weights();
             }
-            return ge.add_observation(bin);
+            return ge.add_observation(bin, thread_id);
         }
     }
 
@@ -202,7 +206,7 @@ public:
 
                 // If we are outside the range, return the extrapolated weight
                 if (!bin.second) {
-                    return extrapolated_weightscheme->get_extrapolated_weight(energy, ge.get_current_histogram().get_lnw(), ge.get_estimate(), ge.get_history(), *binner);
+                    return extrapolated_weightscheme->get_extrapolated_weight(energy, ge.get_current_sum_histogram().get_lnw(), ge.get_estimate(), ge.get_history(), *binner);
                 }
                 // If we are inside the range, return the weight
                 else {
@@ -302,7 +306,7 @@ private:
         // Check if we are outside the range of the bins and resize if we are
         if (!bin.second) {
             // Extend the binning and get the size of the extension
-            std::pair<std::vector<unsigned int>, std::vector<unsigned int> > extension = binner->extend(energy, ge.get_estimate(), ge.get_history(), ge.get_current_histogram().get_lnw());
+            std::pair<std::vector<unsigned int>, std::vector<unsigned int> > extension = binner->extend(energy, ge.get_estimate(), ge.get_history(), ge.get_current_sum_histogram().get_lnw());
 
             // Extend the binner and the GE object
             ge.extend(extension.first, extension.second, binner);

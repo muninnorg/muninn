@@ -160,6 +160,9 @@ public:
         /// The separator symbol between option name and value used in the output operator of the settings object.
         std::string separator;
 
+        /// The number of threads
+        unsigned int nthreads;
+
         /// The verbose level of Muninn.
         int verbose;
 
@@ -192,6 +195,7 @@ public:
         /// \param max_number_of_bins See documentation for Settings::max_number_of_bins.
         /// \param bin_width See documentation for Settings::bin_width.
         /// \param separator See documentation for Settings::separator.
+        /// \param nthreads See documentation for Settings::nthreads.
         /// \param verbose See documentation for Settings::verbose.
         Settings(GeEnum weight_scheme=GE_MULTICANONICAL,
                  EstimatorEnum estimator=ESTIMATOR_MLE,
@@ -220,6 +224,7 @@ public:
                  unsigned int max_number_of_bins=1000000,
                  double bin_width = 0.1,
                  std::string separator=":",
+                 unsigned int nthreads = 1,
                  int verbose=3)
         : weight_scheme(weight_scheme),
           estimator(estimator),
@@ -248,6 +253,7 @@ public:
           max_number_of_bins(max_number_of_bins),
           bin_width(bin_width),
           separator(separator),
+          nthreads(nthreads),
           verbose(verbose) {}
 
         /// Function for setting the separator symbol.
@@ -287,6 +293,7 @@ public:
             o << "use_dynamic_binning" << settings.separator << settings.use_dynamic_binning << std::endl;
             o << "max_number_of_bins" << settings.separator << settings.max_number_of_bins << std::endl;
             o << "bin_width" << settings.separator << settings.bin_width << std::endl;
+            o << "nthreads" << settings.separator << settings.nthreads << std::endl;
             o << "verbose" << settings.separator << settings.verbose << std::endl;
             return o;
         }

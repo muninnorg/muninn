@@ -57,7 +57,7 @@ CGE* CGEfactory::new_CGE(const Settings& settings) {
 
     if (read_statistics_log_filename!="") {
         MessageLogger::get().info("Reading statistics log file");
-    	statistics_log_reader = new StatisticsLogReader(read_statistics_log_filename, settings.memory);
+    	statistics_log_reader = new StatisticsLogReader(read_statistics_log_filename, settings.memory*settings.nthreads);
 
     	// Check that the logger contains adequate information
         if (statistics_log_reader->get_Ns().size()==0 ||
@@ -77,7 +77,7 @@ CGE* CGEfactory::new_CGE(const Settings& settings) {
 
     switch (settings.estimator) {
     case ESTIMATOR_MLE :
-        estimator = new MLE(settings.min_count, settings.memory, settings.restricted_individual_support);
+        estimator = new MLE(settings.min_count, settings.memory*settings.nthreads, settings.restricted_individual_support);
         break;
     default :
         throw(CGEfactorySettingsException("Estimator not set correctly."));
@@ -193,7 +193,7 @@ CGE* CGEfactory::new_CGE(const Settings& settings) {
     CGE* cge = NULL;
 
     if (statistics_log_reader==NULL) {
-    	cge = new CGE(estimator, update_scheme, weight_scheme, binner, statistics_logger, settings.initial_beta, true);
+    	cge = new CGE(estimator, update_scheme, weight_scheme, binner, statistics_logger, settings.initial_beta, true, settings.nthreads);
     }
     else {
         // Reconstruct the history
@@ -225,7 +225,7 @@ CGE* CGEfactory::new_CGE(const Settings& settings) {
                                                          *history, binner);
 
     	// Construct the CGE object
-    	cge = new CGE(estimate, history, estimator, update_scheme, weight_scheme, binner, statistics_logger, true);
+    	cge = new CGE(estimate, history, estimator, update_scheme, weight_scheme, binner, statistics_logger, true, settings.nthreads);
     }
 
     return cge;

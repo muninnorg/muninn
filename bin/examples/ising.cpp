@@ -42,6 +42,7 @@ int main(int argc, char *argv[]) {
     parser.add_option("-l", "statistics_log", "The Muninn statics log file", "muninn.txt");
     parser.add_option("-L", "log_mode", "The mode for the logger (options are ALL or CURRENT)", "all");
     parser.add_option("-r", "read_statistics_log", "Read a Muninn statics log file", "");
+    parser.add_option("-t", "nthreads", "Number of simulated threads", "1");
 
     parser.parse_args(argc, argv);
 
@@ -73,6 +74,7 @@ int main(int argc, char *argv[]) {
     settings.statistics_log_filename = parser.get("statistics_log");
     settings.log_mode = parser.get_as<Muninn::StatisticsLogger::Mode>("log_mode");
     settings.read_statistics_log_filename = parser.get("read_statistics_log");
+    settings.nthreads = parser.get_as<unsigned int>("nthreads");
     settings.verbose = 3;
 
     std::cout << settings;
@@ -101,7 +103,7 @@ int main(int argc, char *argv[]) {
         }
 
         // Add the observation to the GE object
-        cge->add_observation(curr_energy);
+        cge->add_observation(curr_energy, step % settings.nthreads);
 
         // See if it's time for new weights
         if (cge->new_weights()) {

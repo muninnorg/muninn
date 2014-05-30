@@ -41,13 +41,18 @@ void CGE::estimate_new_weights(){
         for (DArray::flatiterator it=lnw.get_flatiterator(); it(); ++it)
             *it = -initial_beta * bin_centers(it);
 
-        delete ge.current;
-        ge.current = ge.estimator->new_histogram(lnw);
+        delete ge.current_sum;
+        ge.current_sum = ge.estimator->new_histogram(lnw);
+
+        for (unsigned int thread_id=0; thread_id<ge.current_histograms.size(); ++thread_id) {
+            delete ge.current_histograms.at(thread_id);
+            ge.current_histograms.at(thread_id) = ge.estimator->new_histogram(lnw);
+        }
 
         // Add the observations to the histogram
         for(std::vector<double>::iterator it = initial_observations.begin(); it < initial_observations.end(); it++) {
             unsigned int bin = binner->calc_bin(*it);
-            ge.add_observation(bin);
+            ge.add_observation(bin, 0);
         }
 
         // And update the entropy estimate

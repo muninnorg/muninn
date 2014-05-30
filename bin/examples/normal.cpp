@@ -40,6 +40,7 @@ int main(int argc, char *argv[]) {
     parser.add_option("-S", "seed", "The seed for the normal sampler, by default the time is used");
     parser.add_option("-r", "read_statistics_log", "Read a Muninn statics log file", "");
     parser.add_option("-R", "restart", "Enable restarts", "0", "1");
+    parser.add_option("-t", "nthreads", "Number of simulated threads", "1");
     parser.parse_args(argc, argv);
 
     // Set the random seed
@@ -72,6 +73,7 @@ int main(int argc, char *argv[]) {
     settings.statistics_log_filename = parser.get("statistics_log");
     settings.log_mode = parser.get_as<Muninn::StatisticsLogger::Mode>("log_mode");
     settings.read_statistics_log_filename = parser.get("read_statistics_log");
+    parser.add_option("-t", "nthreads", "Number of simulated threads", "");
     settings.verbose = 3;
 
     std::cout << settings;
@@ -103,7 +105,7 @@ int main(int argc, char *argv[]) {
         }
 
         // Add the observation to the GE object
-        cge->add_observation(curr_state);
+        cge->add_observation(curr_state, step % settings.nthreads);
 
         // See if it's time for new weights
         if (cge->new_weights()) {

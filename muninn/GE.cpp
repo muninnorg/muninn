@@ -31,41 +31,75 @@ namespace Muninn {
 void GE::estimate_new_weights(const Binner *binner) {
     // Inform that new weights will be estimated
     MessageLogger::get().info("Estimating new weights.");
-    MessageLogger::get().debug("Histogram shape: " + to_string<std::vector<unsigned int> >(current->get_shape()));
+    MessageLogger::get().debug("Histogram shape: " + to_string<std::vector<unsigned int> >(current_sum->get_shape()));
 
     // Bookkeeping
-    total_iterations += current->get_n();
+    total_iterations += current_sum->get_n();
 
     // Tell the update scheme that the history is to be updated
     // TODO: Find a more elegant way of doing this.
-    updatescheme->updating_history(*current, *history);
+    updatescheme->updating_history(*current_sum, *history);
 
-    // Put the current histogram into the history.
-    history->add_histogram(current);
-    current = NULL;
+    int failed_at_thread_id = -1;
 
-    try {
-        // Estimate lnG from the data
-        estimator->estimate(*history, *estimate, binner);
+    for (unsigned int thread_id=0; thread_id < current_histograms.size(); ++thread_id) {
+        MessageLogger::get().info("Thread ID " + to_string<unsigned int>(thread_id));
 
-        // Log the current statistics
-        force_statistics_log();
+        if (current_histograms.at(thread_id)->get_n() > 0) {
+            // Put the current histogram into the history.
+            history->add_histogram(current_histograms.at(thread_id));
+            current_histograms.at(thread_id) = NULL;
 
-        // Make a new empty current histogram, with the newly estimated weights
+            try {
+                // Estimate lnG from the data
+                estimator->estimate(*history, *estimate, binner);
+
+                // Log the current statistics
+                force_statistics_log();
+            }
+            catch (EstimatorException &exception){
+                // Write warnings
+                MessageLogger::get().warning(exception.what());
+                MessageLogger::get().warning("Keeping old weights.");
+
+                // Store which thread id the estimation failed at
+                failed_at_thread_id = thread_id;
+                break;
+            }
+        }
+        else {
+            MessageLogger::get().debug("Skipping estimation due to empty histogram");
+        }
+    }
+
+    if (failed_at_thread_id < 0) {
+        // Clean the current sum histogram and empty histograms in current histograms
+        delete current_sum;
+        for (unsigned int thread_id=0; thread_id<current_histograms.size(); ++thread_id) {
+            delete current_histograms.at(thread_id);
+            current_histograms.at(thread_id) = NULL;
+        }
+
+        // Make a new empty current histograms, with the newly estimated weights
         DArray new_weights = weightscheme->get_weights(*estimate, *history, binner);
-        current = estimator->new_histogram(new_weights);
+
+        current_sum = estimator->new_histogram(new_weights);
+
+        for (unsigned int thread_id=0; thread_id<current_histograms.size(); ++thread_id) {
+            current_histograms.at(thread_id) = estimator->new_histogram(new_weights);
+        }
 
         // TODO: Find a more elegant way of doing this.
         updatescheme->reset_prolonging();
     }
-    catch (EstimatorException &exception){
-        // Write warnings
-        MessageLogger::get().warning(exception.what());
-        MessageLogger::get().warning("Keeping old weights.");
-
+    else {
         // Clean up the history and prolong the simulation time
         // TODO: Find a more elegant way of doing this.
-        current = history->remove_newest();
+        for (int thread_id=failed_at_thread_id; thread_id >= 0; --thread_id) {
+            if(current_histograms.at(thread_id) == NULL) {
+                current_histograms.at(thread_id) = history->remove_newest();
+            }
+        }
         updatescheme->prolong();
     }
 }
@@ -74,14 +108,24 @@ void GE::extend(const std::vector<unsigned int> &add_under, const std::vector<un
     // TODO: Check that a maximum number of bins has not been exceeded
 
     // Extend the the current histogram and the history
-    current->extend(add_under, add_over);
+    current_sum->extend(add_under, add_over);
+
+    for (unsigned int thread_id=0; thread_id<current_histograms.size(); ++thread_id) {
+        current_histograms.at(thread_id)->extend(add_under, add_over);
+    }
+
     history->extend(add_under, add_over);
 
     // Extend the estimate
     estimator->extend_estimate(*history, *estimate, add_under, add_over);
 
     // Set the new weights based on the new estimate
-    current->set_lnw(weightscheme->get_weights(*estimate, *history, binner));
+    DArray new_weights = weightscheme->get_weights(*estimate, *history, binner);
+    current_sum->set_lnw(new_weights);
+    for (unsigned int thread_id=0; thread_id<current_histograms.size(); ++thread_id) {
+        current_histograms.at(thread_id)->set_lnw(new_weights);
+    }
+
 }
 
 } // namespace Muninn

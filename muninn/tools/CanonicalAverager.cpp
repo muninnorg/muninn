@@ -95,7 +95,7 @@ std::vector<double> CanonicalAverager::calculate_weights(const std::vector<doubl
 
 std::vector<double> CanonicalAverager::calculate_weights(const std::vector<double> &energies, const CGE &cge, double beta) {
     // Assume that the CGE only has one dimension (which is the only thing implemented at the moment)
-    assert(cge.get_ge().get_current_histogram().get_shape().size() == 1);
+    assert(cge.get_ge().get_current_sum_histogram().get_shape().size() == 1);
     return calculate_weights(energies, cge.get_binner(), cge.get_ge().get_estimate().get_lnG(), cge.get_ge().get_estimate().get_lnG_support(), beta);
 }
 

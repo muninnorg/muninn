@@ -24,6 +24,8 @@
 #ifndef MUNINN_COMMON_H_
 #define MUNINN_COMMON_H_
 
+#define MUNINN_MULTITHREADED
+
 #include "muninn/Exceptions/MuninnException.h"
 #include "muninn/Exceptions/MessageException.h"
 #include "muninn/utils/MessageLogger.h"
