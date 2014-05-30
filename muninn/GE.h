@@ -334,7 +334,7 @@ public:
     friend class CGE;
 
 private:
-    Histogram *current;                  ///< The current histogram.
+    Histogram *current;                 ///< The current histogram.
     History *history;                   ///< The history of histograms (has ownership unless it's null)
     Estimate *estimate;                 ///< The current estimate of the density of states.
 

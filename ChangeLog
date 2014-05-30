@@ -1,3 +1,7 @@
+2014-05-30  frellsen  <frellsen@cam>
+
+	* muninn/GE.h (GE): Fixed an indention error.
+
 2014-04-30  Jes Frellsen  <frellsen@cam>
 
 	* bin/examples/Makefile.am: LDFLAGS -> AM_LDFLAGS
@@ -15,7 +19,7 @@
 	* muninn/utils/nonlinear/newton/LineSearchAlgorithm.h: Removed
 	warning for binary operator with parentheses.
 
-2013-10-29  Jes Frellsen  <frellsen@demeter>
+2013-10-29  Jes Frellsen  <frellsen@binf>
 
 	* bin/examples/Ising2dSampler.h: Corrected comment
 
