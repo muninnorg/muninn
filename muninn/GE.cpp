@@ -33,19 +33,20 @@ void GE::estimate_new_weights(const Binner *binner) {
     MessageLogger::get().info("Estimating new weights.");
     MessageLogger::get().debug("Histogram shape: " + to_string<std::vector<unsigned int> >(current_sum->get_shape()));
 
-    // Bookkeeping
-    total_iterations += current_sum->get_n();
-
-    // Tell the update scheme that the history is to be updated
-    // TODO: Find a more elegant way of doing this.
-    updatescheme->updating_history(*current_sum, *history);
-
     int failed_at_thread_id = -1;
 
     for (unsigned int thread_id=0; thread_id < current_histograms.size(); ++thread_id) {
         MessageLogger::get().info("Thread ID " + to_string<unsigned int>(thread_id));
 
         if (current_histograms.at(thread_id)->get_n() > 0) {
+
+            // Tell the update scheme that the history is to be updated
+            // TODO: Find a more elegant way of doing this.
+            updatescheme->updating_history(*current_histograms.at(thread_id), *history);
+
+            // Bookkeeping
+            total_iterations += current_histograms.at(thread_id)->get_n();
+
             // Put the current histogram into the history.
             history->add_histogram(current_histograms.at(thread_id));
             current_histograms.at(thread_id) = NULL;

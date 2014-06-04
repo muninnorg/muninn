@@ -1,10 +1,23 @@
-2014-05-30  frellsen  <frellsen@cam>
+2014-06-04  Jes Frellsen  <frellsen@cam>
+
+	* bin/examples/ising.cpp: Added a cmd line option for initial_max.
+
+	* muninn/GE.cpp: The updatescheme is now updated with the
+	individual histograms rather than the sum-histogram.
+
+	* muninn/Factories/CGEfactory.cpp: Added an automatic calculation
+	of the increase_factor.
+
+	* muninn/Factories/CGEfactory.h: Removed the increase_factor
+	setting.
+
+2014-05-30  Jes Frellsen  <frellsen@cam>
 
 	* bin/examples/ising.cpp: Added memory option.
 
 	* muninn/Factories/CGEfactory.h: Set default memory to 20
 
-2014-05-30  frellsen  <frellsen@cam>
+2014-05-30  Jes Frellsen  <frellsen@cam>
 
 	* bin/examples/ising.cpp: Added option to simulate multiple
 	threads.
@@ -33,7 +46,7 @@
 	* muninn/tools/CanonicalAverager.cpp: Adjusted to reflect changes
 	in GE class.
 
-2014-05-30  frellsen  <frellsen@cam>
+2014-05-30  Jes Frellsen  <frellsen@cam>
 
 	* muninn/GE.h (GE): Fixed an indention error.
 

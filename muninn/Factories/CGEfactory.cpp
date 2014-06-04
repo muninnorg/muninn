@@ -94,7 +94,9 @@ CGE* CGEfactory::new_CGE(const Settings& settings) {
     	MessageLogger::get().debug("Settings initial_max to "+to_string(initial_max)+".");
     }
 
-    IncreaseFactorScheme* update_scheme = new IncreaseFactorScheme(initial_max, settings.increase_factor, settings.max_iterations_per_histogram);
+    double increase_factor = pow(2.0, 2.0/(settings.memory*settings.nthreads));
+
+    IncreaseFactorScheme* update_scheme = new IncreaseFactorScheme(initial_max, increase_factor, settings.max_iterations_per_histogram);
 
     // Allocate the weight scheme
     LinearPolatedWeigths *weight_scheme = NULL;

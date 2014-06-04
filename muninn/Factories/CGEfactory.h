@@ -131,11 +131,6 @@ public:
         /// Number of iterations used in first round of sampling.
         unsigned int initial_max;
 
-        /// The sampling time between consecutive histograms is multiplied with
-        /// this factor if the size of the support is not increased for the new
-        /// histogram.
-        double increase_factor;
-
         /// The maximum sampling time (number of iteration) for each round of sampling.
         unsigned int max_iterations_per_histogram;
 
@@ -186,7 +181,6 @@ public:
         /// \param read_statistics_log_filename See documentation for Settings::read_statistics_log_filename.
         /// \param read_fixed_weights_filename See documentation for Settings::read_fixed_weights_filename.
         /// \param initial_max  See documentation for Settings::initial_max.
-        /// \param increase_factor  See documentation for Settings::increase_factor.
         /// \param max_iterations_per_histogram See documentation for Settings::max_iterations_between_rounds.
         /// \param memory See documentation for Settings::memory.
         /// \param min_count See documentation for Settings::min_count.
@@ -215,7 +209,6 @@ public:
                  std::string read_statistics_log_filename = "",
                  std::string read_fixed_weights_filename = "",
                  unsigned int initial_max = 5000,
-                 double increase_factor = 1.07,
                  unsigned int max_iterations_per_histogram = std::numeric_limits<Count>::max(),
                  unsigned int memory = 20,
                  unsigned int min_count = 30,
@@ -244,7 +237,6 @@ public:
           read_statistics_log_filename(read_statistics_log_filename),
           read_fixed_weights_filename(read_fixed_weights_filename),
           initial_max(initial_max),
-          increase_factor(increase_factor),
           max_iterations_per_histogram(max_iterations_per_histogram),
           memory(memory),
           min_count(min_count),
@@ -285,7 +277,6 @@ public:
             o << "read_statistics_log_filename" << settings.separator << settings.read_statistics_log_filename << std::endl;
             o << "read_fixed_weights_filename" << settings.separator << settings.read_fixed_weights_filename << std::endl;
             o << "initial_max" << settings.separator << settings.initial_max << std::endl;
-            o << "increase_factor" << settings.separator << settings.increase_factor << std::endl;
             o << "max_iterations_per_histogram" << settings.separator << settings.max_iterations_per_histogram << std::endl;
             o << "memory" << settings.separator << settings.memory << std::endl;
             o << "min_count" << settings.separator << settings.min_count << std::endl;

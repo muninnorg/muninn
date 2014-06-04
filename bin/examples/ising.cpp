@@ -44,6 +44,7 @@ int main(int argc, char *argv[]) {
     parser.add_option("-L", "log_mode", "The mode for the logger (options are ALL or CURRENT)", "all");
     parser.add_option("-r", "read_statistics_log", "Read a Muninn statics log file", "");
     parser.add_option("-t", "nthreads", "Number of simulated threads", "1");
+    parser.add_option("-i", "init_max", "Number of iterations used in first round of sampling", "5000");
 
     parser.parse_args(argc, argv);
 
@@ -78,6 +79,7 @@ int main(int argc, char *argv[]) {
     settings.read_statistics_log_filename = parser.get("read_statistics_log");
     settings.nthreads = parser.get_as<unsigned int>("nthreads");
     settings.verbose = 3;
+    settings.initial_max = parser.get_as<unsigned int>("init_max");
 
     std::cout << settings;
 
