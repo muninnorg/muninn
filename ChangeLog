@@ -1,3 +1,11 @@
+2014-06-16  frellsen  <frellsen@cam>
+
+	* muninn/Factories/CGEfactory.h: Reintroduced the increase_factor
+	setting.
+
+	* muninn/Factories/CGEfactory.cpp: Reintroduced the
+	increase_factor setting.
+
 2014-06-04  Jes Frellsen  <frellsen@cam>
 
 	* bin/examples/ising.cpp: Added a cmd line option for initial_max.
