@@ -47,6 +47,7 @@ CGE* CGEfactory::new_CGE(const Settings& settings) {
     // Possibly read a statistics log file
     StatisticsLogReader *statistics_log_reader = NULL;
     std::string read_statistics_log_filename = "";
+    StatisticsLogger::Mode read_statistics_log_mode = StatisticsLogger::NONE;
 
     if (settings.continue_statistics_log) {
         read_statistics_log_filename = settings.statistics_log_filename;
@@ -59,17 +60,36 @@ CGE* CGEfactory::new_CGE(const Settings& settings) {
         MessageLogger::get().info("Reading statistics log file");
     	statistics_log_reader = new StatisticsLogReader(read_statistics_log_filename, settings.memory);
 
-    	// Check that the logger contains adequate information
-        if (statistics_log_reader->get_Ns().size()==0 ||
-            statistics_log_reader->get_lnws().size()==0 ||
-            statistics_log_reader->get_lnGs().size()==0 ||
-            statistics_log_reader->get_lnG_supports().size()==0 ||
-            statistics_log_reader->get_binnings().size()==0 ||
-            statistics_log_reader->get_free_energies().size()==0 ||
-            statistics_log_reader->get_this_maxs().size()==0 ||
-            statistics_log_reader->get_x_zeros().size()==0) {
+    	unsigned int number_of_histograms = statistics_log_reader->get_Ns().size();
+
+    	MessageLogger::get().debug("Number of histograms in history: " + to_string(number_of_histograms));
+
+    	// Guess the mode that the history was written with
+        if (statistics_log_reader->get_Ns().size()==number_of_histograms &&
+            statistics_log_reader->get_lnws().size()==number_of_histograms &&
+            statistics_log_reader->get_lnGs().size()==number_of_histograms &&
+            statistics_log_reader->get_lnG_supports().size()==number_of_histograms &&
+            statistics_log_reader->get_binnings().size()==number_of_histograms &&
+            statistics_log_reader->get_free_energies().size()==number_of_histograms &&
+            statistics_log_reader->get_this_maxs().size()==number_of_histograms &&
+            statistics_log_reader->get_x_zeros().size()==number_of_histograms) {
+            read_statistics_log_mode = StatisticsLogger::ALL;
+        }
+        else if (statistics_log_reader->get_Ns().size()==number_of_histograms &&
+                statistics_log_reader->get_lnws().size()==number_of_histograms &&
+                statistics_log_reader->get_lnGs().size()==1 &&
+                statistics_log_reader->get_lnG_supports().size()==1 &&
+                statistics_log_reader->get_binnings().size()==1 &&
+                statistics_log_reader->get_free_energies().size()==1 &&
+                statistics_log_reader->get_this_maxs().size()==1 &&
+                statistics_log_reader->get_x_zeros().size()==1) {
+            read_statistics_log_mode = StatisticsLogger::CURRENT;
+        }
+        else {
             throw(CGEfactorySettingsException("Error: The given log file does not contains adequate information."));
         }
+
+        MessageLogger::get().debug("History mode: " + to_string(read_statistics_log_mode));
     }
 
     // Allocate the estimator
@@ -200,19 +220,25 @@ CGE* CGEfactory::new_CGE(const Settings& settings) {
         History* history = estimator->new_history(statistics_log_reader->get_Ns().back().second.get_shape());
 
     	for (unsigned int i = 0; i < statistics_log_reader->get_Ns().size(); ++i) {
-    		const DArray& current_binning = statistics_log_reader->get_binnings()[i].second;
-    		const DArray& final_binning = statistics_log_reader->get_binnings().back().second;
+    	    if (read_statistics_log_mode == StatisticsLogger::ALL) {
+    	        // Compare the binning of the curren and the final histogram
+                const DArray& current_binning = statistics_log_reader->get_binnings().at(i).second;
+                const DArray& final_binning = statistics_log_reader->get_binnings().back().second;
 
-    		// Check if the binning is the same as the last histogram
-    		if (!current_binning.same_shape(final_binning)) {
-    			std::pair<unsigned int, unsigned int> offsets = ArrayAligner::calculate_alignment_offsets(final_binning, current_binning);
-        		const CArray extended_Ns = statistics_log_reader->get_Ns()[i].second.extended(offsets.first, offsets.second);
-        		const DArray extended_lnws = statistics_log_reader->get_lnws()[i].second.extended(offsets.first, offsets.second);
-        		history->add_histogram(new Histogram(extended_Ns, extended_lnws));
-    		}
-    		else {
-        		history->add_histogram(new Histogram(statistics_log_reader->get_Ns()[i].second, statistics_log_reader->get_lnws()[i].second));
-    		}
+                // Check if the binning is the same as the last histogram
+                if (!current_binning.same_shape(final_binning)) {
+                    std::pair<unsigned int, unsigned int> offsets = ArrayAligner::calculate_alignment_offsets(final_binning, current_binning);
+                    const CArray extended_Ns = statistics_log_reader->get_Ns().at(i).second.extended(offsets.first, offsets.second);
+                    const DArray extended_lnws = statistics_log_reader->get_lnws().at(i).second.extended(offsets.first, offsets.second);
+                    history->add_histogram(new Histogram(extended_Ns, extended_lnws));
+                }
+                else {
+                    history->add_histogram(new Histogram(statistics_log_reader->get_Ns().at(i).second, statistics_log_reader->get_lnws().at(i).second));
+                }
+    	    }
+    	    else {
+    	        history->add_histogram(new Histogram(statistics_log_reader->get_Ns().at(i).second, statistics_log_reader->get_lnws().at(i).second));
+    	    }
     	}
 
     	// Construct a new estimate

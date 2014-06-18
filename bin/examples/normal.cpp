@@ -34,7 +34,7 @@
 int main(int argc, char *argv[]) {
     // Setup the option parser
     OptionParser parser("An example of using Muninn to sample from a normal distribution.");
-    parser.add_option("-l", "statistics_log", "The Muninn statics log file", "muninn.txt");
+    parser.add_option("-l", "statistics_log", "The Muninn statistics log file", "muninn.txt");
     parser.add_option("-L", "log_mode", "The mode for the logger (options are ALL or CURRENT)", "all");
     parser.add_option("-s", "mcmc_steps", "Number of MCMC steps", "1E7");
     parser.add_option("-S", "seed", "The seed for the normal sampler, by default the time is used");

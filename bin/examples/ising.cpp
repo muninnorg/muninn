@@ -39,7 +39,7 @@ int main(int argc, char *argv[]) {
     parser.add_option("-W", "weight_scheme", "The Muninn weight scheme (multicanonical|invk)", "multicanonical");
     parser.add_option("-E", "estimator", "The Muninn estimator (MLE)", "MLE");
     parser.add_option("-w", "bin_width", "The Muninn bin width", "4.0");
-    parser.add_option("-l", "statistics_log", "The Muninn statics log file", "muninn.txt");
+    parser.add_option("-l", "statistics_log", "The Muninn statistics log file", "muninn.txt");
     parser.add_option("-L", "log_mode", "The mode for the logger (options are ALL or CURRENT)", "all");
     parser.add_option("-r", "read_statistics_log", "Read a Muninn statics log file", "");
 

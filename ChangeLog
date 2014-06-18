@@ -1,4 +1,20 @@
-2014-05-30  frellsen  <frellsen@cam>
+2014-06-18  Jes Frellsen  <frellsen@cam>
+
+	* bin/examples/ising.cpp: Corrected spelling error in options.
+
+	* bin/examples/normal.cpp: Corrected spelling error in options.
+
+	* bin/tools/CMakeLists.txt: Added test_read_history.
+
+	* bin/tools/Makefile.am: Added test_read_history.
+
+	* bin/tools/test_read_history.cpp: Added tool to check if a log
+	file can be read.
+
+	* muninn/Factories/CGEfactory.cpp: Fix problem with reading
+	history written in CURRENT mode.
+
+2014-05-30  Jes Frellsen  <frellsen@cam>
 
 	* muninn/GE.h (GE): Fixed an indention error.
 
