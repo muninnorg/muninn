@@ -1,3 +1,16 @@
+2014-06-23  Jes Frellsen  <frellsen@cam>
+
+	* bin/tools/test_read_history.cpp: Added memory as a command line
+	option.
+
+	* muninn/Factories/CGEfactory.cpp: Allowed more flexibility and
+	better warning messages when reading old Muninn log files.
+
+	* muninn/MLE/MLE.h: See MLE.cpp
+
+	* muninn/MLE/MLE.cpp: Allowed optional mismatch between history
+	size and number of free energies, when constructing new estimate.
+
 2014-06-18  Jes Frellsen  <frellsen@cam>
 
 	* bin/examples/ising.cpp: Corrected spelling error in options.

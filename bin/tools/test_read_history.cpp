@@ -33,7 +33,8 @@
 int main(int argc, char *argv[]) {
     // Setup the option parser
     OptionParser parser("Test if a Muninn statistics log file can be read.");
-    parser.add_option("-m", "max_hist", "The maximal number of histograms to read", "0");
+    parser.add_option("-M", "max_hist", "The maximal number of histograms to read", "0");
+    parser.add_option("-m", "memory", "The number of consecutive histograms to keep in memory", Muninn::to_string(Muninn::CGEfactory::Settings().memory));
     parser.add_option("-r", "read_statistics_log", "Read a Muninn statistics log file");
     parser.parse_args(argc, argv);
 
@@ -53,6 +54,7 @@ int main(int argc, char *argv[]) {
 
     Muninn::CGEfactory::Settings settings;
     settings.statistics_log_filename = "/dev/null";
+    settings.memory = parser.get_as<unsigned int>("memory");
     settings.read_statistics_log_filename = parser.get("read_statistics_log");
     settings.verbose = 3;
 

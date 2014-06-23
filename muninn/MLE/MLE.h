@@ -96,8 +96,10 @@ public:
     ///                      order as the histograms has in the history.
     /// \param base_history The history to make the estimate from.
     /// \param binner If a Binner has been use, it can be passed to the estimator.
+    /// \param allow_more_free_energies Allow the free_energies array to be larger
+    ///                                 than the base_history.
     /// \return A new empty Estimate.
-    virtual Estimate* new_estimate(const DArray &lnG, const BArray &lnG_support, const std::vector<unsigned int> &x0, const DArray &free_energies, const History &base_history, const Binner *binner=NULL);
+    virtual Estimate* new_estimate(const DArray &lnG, const BArray &lnG_support, const std::vector<unsigned int> &x0, const DArray &free_energies, const History &base_history, const Binner *binner=NULL, bool allow_more_free_energies=false);
 
 private:
     const Count min_count;                           ///< The minimal number of counts in a bin in order to have support in a bin.

@@ -264,12 +264,12 @@ void MLE::calc_lnG_accumulated(const MultiHistogramHistory &history, const CArra
     }
 }
 
-Estimate* MLE::new_estimate(const DArray &lnG, const BArray &lnG_support, const std::vector<unsigned int> &x0, const DArray &free_energies, const History &base_history, const Binner *binner) {
+Estimate* MLE::new_estimate(const DArray &lnG, const BArray &lnG_support, const std::vector<unsigned int> &x0, const DArray &free_energies, const History &base_history, const Binner *binner, bool allow_more_free_energies) {
 	assert(lnG.same_shape(lnG_support) && lnG.has_shape(base_history.get_shape()));
 
     // Cast the history and estimate to be the MLE type
     const MultiHistogramHistory& history = MultiHistogramHistory::cast_from_base(base_history, "The MLE estimator is only compatible with the MultiHistogramHistory.");
-    assert(free_energies.get_ndims()==1 && free_energies.get_shape(0)==history.get_size());
+    assert(free_energies.get_ndims()==1 && ((!allow_more_free_energies && free_energies.get_shape(0)==history.get_size()) || (allow_more_free_energies && free_energies.get_shape(0)>=history.get_size()) ) );
 
 	// Make a new MLE estimate
 	MLEestimate *estimate = new MLEestimate(lnG, lnG_support, x0);

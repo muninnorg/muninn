@@ -62,8 +62,6 @@ CGE* CGEfactory::new_CGE(const Settings& settings) {
 
     	unsigned int number_of_histograms = statistics_log_reader->get_Ns().size();
 
-    	MessageLogger::get().debug("Number of histograms in history: " + to_string(number_of_histograms));
-
     	// Guess the mode that the history was written with
         if (statistics_log_reader->get_Ns().size()==number_of_histograms &&
             statistics_log_reader->get_lnws().size()==number_of_histograms &&
@@ -89,7 +87,17 @@ CGE* CGEfactory::new_CGE(const Settings& settings) {
             throw(CGEfactorySettingsException("Error: The given log file does not contains adequate information."));
         }
 
+        // Print info about the read history
+        unsigned int number_of_free_energies = statistics_log_reader->get_free_energies().back().second.get_shape().at(0);
+
+        MessageLogger::get().debug("Maximal number of histograms that can be read from log file: " + to_string(number_of_free_energies));
         MessageLogger::get().debug("History mode: " + to_string(read_statistics_log_mode));
+
+        // Check that settings.memory matches the number of available free energies
+        if (number_of_free_energies != settings.memory) {
+            MessageLogger::get().warning("Memory (" + to_string(settings.memory) + ") differs from the number of free energies available (" + to_string(number_of_free_energies) + ")");
+            MessageLogger::get().warning(to_string(number_of_free_energies) + " histograms will be used from log file");
+        }
     }
 
     // Allocate the estimator
@@ -216,10 +224,12 @@ CGE* CGEfactory::new_CGE(const Settings& settings) {
     	cge = new CGE(estimator, update_scheme, weight_scheme, binner, statistics_logger, settings.initial_beta, true);
     }
     else {
+        unsigned int number_of_free_energies = statistics_log_reader->get_free_energies().back().second.get_shape().at(0);
+
         // Reconstruct the history
         History* history = estimator->new_history(statistics_log_reader->get_Ns().back().second.get_shape());
 
-    	for (unsigned int i = 0; i < statistics_log_reader->get_Ns().size(); ++i) {
+    	for (unsigned int i = 0; i < Muninn::min<unsigned int>(statistics_log_reader->get_Ns().size(), number_of_free_energies); ++i) {
     	    if (read_statistics_log_mode == StatisticsLogger::ALL) {
     	        // Compare the binning of the curren and the final histogram
                 const DArray& current_binning = statistics_log_reader->get_binnings().at(i).second;
@@ -248,7 +258,7 @@ CGE* CGEfactory::new_CGE(const Settings& settings) {
     	                                                 statistics_log_reader->get_lnG_supports().back().second,
                                                          TArray_to_vector<Index>(statistics_log_reader->get_x_zeros().back().second),
                                                          statistics_log_reader->get_free_energies().back().second,
-                                                         *history, binner);
+                                                         *history, binner, true);
 
     	// Construct the CGE object
     	cge = new CGE(estimate, history, estimator, update_scheme, weight_scheme, binner, statistics_logger, true);
