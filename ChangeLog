@@ -1,3 +1,7 @@
+2014-10-06  frellsen  <frellsen@cam>
+
+	* bin/examples/ising.cpp: Corrected errors in help text.
+
 2014-06-23  Jes Frellsen  <frellsen@cam>
 
 	* bin/tools/test_read_history.cpp: Added memory as a command line

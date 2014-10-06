@@ -32,10 +32,10 @@
 
 int main(int argc, char *argv[]) {
     // Setup the option parser
-    OptionParser parser("An example of using Muninn to sample from a normal distribution.");
+    OptionParser parser("An example of using Muninn to simulate from the Ising model.");
     parser.add_option("-N", "ising_size", "The size of the side of the Ising system", "48");
     parser.add_option("-s", "mcmc_steps", "Number of MCMC steps", "1E7");
-    parser.add_option("-S", "seed", "The seed for the normal sampler, by default the time is used");
+    parser.add_option("-S", "seed", "The seed for the Ising model and in the acceptance criteria, by default the time is used");
     parser.add_option("-W", "weight_scheme", "The Muninn weight scheme (multicanonical|invk)", "multicanonical");
     parser.add_option("-E", "estimator", "The Muninn estimator (MLE)", "MLE");
     parser.add_option("-w", "bin_width", "The Muninn bin width", "4.0");
