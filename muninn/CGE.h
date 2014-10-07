@@ -244,6 +244,11 @@ public:
         ge.force_statistics_log();
     }
 
+    /// Const getter for the used binner
+    ///
+    /// \return The binner in use.
+    inline const Binner & get_binner() const {return *binner;}
+
     /// Getter for the used binner
     ///
     /// \return The binner in use.

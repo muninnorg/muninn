@@ -1,3 +1,7 @@
+2014-10-07  frellsen  <frellsen@can>
+
+	* muninn/CGE.h: Added const version of get_binner().
+
 2014-10-07  frellsen  <frellsen@cam>
 
 	* bin/examples/normal_parallel.cpp: Added an example of how to use
