@@ -1,4 +1,4 @@
-2014-10-07  frellsen  <frellsen@can>
+2014-10-07  frellsen  <frellsen@cam>
 
 	* muninn/CGE.h: Added const version of get_binner().
 
