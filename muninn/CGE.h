@@ -247,7 +247,7 @@ public:
     /// Getter for the used binner
     ///
     /// \return The binner in use.
-    inline const Binner & get_binner() const {return *binner;}
+    inline Binner & get_binner() {return *binner;}
 
     /// Shortcut to get the bin edges from the Binner object.
     ///
@@ -267,6 +267,9 @@ public:
     ///
     /// \return The discrete GE objected used by the CGE object.
     inline const GE & get_ge() const {return ge;}
+
+    // Define friends
+    friend class CGEcollection;
 
 private:
     // General variables

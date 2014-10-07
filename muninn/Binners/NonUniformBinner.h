@@ -43,7 +43,7 @@ public:
     ///
     /// \param binning The initial edges of the bins.
     NonUniformBinner(const DArray &binning) :
-        Binner(binning.get_asize()-1, false), binning(binning) {
+        Binner(binning.get_asize()-1, false, false), binning(binning) {
         assert(binning.get_shape().size() == 1);
     }
 

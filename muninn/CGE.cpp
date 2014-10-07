@@ -29,7 +29,9 @@ namespace Muninn {
 void CGE::estimate_new_weights(){
     if (initial_collection) {
         // Initialize the binner with the collected observations
-        binner->initialize(initial_observations, initial_beta);
+        if (!binner->is_initialized()) {
+            binner->initialize(initial_observations, initial_beta);
+        }
         unsigned int nbins = binner->get_nbins();
 
         // Now update the histogram with the new number of bins
