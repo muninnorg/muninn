@@ -1,3 +1,8 @@
+2014-10-08  frellsen  <frellsen@cam>
+
+	* muninn/CGEcollection.h: Added methods size() and
+	new_weights_any().
+
 2014-10-07  frellsen  <frellsen@cam>
 
 	* muninn/CGE.h: Added const version of get_binner().

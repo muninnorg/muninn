@@ -153,6 +153,10 @@ public:
         return *cge_objects.at(index);
     }
 
+    size_t size() {
+        return cge_objects.size();
+    }
+
     bool check_consistent_binning() {
         DArray reference = cge_objects.front()->get_binning();
 
@@ -160,19 +164,29 @@ public:
             DArray binning = cge_objects.at(i)->get_binning();
 
             if(!reference.same_shape(binning)) {
-                MessageLogger::get().debug("Mismatch in shape.");
+                MessageLogger::get().error("Inconsistent binning: mismatch in shape!");
                 return false;
             }
 
             for (Index index=0; index<reference.get_asize(); ++index) {
                 if (abs(reference(index)-binning(index)) > 1E-6) {
-                    MessageLogger::get().debug("Mismatch in binning.");
+                    MessageLogger::get().error("Inconsistent binning: mismatch in bin values!");
                     return false;
                 }
             }
         }
+        MessageLogger::get().debug("Binning is consistent.");
 
         return true;
+    }
+
+    bool new_weights_any() {
+        for (size_t i=0; i<cge_objects.size(); ++i) {
+            if(cge_objects.at(i)->new_weights()) {
+                return true;
+            }
+        }
+        return false;
     }
 
 private:
