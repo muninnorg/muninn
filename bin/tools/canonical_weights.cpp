@@ -34,7 +34,7 @@ int main(int argc, char *argv[]) {
     // Setup the option parser
     OptionParser parser("Calculates weights to be used in an canonical average at beta.");
 
-    parser.add_option("-l", "statistics_log", "The Muninn statics log file (e.g. Muninn.txt)", OptionParser::REQUIRED);
+    parser.add_option("-l", "statistics_log", "The Muninn statistics log file (e.g. Muninn.txt)", OptionParser::REQUIRED);
     parser.add_option("-e", "energy_filename", "The file containing energies, separated by white spaces. Use -- for STDIN", "--");
     parser.add_option("-w", "weight_filename", "The file to output the weights corresponding to each energy, separated by white spaces. Use -- for STDOUT", "--");
     parser.add_option("-b", "beta", "The value of beta.", "1.0");

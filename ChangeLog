@@ -1,3 +1,14 @@
+2014-10-09  frellsen  <frellsen@cam>
+
+	* bin/details/OptionParser.h: Extended parser to also have help
+	test and getter for additional arguments.
+
+	* bin/tools/canonical_weights.cpp: Corrected typos in description
+	of options.
+
+	* bin/tools/combine_logs.cpp: Added program for combining log
+	files with shared binning.
+
 2014-10-08  frellsen  <frellsen@cam>
 
 	* muninn/CGEcollection.h: Added methods size() and

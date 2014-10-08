@@ -38,6 +38,8 @@ private:
     std::string program_name;
     std::string help_text;
 
+    std::string additional_arguments_help_text;           // Helptext for additional arugments
+
     std::map<std::string, std::string> options;           // option -> destination map
     std::map<std::string, std::string> help;              // option -> help map
     std::set<std::string> destinations;                   // set of destinations found in options
@@ -48,11 +50,11 @@ private:
     std::vector<std::string> order;                       // The order of options for help
 
     std::map<std::string, std::string> values;            // destination -> value map
-    std::vector<std::string> arguments;                   // list of additional arguments
+    std::vector<std::string> additional_arguments;        // list of additional arguments
 
 public:
     // Constructor
-    OptionParser(const std::string &help_text="") : help_text(help_text) {
+    OptionParser(const std::string &help_text="", const std::string &additional_arguments_help_text="") : help_text(help_text), additional_arguments_help_text(additional_arguments_help_text) {
         // Add the help option
         add_option("-h", "help", "Show this help message and exit", "0", "1");
     }
@@ -103,7 +105,7 @@ public:
                     parser_error("Unknown option " + arg);
                 }
             } else {
-                arguments.push_back(arg);
+                additional_arguments.push_back(arg);
             }
         }
 
@@ -185,9 +187,21 @@ public:
         return values.count(dest);
     }
 
+    // Get the list of additional arguments
+    const std::vector<std::string>& get_additional_arguments() {
+        return additional_arguments;
+    }
+
     // Help printer
     void print_help() {
-        std::string txt = "Usage: " + program_name + " [options]\n";
+        std::string txt = "Usage: " + program_name + " [options]";
+
+        if (additional_arguments_help_text != "") {
+            txt += " [...]\n";
+        }
+        else {
+            txt += "\n";
+        }
 
         if (help_text!="") {
             txt += "\n" + help_text + "\n";
@@ -218,6 +232,10 @@ public:
                     txt += "default=" + defaults[*it] + "]";
             }
             txt += "\n";
+        }
+
+        if (additional_arguments_help_text != "") {
+            txt += "     [...] " + additional_arguments_help_text + "\n";
         }
 
         std::cout << txt;
