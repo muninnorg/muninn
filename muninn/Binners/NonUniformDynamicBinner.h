@@ -61,7 +61,7 @@ public:
     ///              used to obtained a constant resolution in the weights.
     NonUniformDynamicBinner(double resolution=0.2, bool initial_width_is_max_left=true, bool initial_width_is_max_right=false,
                             unsigned int max_number_of_bins=1000000, double extend_factor=1.0, unsigned int sigma = 20) :
-        NonUniformBinner(DArray(0u)), resolution(resolution), initial_width_is_max_left(initial_width_is_max_left),
+        NonUniformBinner(), resolution(resolution), initial_width_is_max_left(initial_width_is_max_left),
         initial_width_is_max_right(initial_width_is_max_right), max_number_of_bins(max_number_of_bins),
         extend_factor(extend_factor), sigma(sigma), initial_bin_width(0.0),
         use_preset_slopes(false), preset_slope_left_bound(0.0), preset_slope_right_bound(0.0) {};

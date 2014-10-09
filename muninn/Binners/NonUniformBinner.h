@@ -43,7 +43,7 @@ public:
     ///
     /// \param binning The initial edges of the bins.
     NonUniformBinner(const DArray &binning) :
-        Binner(binning.get_asize()-1, false, false), binning(binning) {
+        Binner(binning.get_asize()-1, false, true), binning(binning) {
         assert(binning.get_shape().size() == 1);
     }
 
@@ -99,6 +99,12 @@ public:
 
 protected:
     DArray binning; ///< The current edges of the binned region.
+
+    /// Default constructor that creates a uninitialized binner
+    NonUniformBinner() :
+        Binner(0, false, false), binning(0) {
+        assert(binning.get_shape().size() == 1);
+    }
 };
 
 } // namespace Muninn
