@@ -68,6 +68,8 @@ void GE::estimate_new_weights(const Binner *binner) {
         current = history->remove_newest();
         updatescheme->prolong();
     }
+
+    new_weights_variable = updatescheme->update_required(*current, *history);
 }
 
 void GE::extend(const std::vector<unsigned int> &add_under, const std::vector<unsigned int> &add_over, const Binner *binner) {

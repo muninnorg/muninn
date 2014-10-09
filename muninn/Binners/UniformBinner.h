@@ -42,7 +42,7 @@ public:
     /// \param extend_nbins The number of bins used as additional padding when
     ///                     extending the binned region.
     UniformBinner(double bin_width, unsigned int extend_nbins=20) :
-        Binner(0, true), std_bins(0), extend_nbins(extend_nbins),
+        Binner(0, true, false), std_bins(0), extend_nbins(extend_nbins),
         min_value(0.0), max_value(0.0), bin_width(bin_width) {};
 
     /// Constructor where the bin width is set based on assuming that the
@@ -55,7 +55,7 @@ public:
     /// \param extend_nbins The number of bins used as additional padding when
     ///                     extending the binned region.
     UniformBinner(unsigned int std_bins=20, unsigned int extend_nbins=20) :
-        Binner(0, true), std_bins(std_bins), extend_nbins(extend_nbins),
+        Binner(0, true, false), std_bins(std_bins), extend_nbins(extend_nbins),
         min_value(0.0), max_value(0.0), bin_width(0.0) {};
 
     /// Constructor where the bin width are set based on an initial min/max
@@ -67,7 +67,7 @@ public:
     /// \param extend_nbins The number of bins used as additional padding when
     ///                     extending the binned region.
     UniformBinner(double min_value, double max_value, unsigned int nbins, unsigned int extend_nbins=20) :
-        Binner(nbins, true), std_bins(0), extend_nbins(extend_nbins),
+        Binner(nbins, true, false), std_bins(0), extend_nbins(extend_nbins),
         min_value(min_value), max_value(max_value) {
         bin_width = (max_value - min_value) / static_cast<double>(nbins);
     };
@@ -114,8 +114,9 @@ public:
             }
         }
 
-        // Print info
+        // Print info and update initialized state
         MessageLogger::get().info("Setting bin width to: "+to_string(bin_width));
+        initialized = true;
     }
 
     /// Function for calculate the bin index for an energy value. This is

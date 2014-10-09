@@ -1,3 +1,36 @@
+2014-10-09  frellsen  <frellsen@cam>
+
+	* bin/details/OptionParser.h: Extended parser to also have help
+	test and getter for additional arguments.
+
+	* bin/tools/canonical_weights.cpp: Corrected typos in description
+	of options.
+
+	* bin/tools/combine_logs.cpp: Added program for combining log
+	files with shared binning.
+
+2014-10-07  frellsen  <frellsen@cam>
+
+	* bin/tools/test_read_history.cpp: Added missing deletion of cge
+	object.
+
+	* muninn/Binner.h: Added the initialized variable and
+	is_initialized() method.
+
+	* muninn/CGE.cpp: Adopted the binner::is_initialized() method.
+
+	* muninn/GE.cpp: Corrected bug with new_weights_variable not being
+	updated when GE::estimate_new_weights(...) is called.
+
+	* muninn/Binners/NonUniformBinner.h: Adopted the initalized
+	variable from base class.
+
+	* muninn/Binners/NonUniformDynamicBinner.h: Added support for
+	presetting slope values and the include method.
+
+	* muninn/Binners/UniformBinner.h: Adopted the initalized variable
+	from base class.
+
 2014-10-06  frellsen  <frellsen@cam>
 
 	* bin/examples/ising.cpp: Corrected errors in help text.

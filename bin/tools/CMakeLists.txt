@@ -1,5 +1,7 @@
 # Create executable: canonical_weights.cpp
 add_executable(canonical_weights canonical_weights.cpp)
 target_link_libraries(canonical_weights muninn)
+add_executable(combine_logs combine_logs.cpp)
+target_link_libraries(combine_logs muninn)
 add_executable(test_read_history test_read_history.cpp)
 target_link_libraries(test_read_history muninn)

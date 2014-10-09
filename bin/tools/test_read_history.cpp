@@ -59,7 +59,7 @@ int main(int argc, char *argv[]) {
     settings.verbose = 3;
 
     Muninn::CGE *cge = Muninn::CGEfactory::new_CGE(settings);
-
+    delete cge;
 
     return EXIT_SUCCESS;
 }

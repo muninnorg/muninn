@@ -35,13 +35,14 @@
 
 #include "muninn/utils/polation/SupportBoundaries.h"
 #include "muninn/utils/polation/AverageSlope.h"
+#include "muninn/utils/BaseConverter.h"
 
 namespace Muninn {
 
 /// This class implements an automatic non uniform binning procedure. The bins
 /// are set so that a uniform resolution, \f$ r \f$, in the weights is
 /// obtained, \f$ |\ln w(E_j) - \ln w(E_{j+1})| \simeq r \f$.
-class NonUniformDynamicBinner : public NonUniformBinner {
+class NonUniformDynamicBinner : public NonUniformBinner, public BaseConverter<Binner, NonUniformDynamicBinner> {
 public:
     /// Constructor
     ///
@@ -60,9 +61,10 @@ public:
     ///              used to obtained a constant resolution in the weights.
     NonUniformDynamicBinner(double resolution=0.2, bool initial_width_is_max_left=true, bool initial_width_is_max_right=false,
                             unsigned int max_number_of_bins=1000000, double extend_factor=1.0, unsigned int sigma = 20) :
-        NonUniformBinner(DArray(0u)), resolution(resolution), initial_width_is_max_left(initial_width_is_max_left),
+        NonUniformBinner(), resolution(resolution), initial_width_is_max_left(initial_width_is_max_left),
         initial_width_is_max_right(initial_width_is_max_right), max_number_of_bins(max_number_of_bins),
-        extend_factor(extend_factor), sigma(sigma), initial_bin_width(0.0) {};
+        extend_factor(extend_factor), sigma(sigma), initial_bin_width(0.0),
+        use_preset_slopes(false), preset_slope_left_bound(0.0), preset_slope_right_bound(0.0) {};
 
     /// Constructor based on a previous estimated binning.
     ///
@@ -86,7 +88,8 @@ public:
                             unsigned int max_number_of_bins=1000000, double extend_factor=1.0, unsigned int sigma = 20) :
         NonUniformBinner(binning), resolution(resolution), initial_width_is_max_left(initial_width_is_max_left),
         initial_width_is_max_right(initial_width_is_max_right), max_number_of_bins(max_number_of_bins),
-        extend_factor(extend_factor), sigma(sigma), initial_bin_width(0.0) {
+        extend_factor(extend_factor), sigma(sigma), initial_bin_width(0.0),
+        use_preset_slopes(false), preset_slope_left_bound(0.0), preset_slope_right_bound(0.0) {
         if (std::abs(beta)<1E-6) {
             initial_bin_width = get_bin_widths().max();
         }
@@ -147,8 +150,9 @@ public:
             binning(i) = min_value + i*initial_bin_width;
         }
 
-        // Print info
+        // Print info and update initialized state
         MessageLogger::get().info("Setting initial bin width to: "+to_string(initial_bin_width));
+        initialized = true;
     }
 
     // Implementation of Binner interface (see base class for documentation).
@@ -164,7 +168,7 @@ public:
         if (bin < 0) {
             // Find the average slope on the left bound of the weights
             unsigned int bin_left = MLEutils::SupportBoundaries1D::find_left_bound(estimate.get_lnG_support());
-            double slope = MLEutils::AverageSlope1d<DArray>::get_slope(bin_left, lnw, estimate.get_lnG_support(), history.get_sum_N(), this->get_binning_centered(), sigma);
+            double slope = use_preset_slopes ? preset_slope_left_bound : MLEutils::AverageSlope1d<DArray>::get_slope(bin_left, lnw, estimate.get_lnG_support(), history.get_sum_N(), this->get_binning_centered(), sigma);
 
             // Calculate the new bin width
             double bin_width = std::abs(resolution/slope);
@@ -198,7 +202,7 @@ public:
         else if (bin >= static_cast<int>(nbins) ) {
             // Find the average slope on the right bound of the weights
             unsigned int bin_right = MLEutils::SupportBoundaries1D::find_right_bound(estimate.get_lnG_support());
-            double slope = MLEutils::AverageSlope1d<DArray>::get_slope(bin_right, lnw, estimate.get_lnG_support(), history.get_sum_N(), this->get_binning_centered(), sigma);
+            double slope = use_preset_slopes ? preset_slope_right_bound : MLEutils::AverageSlope1d<DArray>::get_slope(bin_right, lnw, estimate.get_lnG_support(), history.get_sum_N(), this->get_binning_centered(), sigma);
 
             // Calculate the new bin width
             double bin_width = std::abs(resolution/slope);
@@ -235,14 +239,56 @@ public:
         return extension;
     }
 
+    ///  Function for extending the binned region to include a new energy value,
+    ///  without adding additional bins for padding.
+    ///
+    /// \param value This energy value should now be included in the binned region.
+    /// \param estimate The newest estimate of the density of states.
+    /// \param history The current history.
+    /// \param lnw The curren log weights
+    /// \return The number of bins added in respectively lower and upper end of the histogram
+    std::pair<std::vector<unsigned int>, std::vector<unsigned int> > include(double value, const Estimate &estimate, const History &base_history, const DArray &lnw) {
+        double tmp_extend_factor = extend_factor;
+        extend_factor = 0.0;
+        std::pair<std::vector<unsigned int>, std::vector<unsigned int> > extension = extend(value, estimate, base_history, lnw);
+        extend_factor = tmp_extend_factor;
+        return extension;
+    }
+
+    /// Preset the slope that is used when extending the binning
+    ///
+    /// \param slope_left_bound The slope used for extending to the left
+    /// \param slope_right_bound The slope used for extending to the right
+    void set_slopes(double slope_left_bound, double slope_right_bound) {
+        use_preset_slopes = true;
+        preset_slope_left_bound = slope_left_bound;
+        preset_slope_right_bound = slope_right_bound;
+    }
+
+    /// Reset the slope values and use the slope of the weights
+    void reset_slopes() {
+        use_preset_slopes = false;
+    }
+
+    /// Get the sigma value
+    ///
+    /// \return The sigma value.
+    unsigned int get_sigma() {
+        return sigma;
+    }
+
 private:
-    const double resolution;         ///< The (constant) resolution used for binning.
-    bool initial_width_is_max_left;  ///< Use the initial bin with as maximal bin width, when expanding to the left.
-    bool initial_width_is_max_right; ///< Use the initial bin with as maximal bin width, when expanding to the right.
-    unsigned int max_number_of_bins; ///< The maximal number of bins the binner can use.
-    const double extend_factor;      ///< When extending the binned area the extension is padded with extend_factor/resolution bins.
-    unsigned int sigma;              ///< The number of observed bins used in the Gaussian kernel for the slope estimate of the weights.
-    double initial_bin_width;        ///< The bin width estimated based on the initial samples in the function initialize().
+    const double resolution;               ///< The (constant) resolution used for binning.
+    const bool initial_width_is_max_left;  ///< Use the initial bin with as maximal bin width, when expanding to the left.
+    const bool initial_width_is_max_right; ///< Use the initial bin with as maximal bin width, when expanding to the right.
+    const unsigned int max_number_of_bins; ///< The maximal number of bins the binner can use.
+    double extend_factor;                  ///< When extending the binned area the extension is padded with extend_factor/resolution bins.
+    const unsigned int sigma;              ///< The number of observed bins used in the Gaussian kernel for the slope estimate of the weights.
+    double initial_bin_width;              ///< The bin width estimated based on the initial samples in the function initialize().
+
+    bool use_preset_slopes;                ///< If true the, the binner will use the preset slopes for extending the binning
+    double preset_slope_left_bound;        ///< Preset slope used when expanding to the left
+    double preset_slope_right_bound;       ///< Preset slope used when expanding to the right
 
 };
 

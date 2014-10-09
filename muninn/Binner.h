@@ -44,7 +44,7 @@ namespace Muninn {
 class Binner : public Loggable {
 public:
     /// The constructor of the Binner base class.
-    Binner(unsigned int nbins, bool uniform) : nbins(nbins), uniform(uniform) {};
+    Binner(unsigned int nbins, bool uniform, bool initialized) : nbins(nbins), uniform(uniform), initialized(initialized) {};
 
     /// Default virtual destructor.
     virtual ~Binner() {};
@@ -138,9 +138,17 @@ public:
         statistics_logger.add_entry("bin_widths", get_bin_widths());
     }
 
+    /// Getter function for determining whether the binner has been initialized
+    ///
+    /// \return Returns true is the current binning has been initialized.
+    inline bool is_initialized() {
+        return initialized;
+    }
+
 protected:
     unsigned int nbins;  ///< The current number of bins
     bool uniform;        ///< Is true if the current binning can be assued to be uniform
+    bool initialized;    ///< Is true if the current binner has been initialized
 };
 
 } // namespace Muninn

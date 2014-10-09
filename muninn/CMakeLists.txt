@@ -8,12 +8,12 @@ add_library(muninn
   Histories/MultiHistogramHistory.cpp
   MLE/MLE.cpp
   tools/CanonicalAverager.cpp
-  utils/utils.cpp
+  utils/MessageLogger.cpp
+  utils/StatisticsLogger.cpp
+  utils/StatisticsLogReader.cpp
   utils/TArrayUtils.cpp
   utils/timer.cpp
-  utils/StatisticsLogger.cpp
-  utils/MessageLogger.cpp
-  utils/StatisticsLogReader.cpp
+  utils/utils.cpp
   utils/nonlinear/newton.cpp
   WeightSchemes/LinearPolatedWeights.cpp
 )
