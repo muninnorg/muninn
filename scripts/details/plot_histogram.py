@@ -1,5 +1,5 @@
-# myhist.py
-# Copyright (c) 2010 Jes Frellsen
+# plot_histogram.py
+# Copyright (c) 2010,2014 Jes Frellsen
 #
 # This file is part of Muninn.
 #
@@ -22,10 +22,10 @@
 # specific prior written permission..
 
 import operator
-from rpy import r
+import matplotlib.pyplot as plt
 from numpy import array, inf, arange
 
-def myhist(lnw, color="black", makenewplot=True, main=None, bins=None, support=None, xlab=None, ylab="", sub=None, xmin=None, xmax=None, bin_numbers=True):
+def plot_histogram(pdf, lnw, color="black", fig=None, main=None, bins=None, support=None, xlab=None, ylab="", sub=None, xmin=None, xmax=None, bin_numbers=True):
     nbins = len(lnw)
 
     if bins!=None:
@@ -33,7 +33,6 @@ def myhist(lnw, color="black", makenewplot=True, main=None, bins=None, support=N
 
     xss = [[]]
     yss = [[]]
-    xlim = None
     connect_to_prev = False
     
     if bins==None:
@@ -45,12 +44,6 @@ def myhist(lnw, color="black", makenewplot=True, main=None, bins=None, support=N
             elif xss[-1]!=[]:
                 xss.append([])
                 yss.append([])
-
-        if xmin==None and xmax==None:
-            xlim = (0, nbins+1)
-        else:
-            xs = reduce(operator.add, xss, [])
-            xlim = (min(xs), max(xs))
     else:
         for bin in range(nbins):
             if (lnw[bin] > -inf or lnw[bin] < inf) and (support==None or support[bin]) and (xmin==None or xmin<=bins[bin]) and (xmax==None or bins[bin+1]<=xmax):
@@ -61,64 +54,37 @@ def myhist(lnw, color="black", makenewplot=True, main=None, bins=None, support=N
                 xss.append([])
                 yss.append([])
 
-        if xmin==None and xmax==None:
-            xlim = (bins[0], bins[-1])
-        else:
-            xs = reduce(operator.add, xss, [])
-            xlim = (min(xs), max(xs))
-
     # Do the plotting
-    if makenewplot:
-        r.plot_new()
+    if fig==None:
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
 
         ys = reduce(operator.add, yss, [])
-        ymin = min(ys)
-        ymax = max(ys)
+        ylim = (min(ys), max(ys))
         
-        r.plot_window(xlim=xlim, ylim=(ymin, ymax))
-
-        if bins!=None and bin_numbers:
-            labels = array(r.pretty(range(nbins), 8), dtype=int)
-            labels = labels[(0<=labels) & (labels<nbins)]
-            ats = bins[labels]
-
-            r.axis(1)
-            r.axis(1, tick=False, labels=labels, at=ats, mgp=(3,2,0))
-            r.axis(2)
-
-            this_xlab = "E, bin"
+        if bins!=None and bin_numbers and False:
+            # TODO: Add support for bin numbers
+            this_xlab = r"$E$"
+        elif bins!=None:
+            this_xlab = r"$E$"
         else:
-            r.axis(1)
-            r.axis(2)
-
-            this_xlab = "E"
+            this_xlab = r"bin"
         
-        r.axis(1)
-        r.axis(2)
-        r.box()
-        r.title(ylab=ylab)
+        ax.set_ylabel(ylab)
 
         if xlab==None:
-            r.title(xlab=this_xlab)
+            ax.set_xlabel(this_xlab)
         else:
-            r.title(xlab=xlab)
+            ax.set_xlabel(xlab)
         
-        if main!=None:
-            r.title(main=main)
-
-        if sub!=None:
-            r.title(sub=sub)
+        if main!=None and sub!=None:
+            ax.set_title(main + "\n" + sub)
+        elif main!=None:
+            ax.set_title(main)
 
     for (xs, ys) in zip(xss, yss):
-        r.lines(xs, ys, col=color, lwd=0.5)
+        ax.plot(xs, ys, color=color, linewidth=0.5)
+
+    pdf.savefig()
 
     return (xss, yss)
-
-
-def myhist2d(lnw, color="gray", main=None, theta=30):
-    
-    # Set up the array
-    xs = arange(lnw.shape[0])
-    ys = arange(lnw.shape[1])
-
-    r.persp(xs, ys, lnw, theta = theta, phi = 30, expand = 0.5, col=color, xlab="i", ylab="j", zlab="S", main=main, ticktype="detailed")

@@ -1,5 +1,5 @@
 # plot.py
-# Copyright (c) 2010 Jes Frellsen
+# Copyright (c) 2010,2014 Jes Frellsen
 #
 # This file is part of Muninn.
 #
@@ -24,14 +24,12 @@
 import numpy
 from numpy import array, log, zeros
 from re import findall
-from details.myhist import myhist, myhist2d
+from details.plot_histogram import plot_histogram
 from details.utils import pickle_to_file
 
-from rpy import r
-
-def plot_name_array(name, data, ndims, counts=False, bins=None, support=None, makenewplot=True,
-                    color="black", xlab=None, ylab="", xmin=None, xmax=None, main=None,
-                    bin_numbers=True):
+def plot_name_array(pdf, name, data, ndims, counts=False, bins=None, support=None, fig=None,
+                    xlab=None, ylab="", xmin=None, xmax=None, main=None,
+                    bin_numbers=True, color="blue"):
 
     # Set the title
     if main==None:
@@ -53,14 +51,12 @@ def plot_name_array(name, data, ndims, counts=False, bins=None, support=None, ma
     
     # Do the plotting
     if ndims==1:
-        return myhist(data, color=color, main=this_main, bins=bins, support=support, makenewplot=makenewplot,
+        return plot_histogram(pdf, data, color=color, main=this_main, bins=bins, support=support, fig=fig,
                       xlab=xlab, ylab=ylab, sub=sub, xmin=xmin, xmax=xmax, bin_numbers=bin_numbers)
-    elif ndims==2:
-        return myhist2d(data, main=this_main, theta=-120)
     else:
         print "Cannot plot %d dimensions!" % ndims
 
-def plot_binning(entries, main=None):
+def plot_binning(pdf, entries, main=None, color="blue"):
     for entry in entries:
         number, fullname, tarray = entry
 
@@ -70,17 +66,23 @@ def plot_binning(entries, main=None):
             this_main = main
 
         if len(tarray)>0:
-            r.plot(range(len(tarray)), tarray, xlab="bin index", ylab="center value", main=this_main)
+            fig = plt.figure()
+            ax = fig.add_subplot(111)
+            ax.plot(range(len(tarray)), tarray, color=color)
+            ax.set_xlabel("bin index")
+            ax.set_ylabel("center value")
+            ax.set_title(this_main)
+            pdf.savefig()
 
-def plot_bin_widths(entries, log_space=False, main=None):
+def plot_bin_widths(pdf, entries, log_space=False, main=None, color="blue"):
     for entry in entries:
         number, fullname, tarray = entry
 
         if log_space:
             tarray = numpy.log(tarray)
-            ylab = r("expression(ln(Delta[bin]))")
+            ylab = r"$\ln(\Delta_\mathrm{bin})$"
         else:
-            ylab = r("expression(Delta[bin])")
+            ylab = r"$\Delta_\mathrm{bin})$"
 
         if main==None:
             this_main = fullname
@@ -88,12 +90,17 @@ def plot_bin_widths(entries, log_space=False, main=None):
             this_main = main
         
         if len(tarray)>0:
-            r.plot(range(len(tarray)), tarray, xlab="bin number", ylab=ylab, main=this_main)
+            fig = plt.figure()
+            ax = fig.add_subplot(111)
+            ax.plot(range(len(tarray)), tarray, color=color)
+            ax.set_xlabel("bin number")
+            ax.set_ylabel(ylab)
+            ax.set_title(this_main)
+            pdf.savefig()
 
-
-def plot_entry_list(log_entry_list, binning=None, binning_dict=None, bin_widths=None, bin_widths_dict=None,
+def plot_entry_list(pdf, log_entry_list, binning=None, binning_dict=None, bin_widths=None, bin_widths_dict=None,
                     support_dict=None, xlab=None, ylab="", normalize_log_space=True, xmin=None, xmax=None,
-                    main=None, bin_numbers=True):
+                    main=None, bin_numbers=True, color="blue"):
     entries = convert_log_entries(log_entry_list)
 
     points = []
@@ -121,10 +128,10 @@ def plot_entry_list(log_entry_list, binning=None, binning_dict=None, bin_widths=
         if widths!=None:
             if normalize_log_space:
                 tarray -= log(widths)
-                this_ylab = r("expression(%s - ln(Delta[bin]))" % ylab)
+                this_ylab = r"$%s - \ln(\Delta_\mathrm{bin})$" % ylab.replace("$", "")
             else:
                 tarray = tarray/widths  # Note, /= worn't work, since tarray might be an int array
-                this_ylab = r("expression(%s / Delta[bin])" % ylab)
+                this_ylab = r"$%s / \Delta_\mathrm{bin}$" % ylab.replace("$", "")
 
         # Decide on which support to use
         if support_dict!=None and support_dict.has_key(number):
@@ -133,16 +140,16 @@ def plot_entry_list(log_entry_list, binning=None, binning_dict=None, bin_widths=
             support = None
 
         # Do the plotting
-        p = plot_name_array(fullname, tarray, 1, counts=False, bins=bins, support=support, makenewplot=True,
+        p = plot_name_array(pdf, fullname, tarray, 1, counts=False, bins=bins, support=support, fig=None,
                             xlab=xlab, ylab=this_ylab, xmin=xmin, xmax=xmax,
-                            main=main, bin_numbers=bin_numbers)
+                            main=main, bin_numbers=bin_numbers, color=color)
 
         points.append((number, fullname, p))
 
     return points
 
-def plot_sum_N(log_entry_list, binning=None, binning_dict=None, bin_widths=None, bin_widths_dict=None,
-                    support_dict=None, xlab=None, ylab="", normalize_log_space=True, xmin=None, xmax=None, main=None, bin_numbers=True):
+def plot_sum_N(pdf, log_entry_list, binning=None, binning_dict=None, bin_widths=None, bin_widths_dict=None,
+                    support_dict=None, xlab=None, ylab="", normalize_log_space=True, xmin=None, xmax=None, main=None, bin_numbers=True, color="blue"):
     entries = convert_log_entries(log_entry_list)
 
     if binning!=None and binning_dict!=None and len(binning_dict)>0:
@@ -207,10 +214,10 @@ def plot_sum_N(log_entry_list, binning=None, binning_dict=None, bin_widths=None,
         if widths!=None:
             if normalize_log_space:
                 sums -= log(widths)
-                this_ylab = r("expression(%s - ln(Delta[bin]))" % ylab)
+                this_ylab = r"$%s - \ln(\Delta_\mathrm{bin})$" % ylab.replace("$", "")
             else:
                 sums = sums/widths  # Note, /= worn't work, since tarray might be an int array               
-                this_ylab = r("expression(%s / Delta[bin])" % ylab)
+                this_ylab = r"$%s / \Delta_\mathrm{bin}$" % ylab.replace("$", "")
 
             counts = False
             name = "sum_n"
@@ -221,101 +228,81 @@ def plot_sum_N(log_entry_list, binning=None, binning_dict=None, bin_widths=None,
 
 
         # Do the plotting
-        p = plot_name_array("Accumulated", sums, 1, counts=counts, bins=bins, support=None, makenewplot=True,
-                            xlab=xlab, ylab=this_ylab, xmin=xmin, xmax=xmax, main=main, bin_numbers=bin_numbers)
+        p = plot_name_array(pdf, "Accumulated", sums, 1, counts=counts, bins=bins, support=None, fig=None,
+                            xlab=xlab, ylab=this_ylab, xmin=xmin, xmax=xmax, main=main, bin_numbers=bin_numbers,
+                            color=color)
 
         return [(None, name, p)]
 
 
 if __name__ == "__main__":
     import os
+    import matplotlib
+    import matplotlib.pyplot as plt
+    from matplotlib.backends.backend_pdf import PdfPages
     from details.parse_statics_log import parse_statics_log, convert_log_entries
 
-    from optparse import OptionParser
-    parser = OptionParser("usage: %prog [options]")
-    parser.add_option("-f", dest="muninn_log_file", metavar="FILE", type="string", default=None, help="The Muninn statics-log filename [required].")
-    parser.add_option("-o", dest="output", metavar="FILE", type="string", default="plot.pdf", help="The output plot file [default %default]")
-    parser.add_option("-p", dest="pickle", metavar="FILE", type="string", default=None, help="Output the plot as a pickle [optional]")
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-f", dest="muninn_log_file", metavar="FILE", type=str, required=True, help="The Muninn statics-log filename.")
+    parser.add_argument("-o", dest="output", metavar="FILE", type=str, default="plot.pdf", help="The output plot file (default: %(default)s)")
+    parser.add_argument("-p", dest="pickle", metavar="FILE", type=str, default=None, help="Output the plot as a pickle [optional]")
     
-    parser.add_option("-g", dest="lng", default=False, action="store_true", help="Plot the entropy (lng)")
-    parser.add_option("-w", dest="lnw", default=False, action="store_true", help="Plot the weights (lnw)")
-    parser.add_option("-n", dest="n", default=False, action="store_true", help="Plot the normalized couns")
-    parser.add_option("-N", dest="N", default=False, action="store_true", help="Plot the counts (N)")
-    parser.add_option("-s", dest="s", default=False, action="store_true", help="Plot the sum of normalized couns")
-    parser.add_option("-S", dest="S", default=False, action="store_true", help="Plot the sum of counts (N)")
-    parser.add_option("-b", dest="bins", default=False, action="store_true", help="Plot the binning")
+    parser.add_argument("-g", dest="lng", default=False, action="store_true", help="Plot the entropy (lng)")
+    parser.add_argument("-w", dest="lnw", default=False, action="store_true", help="Plot the weights (lnw)")
+    parser.add_argument("-n", dest="n", default=False, action="store_true", help="Plot the normalized couns")
+    parser.add_argument("-N", dest="N", default=False, action="store_true", help="Plot the counts (N)")
+    parser.add_argument("-s", dest="s", default=False, action="store_true", help="Plot the sum of normalized couns")
+    parser.add_argument("-S", dest="S", default=False, action="store_true", help="Plot the sum of counts (N)")
+    parser.add_argument("-b", dest="bins", default=False, action="store_true", help="Plot the binning")
 
-    parser.add_option("--start", dest="start", metavar="VAL", default=None,
+    parser.add_argument("--start", dest="start", metavar="VAL", type=int, default=None,
                       help="The first array number to plot, a negative value means " +
-                           "counting from the end [default %default]")
-    parser.add_option("--end", dest="end", metavar="VAL", default=None,
+                           "counting from the end (default: %(default)s)")
+    parser.add_argument("--end", dest="end", metavar="VAL", type=int, default=None,
                       help="The last but one array number to plot, negative values " +
-                           "are not allowed [default %default].")
-    parser.add_option("-i", dest="indices", metavar="VAL", default=[], action="append",
+                           "are not allowed (default: %(default)s).")
+    parser.add_argument("-i", dest="indices", metavar="VAL", default=[], action="append",
                       help="Index for the array number to plot - options can be used multiple times.")
-    parser.add_option("--xmin", dest="xmin", metavar="FLOAT", type="float", default=None,
+    parser.add_argument("--xmin", dest="xmin", metavar="FLOAT", type=float, default=None,
                       help="The minimal x-value to plot.")
-    parser.add_option("--xmax", dest="xmax", metavar="FLOAT", type="float", default=None,
+    parser.add_argument("--xmax", dest="xmax", metavar="FLOAT", type=float, default=None,
                       help="The maximal x-value to plot.")
-    parser.add_option("--width", dest="width", metavar="FLOAT", type="float", default=7.,
-                      help="The width of the graphics region in inches [default %default].")
-    parser.add_option("--height", dest="height", metavar="FLOAT", type="float", default=7.,
-                      help="The height of the graphics region in inches [default %default].")
-    parser.add_option("--cex", dest="cex", metavar="FLOAT", type="float", default=1,
-                      help="Scaling factor for the font size [default %default].")
-    parser.add_option("--main", dest="main", metavar="VAL", type="string", default=None,
+    parser.add_argument("--width", dest="width", metavar="FLOAT", type=float, default=10.,
+                      help="The width of the graphics region in inches (default: %(default)s).")
+    parser.add_argument("--height", dest="height", metavar="FLOAT", type=float, default=7.,
+                      help="The height of the graphics region in inches (default: %(default)s).")
+    parser.add_argument("--fontsize", dest="fontsize", metavar="INT", type=int, default=14,
+                      help="The font size (default: %(default)s).")
+    parser.add_argument("--color", dest="color", metavar="COLOR", type=str, default="blue",
+                      help="The plot color (default: %(default)s).")
+    parser.add_argument("--main", dest="main", metavar="TEXT", type=str, default=None,
                       help="Set a different title than the default.")
-    parser.add_option("--xlab", dest="xlab", metavar="VAL", type="string", default=None,
+    parser.add_argument("--xlab", dest="xlab", metavar="TEXT", type=str, default=None,
                       help="Set a different label on the x-axis than 'E'.")
-    parser.add_option("--no-bins", dest="bin_numbers", action="store_false", default=True,
+    parser.add_argument("--no-bins", dest="bin_numbers", action="store_false", default=True,
                       help="Disable bin numbers on the x-axis.")
+    args = parser.parse_args()
 
-    (options, args) = parser.parse_args()
+    # Check the arguments
+    if not os.access(args.muninn_log_file, os.R_OK):
+        parser.error("File '" + args.muninn_log_file + "' not accessible.")
 
-    # Check that rpy is present
-    try:
-        from rpy import r
-    except ImportError:
-        parser.error("rpy is not install.")
-
-    # Check arguments
-    if len(args)>0:
-        parser.error("No additional arguments should be given.")
-
-    # Check options
-    if options.muninn_log_file==None:
-        parser.error("Muninn statics-log filename must be given with the Option -f.")
-
-    if not os.access(options.muninn_log_file, os.R_OK):
-        parser.error("File '" + options.muninn_log_file + "' not accessible.")
-
-    if (options.start!=None or options.end!=None) and options.indices!=[]:
+    if (args.start!=None or args.end!=None) and args.indices!=[]:
         parser.error("Options --start and --end are mutually exclusive with -i.")
 
-    if options.start!=None:
-        try:
-            options.start = int(options.start)
-        except ValueError:
-            parser.error("Invalid start value '" + options.start + "'.")
+    if args.end!=None:
+        if args.end<0:
+            parser.error("argument --end: negative end value not allowed.")
 
-    if options.end!=None:
+    if args.indices!=[]:
         try:
-            options.end = int(options.end)
-        except ValueError:
-            parser.error("Invalid end value '" + options.end + "'.")
-
-        if options.end<0:
-            parser.error("Negative end value not allowed.")
-
-    if options.indices!=[]:
-        try:
-            options.indices = map(int, options.indices)
+            args.indices = map(int, args.indices)
         except ValueError:
             parser.error("Invalid index value used with option -i.")
 
-            
     # Parse the log file
-    log_dict = parse_statics_log(options.muninn_log_file, options.start, options.end, options.indices)
+    log_dict = parse_statics_log(args.muninn_log_file, args.start, args.end, args.indices)
 
     # Convert the binning from strings to arrays and make a dictionary
     binning = convert_log_entries(log_dict.get('binning', []))
@@ -326,63 +313,61 @@ if __name__ == "__main__":
 
 
     # Plot the required output
-    r.pdf(options.output, width=options.width, height=options.height)
-    r.par(cex=options.cex)
+    pdf = PdfPages(args.output)
+    matplotlib.rc('font', size=args.fontsize)
+    matplotlib.rc('figure', figsize=(args.width, args.height), max_open_warning=1000)
 
-    xmin = options.xmin
-    xmax = options.xmax
+    xmin = args.xmin
+    xmax = args.xmax
 
     points = []
         
-    if options.lng:
+    if args.lng:
         support = convert_log_entries(log_dict.get('lnG_support', []))
         support_dict = dict(map(lambda entry: (entry[0], entry), support))
-        p = plot_entry_list(log_dict.get('lnG', []), binning, binning_dict, bin_widths, bin_widths_dict, support_dict,
-                            xlab=options.xlab, ylab="ln(G)", xmin=xmin, xmax=xmax, main=options.main,
-                            bin_numbers=options.bin_numbers)
+        p = plot_entry_list(pdf, log_dict.get('lnG', []), binning, binning_dict, bin_widths, bin_widths_dict, support_dict,
+                            xlab=args.xlab, ylab=r"$\ln(G)$", xmin=xmin, xmax=xmax, main=args.main,
+                            bin_numbers=args.bin_numbers, color=args.color)
         points += p
 
-    if options.lnw:
-        p = plot_entry_list(log_dict.get('lnw', []), binning, binning_dict, None, None,
-                               xlab=options.xlab, ylab="ln(w)", xmin=xmin, xmax=xmax, main=options.main,
-                               bin_numbers=options.bin_numbers)
+    if args.lnw:
+        p = plot_entry_list(pdf, log_dict.get('lnw', []), binning, binning_dict, None, None,
+                               xlab=args.xlab, ylab=r"$\ln(w)$", xmin=xmin, xmax=xmax, main=args.main,
+                               bin_numbers=args.bin_numbers, color=args.color)
         points += p
 
-    if options.n:
-        p = plot_entry_list(log_dict.get('N',[]), binning, binning_dict, bin_widths, bin_widths_dict,
-                            xlab=options.xlab, ylab="N", normalize_log_space=False, xmin=xmin, xmax=xmax,
-                            main=options.main, bin_numbers=options.bin_numbers)
+    if args.n:
+        p = plot_entry_list(pdf, log_dict.get('N',[]), binning, binning_dict, bin_widths, bin_widths_dict,
+                            xlab=args.xlab, ylab=r"$N$", normalize_log_space=False, xmin=xmin, xmax=xmax,
+                            main=args.main, bin_numbers=args.bin_numbers, color=args.color)
         points += p
 
-    if options.N:
-        p = plot_entry_list(log_dict.get('N',[]), binning, binning_dict, None, None,
-                            xlab=options.xlab, ylab="N", normalize_log_space=False, xmin=xmin, xmax=xmax,
-                            main=options.main, bin_numbers=options.bin_numbers)
+    if args.N:
+        p = plot_entry_list(pdf, log_dict.get('N',[]), binning, binning_dict, None, None,
+                            xlab=args.xlab, ylab=r"$N$", normalize_log_space=False, xmin=xmin, xmax=xmax,
+                            main=args.main, bin_numbers=args.bin_numbers, color=args.color)
         points += p
 
 
-    if options.s:
-        p = plot_sum_N(log_dict.get('N',[]), binning, binning_dict, bin_widths, bin_widths_dict,
-                       xlab=options.xlab, ylab="N", normalize_log_space=False, xmin=xmin, xmax=xmax,
-                       main=options.main, bin_numbers=options.bin_numbers)
+    if args.s:
+        p = plot_sum_N(pdf, log_dict.get('N',[]), binning, binning_dict, bin_widths, bin_widths_dict,
+                       xlab=args.xlab, ylab=r"$N$", normalize_log_space=False, xmin=xmin, xmax=xmax,
+                       main=args.main, bin_numbers=args.bin_numbers, color=args.color)
         points += p
 
-    if options.S:
-        p = plot_sum_N(log_dict.get('N',[]), binning, binning_dict, None, None,
-                       xlab=options.xlab, ylab="N", normalize_log_space=False, xmin=xmin, xmax=xmax,
-                       main=options.main, bin_numbers=options.bin_numbers)
+    if args.S:
+        p = plot_sum_N(pdf, log_dict.get('N',[]), binning, binning_dict, None, None,
+                       xlab=args.xlab, ylab=r"$N$", normalize_log_space=False, xmin=xmin, xmax=xmax,
+                       main=args.main, bin_numbers=args.bin_numbers, color=args.color)
         points += p
         
-    if options.bins:
-        plot_binning(binning, main=options.main)
-        plot_bin_widths(bin_widths, log_space=False, main=options.main)
-        plot_bin_widths(bin_widths, log_space=True, main=options.main)
+    if args.bins:
+        plot_binning(pdf, binning, main=args.main, color=args.color)
+        plot_bin_widths(pdf, bin_widths, log_space=False, main=args.main, color=args.color)
+        plot_bin_widths(pdf, bin_widths, log_space=True, main=args.main, color=args.color)
 
-
-    r.graphics_off()
-
+    pdf.close()
 
     # Dump the output as a pickle
-    if options.pickle!=None:
-        pickle_to_file(points, options.pickle)
-    
+    if args.pickle!=None:
+        pickle_to_file(points, args.pickle)

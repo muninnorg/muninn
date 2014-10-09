@@ -1,4 +1,15 @@
-2014-10-09  frellsen  <frellsen@cam>
+2014-10-09  Jes Frellsen  <frellsen@cam>
+
+	* scripts/plot_canonical.py: Replaced rpy with matplotlib for
+	plotting.
+
+	* scripts/plot.py: Replaced rpy with matplotlib for plotting.
+
+	* scripts/details/plot_histogram.py: Renamed myhist to
+	plot_histogram and replaced rpy with matplotlib for plotting.
+
+
+2014-10-09  Jes Frellsen  <frellsen@cam>
 
 	* bin/details/OptionParser.h: Extended parser to also have help
 	test and getter for additional arguments.
@@ -9,7 +20,7 @@
 	* bin/tools/combine_logs.cpp: Added program for combining log
 	files with shared binning.
 
-2014-10-07  frellsen  <frellsen@cam>
+2014-10-07  Jes Frellsen  <frellsen@cam>
 
 	* bin/tools/test_read_history.cpp: Added missing deletion of cge
 	object.
@@ -31,7 +42,7 @@
 	* muninn/Binners/UniformBinner.h: Adopted the initalized variable
 	from base class.
 
-2014-10-06  frellsen  <frellsen@cam>
+2014-10-06  Jes Frellsen  <frellsen@cam>
 
 	* bin/examples/ising.cpp: Corrected errors in help text.
 
@@ -294,13 +305,13 @@
 	* muninn/utils/nonlinear/NonlinearEquation.h: Added virtual
 	destructor.
 
-2012-04-25  frellsen  <frellsen@binf>
+2012-04-25  Jes Frellsen  <frellsen@binf>
 
 	* muninn/CMakeLists.txt: Updated to accommodate new header files.
 
 	* muninn/Makefile.am: Updated to accommodate new header files.
 
-2012-04-25  frellsen  <frellsen@binf>
+2012-04-25  Jes Frellsen  <frellsen@binf>
 
 	* muninn/Factories/CGEfactory.h: Added the setting
 	read_fixed_weights_filename.
