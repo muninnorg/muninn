@@ -26,43 +26,37 @@ from details.CanonicalProperties import CanonicalProperties, CanonicalException
 if __name__ == "__main__":
     import os
     from numpy import arange, vectorize
+    import matplotlib
+    import matplotlib.pyplot as plt
+    from matplotlib.backends.backend_pdf import PdfPages
     from details.utils import pickle_to_file
     from details.parse_statics_log import parse_statics_log, convert_log_entries
 
-    from optparse import OptionParser
-    parser = OptionParser("usage: %prog [options]")
-    parser.add_option("-f", dest="muninn_log_file", metavar="FILE", type="string", default=None, help="The Muninn statics-log filename [required].")
-    parser.add_option("-o", dest="output", metavar="FILE", type="string", default="plot_canonical.pdf", help="The output plot file [default %default]")
-    parser.add_option("-p", dest="pickle", metavar="FILE", type="string", default=None, help="Output the plot as a pickle [optional]")
-    parser.add_option("-i", dest="which", metavar="VAL", type=int, default=-1, help="Which lng estimate to use in the statics-log [default %default]")
-    parser.add_option("--min", dest="inv_beta_min", metavar="VAL", default=0.1, type="float", help="Minimal value for 1/beta [default %default]")
-    parser.add_option("--max", dest="inv_beta_max", metavar="VAL", default=10,  type="float", help="Maximal value for 1/beta [default %default]")
-    parser.add_option("--width", dest="width", metavar="FLOAT", type="float", default=7., help="The width of the graphics region in inches [default %default].")
-    parser.add_option("--height", dest="height", metavar="FLOAT", type="float", default=7., help="The height of the graphics region in inches [default %default].")
-    parser.add_option("--cex", dest="cex", metavar="FLOAT", type="float", default=1, help="Scaling factor for the font size [default %default].")
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-f", dest="muninn_log_file", metavar="FILE", type=str, required=True, help="The Muninn statics-log filename.")
+    parser.add_argument("-o", dest="output", metavar="FILE", type=str, default="plot_canonical.pdf", help="The output plot file (default: %(default)s)")
+    parser.add_argument("-p", dest="pickle", metavar="FILE", type=str, default=None, help="Output the plot as a pickle [optional]")
+    parser.add_argument("-i", dest="which", metavar="VAL", type=int, default=-1, help="Which lng estimate to use in the statics-log (default: %(default)s)")
+    parser.add_argument("--min", dest="inv_beta_min", metavar="VAL", default=0.1, type=float, help="Minimal value for 1/beta (default: %(default)s)")
+    parser.add_argument("--max", dest="inv_beta_max", metavar="VAL", default=10,  type=float, help="Maximal value for 1/beta (default: %(default)s)")
+    parser.add_argument("--width", dest="width", metavar="FLOAT", type=float, default=10.,
+                      help="The width of the graphics region in inches (default: %(default)s).")
+    parser.add_argument("--height", dest="height", metavar="FLOAT", type=float, default=7.,
+                      help="The height of the graphics region in inches (default: %(default)s).")
+    parser.add_argument("--fontsize", dest="fontsize", metavar="INT", type=int, default=14,
+                      help="The font size (default: %(default)s).")
+    parser.add_argument("--color", dest="color", metavar="COLOR", type=str, default="red",
+                      help="The plot color (default: %(default)s).")
+    args = parser.parse_args()
 
-    (options, args) = parser.parse_args()
-
-    # Check that rpy is present
-    try:
-        from rpy import r
-    except ImportError:
-        parser.error("rpy is not install.")
-
-    # Check arguments
-    if len(args)>0:
-        parser.error("No additional arguments should be given.")
-
-    # Check options
-    if options.muninn_log_file==None:
-        parser.error("Muninn statics-log filename must be given with the Option -f.")
-
-    if not os.access(options.muninn_log_file, os.R_OK):
-        parser.error("File '" + options.muninn_log_file + "' not accessible.")
+    # Check that the log file is accessible
+    if not os.access(args.muninn_log_file, os.R_OK):
+        parser.error("File '" + args.muninn_log_file + "' not accessible.")
 
     # Make the CanonicalProperties
     try:
-        cp = CanonicalProperties(options.muninn_log_file, options.which)
+        cp = CanonicalProperties(args.muninn_log_file, args.which)
     except CanonicalException, e:
         print parser.error(e)
 
@@ -74,34 +68,60 @@ if __name__ == "__main__":
 
 
     # Plot the required output
-    r.pdf(options.output, width=options.width, height=options.height)      
-    r.par(cex=options.cex)
+    pdf = PdfPages(args.output)
+    matplotlib.rc('font', size=args.fontsize)
+    matplotlib.rc('figure', figsize=(args.width, args.height), max_open_warning=1000)
 
-    inv_beta = arange(options.inv_beta_min, options.inv_beta_max, 0.01)
+    inv_beta = arange(args.inv_beta_min, args.inv_beta_max, 0.01)
     beta = 1.0/inv_beta
 
     lnZ = vectorize(cp.lnZ)(beta)
-    r.plot(inv_beta, lnZ, type='l', xlab=r("expression(beta**-1)"), ylab=r("""expression(paste("ln ", Z(beta)))"""))
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    ax.plot(inv_beta, lnZ, color=args.color)
+    ax.set_xlabel(r"$\beta^{-1}$")
+    ax.set_ylabel(r"$\ln Z_\beta$")
+    pdf.savefig()
     data.append((cp.number, "lnZ", (inv_beta, lnZ)))
 
     betaF = vectorize(cp.betaF)(beta)
-    r.plot(inv_beta, betaF, type='l', xlab=r("expression(beta**-1)"), ylab=r("expression(F(beta) * beta)"))
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    ax.plot(inv_beta, betaF, color=args.color)
+    ax.set_xlabel(r"$\beta^{-1}$")
+    ax.set_ylabel(r"$F(\beta) \beta$")
+    pdf.savefig()
     data.append((cp.number, "betaF", (inv_beta, betaF)))
 
     S = vectorize(cp.S)(beta)
-    r.plot(inv_beta, S, type='l', xlab=r("expression(beta**-1)"), ylab=r("expression(S(beta) / k[B])"))
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    ax.plot(inv_beta, S, color=args.color)
+    ax.set_xlabel(r"$\beta^{-1}$")
+    ax.set_ylabel(r"$S(\beta) / k_\mathrm{B}$")
+    pdf.savefig()
     data.append((cp.number, "S", (inv_beta, S)))
 
     E = vectorize(cp.E)(beta)
-    r.plot(inv_beta, E, type='l', xlab=r("expression(beta**-1)"), ylab=r("expression(bar(E)(beta))"))
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    ax.plot(inv_beta, E, color=args.color)
+    ax.set_xlabel(r"$\beta^{-1}$")
+    ax.set_ylabel(r"$\bar{E}(\beta)$")
+    pdf.savefig()
     data.append((cp.number, "E", (inv_beta, E)))
 
     C = vectorize(cp.C)(beta)
-    r.plot(inv_beta, C, type='l', xlab=r("expression(beta**-1)"), ylab=r("expression(C(beta)/k[B])"))
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    ax.plot(inv_beta, C, color=args.color)
+    ax.set_xlabel(r"$\beta^{-1}$")
+    ax.set_ylabel(r"$C(\beta) / k_\mathrm{B}$")
+    pdf.savefig()
     data.append((cp.number, "C", (inv_beta, C)))
     
-    r.graphics_off()
+    pdf.close()
 
     # Dump the output as a pickle
-    if options.pickle!=None:
-        pickle_to_file(data, options.pickle)
+    if args.pickle!=None:
+        pickle_to_file(data, args.pickle)
