@@ -250,9 +250,9 @@ if __name__ == "__main__":
     
     parser.add_argument("-g", dest="lng", default=False, action="store_true", help="Plot the entropy (lng)")
     parser.add_argument("-w", dest="lnw", default=False, action="store_true", help="Plot the weights (lnw)")
-    parser.add_argument("-n", dest="n", default=False, action="store_true", help="Plot the normalized couns")
+    parser.add_argument("-n", dest="n", default=False, action="store_true", help="Plot the normalized counts")
     parser.add_argument("-N", dest="N", default=False, action="store_true", help="Plot the counts (N)")
-    parser.add_argument("-s", dest="s", default=False, action="store_true", help="Plot the sum of normalized couns")
+    parser.add_argument("-s", dest="s", default=False, action="store_true", help="Plot the sum of normalized counts")
     parser.add_argument("-S", dest="S", default=False, action="store_true", help="Plot the sum of counts (N)")
     parser.add_argument("-b", dest="bins", default=False, action="store_true", help="Plot the binning")
 

@@ -1,5 +1,9 @@
 2014-10-09  Jes Frellsen  <frellsen@cam>
 
+	* scripts/plot.py: Corrected typo in description of options.
+
+2014-10-09  Jes Frellsen  <frellsen@cam>
+
 	* scripts/plot_canonical.py: Replaced rpy with matplotlib for
 	plotting.
 
