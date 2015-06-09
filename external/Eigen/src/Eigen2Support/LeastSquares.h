@@ -1,23 +1,16 @@
 // This file is part of Eigen, a lightweight C++ template library
-// for linear algebra. Eigen itself is part of the KDE project.
+// for linear algebra.
 //
 // Copyright (C) 2006-2009 Benoit Jacob <jacob.benoit.1@gmail.com>
 //
-// Eigen is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public
-// License version 3 as published by the Free Software Foundation.
-//
-// Eigen is distributed in the hope that it will be useful, but WITHOUT ANY
-// WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-// FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License or the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU Lesser General Public
-// License and a copy of the GNU General Public License along with
-// Eigen. If not, see <http://www.gnu.org/licenses/>.
+// This Source Code Form is subject to the terms of the Mozilla
+// Public License v. 2.0. If a copy of the MPL was not distributed
+// with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #ifndef EIGEN2_LEASTSQUARES_H
 #define EIGEN2_LEASTSQUARES_H
+
+namespace Eigen { 
 
 /** \ingroup LeastSquares_Module
   *
@@ -154,7 +147,6 @@ void fitHyperplane(int numPoints,
 
   // compute the covariance matrix
   CovMatrixType covMat = CovMatrixType::Zero(size, size);
-  VectorType remean = VectorType::Zero(size);
   for(int i = 0; i < numPoints; ++i)
   {
     VectorType diff = (*(points[i]) - mean).conjugate();
@@ -172,5 +164,6 @@ void fitHyperplane(int numPoints,
   result->offset() = - (result->normal().cwise()* mean).sum();
 }
 
+} // end namespace Eigen
 
 #endif // EIGEN2_LEASTSQUARES_H
