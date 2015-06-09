@@ -1,3 +1,16 @@
+2015-06-09  Jes Frellsen  <frellsen@jf519pc.eng.cam.ac.uk>
+
+	* CMakeLists.txt: Removed -ansi flag
+
+	* muninn/Factories/CGEfactory.h: Changed type of max_iterations_per_histogram from unsigned int to Count
+
+	* muninn/CGEcollection.h: abs -> std::abs
+
+	* muninn/Makefile.am (lib_LTLIBRARIES): Removed -ansi flag
+
+2015-06-09  Jes Frellsen  <frellsen@cam>
+
+
 2014-06-09  Jes Frellsen  <frellsen@cam>
 
 	* external/Eigen/: Upgrade Eigen to version 3.2.4

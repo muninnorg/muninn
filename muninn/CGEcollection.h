@@ -169,7 +169,7 @@ public:
             }
 
             for (Index index=0; index<reference.get_asize(); ++index) {
-                if (abs(reference(index)-binning(index)) > 1E-6) {
+                if (std::abs(reference(index)-binning(index)) > 1E-6) {
                     MessageLogger::get().error("Inconsistent binning: mismatch in bin values!");
                     return false;
                 }

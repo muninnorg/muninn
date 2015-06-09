@@ -137,7 +137,7 @@ public:
         double increase_factor;
 
         /// The maximum sampling time (number of iteration) for each round of sampling.
-        unsigned int max_iterations_per_histogram;
+        Count max_iterations_per_histogram;
 
         /// The number of consecutive histograms to keep in memory.
         unsigned int memory;
@@ -212,7 +212,7 @@ public:
                  std::string read_fixed_weights_filename = "",
                  unsigned int initial_max = 5000,
                  double increase_factor = 1.07,
-                 unsigned int max_iterations_per_histogram = std::numeric_limits<Count>::max(),
+                 Count max_iterations_per_histogram = std::numeric_limits<Count>::max(),
                  unsigned int memory = 40,
                  unsigned int min_count = 30,
                  bool restricted_individual_support=false,
