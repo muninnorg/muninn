@@ -1,3 +1,7 @@
+2014-06-09  Jes Frellsen  <frellsen@cam>
+
+	* external/Eigen/: Upgrade Eigen to version 3.2.4
+
 2014-10-09  Jes Frellsen  <frellsen@cam>
 
 	* scripts/plot_canonical.py: Replaced rpy with matplotlib for
