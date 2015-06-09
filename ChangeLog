@@ -1,15 +1,12 @@
-2015-06-09  Jes Frellsen  <frellsen@jf519pc.eng.cam.ac.uk>
+2015-06-09  Jes Frellsen  <frellsen@cam>
 
 	* CMakeLists.txt: Removed -ansi flag
 
-	* muninn/Factories/CGEfactory.h: Changed type of max_iterations_per_histogram from unsigned int to Count
+	* muninn/Makefile.am: Removed -ansi flag
 
 	* muninn/CGEcollection.h: abs -> std::abs
 
-	* muninn/Makefile.am (lib_LTLIBRARIES): Removed -ansi flag
-
-2015-06-09  Jes Frellsen  <frellsen@cam>
-
+	* muninn/Factories/CGEfactory.h: Changed type of max_iterations_per_histogram from unsigned int to Count
 
 2014-06-09  Jes Frellsen  <frellsen@cam>
 
