@@ -42,6 +42,12 @@ enum EstimatorEnum {ESTIMATOR_MLE=0, ESTIMATOR_ENUM_SIZE};
 /// Define the string names corresponding to the values of EstimatorEnum
 static const std::string EstimatorEnumNames[] = {"MLE"};
 
+/// Define the different binners.
+enum BinnerEnum {DYNAMIC=0, UNIFORM, UNIFORM_MIN_MAX, BINNER_ENUM_SIZE};
+
+/// Define the string names corresponding to the values of GeEnum.
+static const std::string BinnerEnumNames[] = {"dynamic", "uniform", "uniform-min-max"};
+
 /// Input operator of a GeEnum from string.
 std::istream &operator>>(std::istream &input, GeEnum &g);
 
@@ -53,6 +59,12 @@ std::istream &operator>>(std::istream &input, EstimatorEnum &g);
 
 /// Output operator for a EstimatorEnum.
 std::ostream &operator<<(std::ostream &o, const EstimatorEnum &g);
+
+/// Input operator of a BinnerEnum from string.
+std::istream &operator>>(std::istream &input, BinnerEnum &g);
+
+/// Output operator for a BinnerEnum.
+std::ostream &operator<<(std::ostream &o, const BinnerEnum &g);
 
 /// Input operator of a StatisticsLogger::Mode from string.
 std::istream &operator>>(std::istream &input, StatisticsLogger::Mode &m);
@@ -92,7 +104,7 @@ public:
         /// The p value for the invkp scheme
         double p;
 
-        /// The resolution for the non-uniform binner. The binning is set so
+        /// The resolution for the dynamic binner. The binning is set so
         /// that a uniform resolution, \f$ r \f$, in the weights
         /// is obtained, \f$ |ln w(E_j) - \ln w(E_{j+1})| \simeq r \f$.
         double resolution;
@@ -137,7 +149,7 @@ public:
         double increase_factor;
 
         /// The maximum sampling time (number of iteration) for each round of sampling.
-        unsigned int max_iterations_per_histogram;
+        Count max_iterations_per_histogram;
 
         /// The number of consecutive histograms to keep in memory.
         unsigned int memory;
@@ -148,14 +160,23 @@ public:
         /// Restrict the support of the individual histograms to only cover the support for the given histogram.
         bool restricted_individual_support;
 
-        /// Use dynamic binning.
-        bool use_dynamic_binning;
+        /// Which binner to use
+        BinnerEnum binner;
 
         /// The maximal number of bins allowed to be used by the binner
         unsigned int max_number_of_bins;
 
-        /// Bin width used for non-dynamic binning.
+        /// Bin width used for the uniform binner (used when binner==UNIFORM)
         double bin_width;
+
+        /// The initial min value for the uniform binner (used when binner==UNIFORM_MIN_MAX)
+        double binner_min_value;
+
+        /// The initial max value for the uniform binner (used when binner==UNIFORM_MIN_MAX)
+        double binner_max_value;
+
+        /// The initial number of bins for the uniform binner (used when binner==UNIFORM_MIN_MAX)
+        unsigned int binner_nbins;
 
         /// The separator symbol between option name and value used in the output operator of the settings object.
         std::string separator;
@@ -188,9 +209,12 @@ public:
         /// \param memory See documentation for Settings::memory.
         /// \param min_count See documentation for Settings::min_count.
         /// \param restricted_individual_support See documentation for Settings::restricted_individual_support.
-        /// \param use_dynamic_binning See documentation for Settings::use_dynamic_binning.
+        /// \param binner See documentation for Settings::binner
         /// \param max_number_of_bins See documentation for Settings::max_number_of_bins.
         /// \param bin_width See documentation for Settings::bin_width.
+        /// \param binner_min_value See documentation for Settings::binner_min_value.
+        /// \param binner_max_value See documentation for Settings::binner_max_value.
+        /// \param binner_nbins See documentation for Settings::binner_nbins.
         /// \param separator See documentation for Settings::separator.
         /// \param verbose See documentation for Settings::verbose.
         Settings(GeEnum weight_scheme=GE_MULTICANONICAL,
@@ -212,13 +236,16 @@ public:
                  std::string read_fixed_weights_filename = "",
                  unsigned int initial_max = 5000,
                  double increase_factor = 1.07,
-                 unsigned int max_iterations_per_histogram = std::numeric_limits<Count>::max(),
+                 Count max_iterations_per_histogram = std::numeric_limits<Count>::max(),
                  unsigned int memory = 40,
                  unsigned int min_count = 30,
                  bool restricted_individual_support=false,
-                 bool use_dynamic_binning=true,
+                 BinnerEnum binner=DYNAMIC,
                  unsigned int max_number_of_bins=1000000,
                  double bin_width = 0.1,
+                 double binner_min_value=0,
+                 double binner_max_value=1,
+                 unsigned int binner_nbins=1,
                  std::string separator=":",
                  int verbose=3)
         : weight_scheme(weight_scheme),
@@ -244,9 +271,12 @@ public:
           memory(memory),
           min_count(min_count),
           restricted_individual_support(restricted_individual_support),
-          use_dynamic_binning(use_dynamic_binning),
+          binner(binner),
           max_number_of_bins(max_number_of_bins),
           bin_width(bin_width),
+          binner_min_value(binner_min_value),
+          binner_max_value(binner_max_value),
+          binner_nbins(binner_nbins),
           separator(separator),
           verbose(verbose) {}
 
@@ -284,9 +314,12 @@ public:
             o << "memory" << settings.separator << settings.memory << std::endl;
             o << "min_count" << settings.separator << settings.min_count << std::endl;
             o << "restricted_individual_support" << settings.separator << settings.restricted_individual_support << std::endl;
-            o << "use_dynamic_binning" << settings.separator << settings.use_dynamic_binning << std::endl;
+            o << "binner" << settings.separator << settings.binner << std::endl;
             o << "max_number_of_bins" << settings.separator << settings.max_number_of_bins << std::endl;
             o << "bin_width" << settings.separator << settings.bin_width << std::endl;
+            o << "binner_min_value"  << settings.separator << settings.binner_min_value << std::endl;
+            o << "binner_max_value" << settings.separator << settings.binner_max_value << std::endl;
+            o << "binner_nbins" << settings.separator << settings.binner_nbins << std::endl;
             o << "verbose" << settings.separator << settings.verbose << std::endl;
             return o;
         }

@@ -185,7 +185,7 @@ CGE* CGEfactory::new_CGE(const Settings& settings) {
     // Allocate the binner
     Binner* binner = NULL;
 
-    if (settings.use_dynamic_binning) {
+    if (settings.binner==DYNAMIC) {
         if (statistics_log_reader==NULL) {
         	binner = new NonUniformDynamicBinner(settings.resolution, settings.initial_width_is_max_left, settings.initial_width_is_max_right, settings.max_number_of_bins);
         }
@@ -195,8 +195,13 @@ CGE* CGEfactory::new_CGE(const Settings& settings) {
     }
     else {
         if (statistics_log_reader==NULL) {
-        	// TODO: This constructor should also use the max_number_of_bins
-        	binner = new UniformBinner(settings.bin_width);
+        	// TODO: This these constructors should also use the max_number_of_bins
+            if (settings.binner==UNIFORM) {
+                binner = new UniformBinner(settings.bin_width);
+            }
+            else {
+                binner = new UniformBinner(settings.binner_min_value, settings.binner_max_value, settings.binner_nbins);
+            }
         }
         else {
         	binner = new UniformBinner(statistics_log_reader->get_binnings().back().second.min(), statistics_log_reader->get_binnings().back().second.max(), statistics_log_reader->get_binnings().back().second.get_asize()-1);
@@ -267,24 +272,34 @@ CGE* CGEfactory::new_CGE(const Settings& settings) {
     return cge;
 }
 
-// Input GeEnum from string
+/// Input GeEnum from string
 std::istream &operator>>(std::istream &input, GeEnum &g) {
     return input_operator<GeEnum>(input, g, GE_ENUM_SIZE, GeEnumNames);
 }
 
-// Output GeEnum
+/// Output GeEnum
 std::ostream &operator<<(std::ostream &output, const GeEnum &g) {
     return output_operator<GeEnum>(output, g, GE_ENUM_SIZE, GeEnumNames);
 }
 
-// Input EstimatorEnum from string
+/// Input EstimatorEnum from string
 std::istream &operator>>(std::istream &input, EstimatorEnum &e) {
     return input_operator<EstimatorEnum>(input, e, ESTIMATOR_ENUM_SIZE, EstimatorEnumNames);
 }
 
-// Output EstimatorEnum
+/// Output EstimatorEnum
 std::ostream &operator<<(std::ostream &output, const EstimatorEnum &e) {
     return output_operator<EstimatorEnum>(output, e, ESTIMATOR_ENUM_SIZE, EstimatorEnumNames);
+}
+
+/// Input BinnerEnum from string
+std::istream &operator>>(std::istream &input, BinnerEnum &g) {
+    return input_operator<BinnerEnum>(input, g, BINNER_ENUM_SIZE, BinnerEnumNames);
+}
+
+/// Output BinnerEnum
+std::ostream &operator<<(std::ostream &output, const BinnerEnum &g) {
+    return output_operator<BinnerEnum>(output, g, BINNER_ENUM_SIZE, BinnerEnumNames);
 }
 
 /// Input operator of a StatisticsLogger::Mode from string.
@@ -296,5 +311,7 @@ std::istream &operator>>(std::istream &input, StatisticsLogger::Mode &m) {
 std::ostream &operator<<(std::ostream &putput, const StatisticsLogger::Mode &m) {
     return output_operator<StatisticsLogger::Mode>(putput, m, StatisticsLogger::SIZE, StatisticsLogger::ModeNames);
 }
+
+
 
 } // namespace Muninn
