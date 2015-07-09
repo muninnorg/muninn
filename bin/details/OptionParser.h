@@ -55,6 +55,8 @@ private:
     std::map<std::string, std::string> values;            // destination -> value map
     std::vector<std::string> additional_arguments;        // list of additional arguments
 
+    static bool isnalnum(char c){return !isalnum(c);}     // Test is a char is not alpha numeric
+    
 public:
     // Constructor
     OptionParser(const std::string &help_text="", const std::string &additional_arguments_help_text="") : help_text(help_text), additional_arguments_help_text(additional_arguments_help_text) {
@@ -152,7 +154,7 @@ public:
             }
         }
         else {
-            if (std::find_if_not(option.begin(), option.end(), isalnum) != option.end()) {
+            if (std::find_if(option.begin(), option.end(), isnalnum) != option.end()) {
                 parser_setup_error("A positional argument must be all alpha numeric");
             }
             if (option.length() > 10) {
