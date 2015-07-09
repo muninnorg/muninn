@@ -25,6 +25,7 @@
 #define OPTIONPARSER_H_
 
 #include <iostream>
+#include <iomanip>
 #include <set>
 #include <map>
 #include <vector>
@@ -32,6 +33,7 @@
 #include <sstream>
 #include <cctype>
 #include <cstdlib>
+#include <algorithm>
 
 class OptionParser {
 private:
@@ -47,7 +49,8 @@ private:
     std::map<std::string, std::string> implicits;         // option -> implicit values map
 
     std::set<std::string> required;                       // The required options
-    std::vector<std::string> order;                       // The order of options for help
+    std::vector<std::string> options_order;               // The order of options for help
+    std::vector<std::string> positional_order;            // The order of positional arguments
 
     std::map<std::string, std::string> values;            // destination -> value map
     std::vector<std::string> additional_arguments;        // list of additional arguments
@@ -69,6 +72,9 @@ public:
             std::string dest = options[it->first];
             values[dest] = it->second;
         }
+
+        // Make counter for passed positional arguments
+        std::vector<std::string>::iterator positional = positional_order.begin();
 
         // Parse the arguments
         for (int i=1; i<argc; ++i) {
@@ -105,7 +111,14 @@ public:
                     parser_error("Unknown option " + arg);
                 }
             } else {
-                additional_arguments.push_back(arg);
+                if (positional < positional_order.end()) {
+                    std::string dest = options[*positional];
+                    values[dest] = arg;
+                    ++positional;
+                }
+                else {
+                    additional_arguments.push_back(arg);
+                }
             }
         }
 
@@ -127,13 +140,28 @@ public:
     enum ConstrainEnum {OPTINAL=0, REQUIRED};
 
     void add_option(const std::string &option, const std::string &dest, const std::string &help_text, ConstrainEnum constrain=OPTINAL) {
-        // Check the validity of the option
-        if (option.length() != 2)
-            parser_setup_error("An options must have length 2");
-        if (option.substr(0, 1) != "-")
-            parser_setup_error("An options must start with -");
-        if (!isalnum(option.substr(1, 2).c_str()[0]))
-            parser_setup_error("An options must have the form -?, where ? is alpha numeric");
+        // Check if it's an option or an positional argument
+        bool is_option = option.substr(0, 1) == "-";
+        if (is_option) {
+            // Check the validity of the option
+        	if (option.length() != 2) {
+                parser_setup_error("An options must have length 2");
+        	}
+            if (!isalnum(option.substr(1, 2).c_str()[0])) {
+                parser_setup_error("An options must have the form -?, where ? is alpha numeric");
+            }
+        }
+        else {
+            if (std::find_if_not(option.begin(), option.end(), isalnum) != option.end()) {
+                parser_setup_error("A positional argument must be all alpha numeric");
+            }
+            if (option.length() > 10) {
+                parser_setup_error("A positional argument cannot be longer than 10");
+            }
+            if (implicits.count(option)>0) {
+                parser_setup_error("A positional argument cannot have a implicit value");
+            }
+        }
 
         // Check that it the first time the options is given
         if (options.count(option) > 0)
@@ -141,11 +169,17 @@ public:
         if (destinations.count(dest) > 0)
             parser_setup_error("Duplicate destination: " + dest);
 
-        // Add the options
+        // Add the option
         options[option] = dest;
         help[option] = help_text;
         destinations.insert(dest);
-        order.push_back(option);
+
+        if (is_option) {
+            options_order.push_back(option);
+        }
+        else {
+            positional_order.push_back(option);
+        }
 
         if (constrain==REQUIRED)
             this->required.insert(option);
@@ -153,13 +187,13 @@ public:
     }
 
     void add_option(const std::string &option, const std::string &dest, const std::string &help_text, const std::string &default_value) {
-        add_option(option, dest, help_text);
         defaults[option] = default_value;
+        add_option(option, dest, help_text);
     }
 
     void add_option(const std::string &option, const std::string &dest, const std::string &help_text, const std::string &default_value, const std::string &implicit_value) {
-        add_option(option, dest, help_text, default_value);
         implicits[option] = implicit_value;
+        add_option(option, dest, help_text, default_value);
     }
 
     // Getters for options
@@ -173,14 +207,25 @@ public:
     template <typename T>
     T get_as(const std::string &dest) {
         // Check that the destination is valid
-        if (values.count(dest)==0)
+        if (values.count(dest)==0) {
             parser_setup_error("Unknown destination: " + dest);
+        }
 
         // Transform the options to the given type
         std::istringstream iss(values[dest]);
         T value;
         iss >> value;
         return value;
+    }
+
+    template <typename T>
+    T get_as(const std::string &dest, const T &def) {
+        if (values.count(dest)==0) {
+            return def;
+        }
+        else {
+            return get_as<T>(dest);
+        }
     }
 
     bool has(const std::string &dest) {
@@ -194,52 +239,112 @@ public:
 
     // Help printer
     void print_help() {
-        std::string txt = "Usage: " + program_name + " [options]";
+        std::stringstream usagess;
+        std::stringstream helpss;
+        std::stringstream optionsss;
 
-        if (additional_arguments_help_text != "") {
-            txt += " [...]\n";
-        }
-        else {
-            txt += "\n";
-        }
+        usagess << "Usage: " << program_name << " [options]";
 
         if (help_text!="") {
-            txt += "\n" + help_text + "\n";
+            helpss << "\n" << help_text << "\n";
         }
 
-        txt += "\nOptions:\n";
+        optionsss << "\nOptions:\n";
 
-        for (std::vector<std::string>::const_iterator it=order.begin(); it!=order.end(); ++it) {
-            txt += "  " + *it;
+        for (std::vector<std::string>::const_iterator it=options_order.begin(); it!=options_order.end(); ++it) {
+            optionsss << "  " << *it;
 
             if (implicits.count(*it)==0)
-                txt += "  ARG";
+                optionsss << "  ARG";
             else
-                txt += "     ";
+                optionsss << "     ";
 
-            txt += "  " + help[*it];
+            optionsss << "  " << help[*it];
 
             if (defaults.count(*it)>0 || implicits.count(*it)>0 || required.count(*it)) {
-                txt += " [";
+                optionsss << " [";
 
                 if (required.count(*it)>0)
-                    txt += "required]";
+                    optionsss << "required]";
 
                 if (implicits.count(*it)>0)
-                    txt += "implicit=" + implicits[*it] + ", ";
+                    optionsss << "implicit=" << implicits[*it] << ", ";
 
                 if (defaults.count(*it)>0)
-                    txt += "default=" + defaults[*it] + "]";
+                    optionsss << "default=" << defaults[*it] << "]";
             }
-            txt += "\n";
+            optionsss << "\n";
+        }
+
+        if (positional_order.size() > 0) {
+            optionsss << "\nPositional arguments:\n";
+
+            for (std::vector<std::string>::const_iterator it=positional_order.begin(); it!=positional_order.end(); ++it) {
+                optionsss << std::left << std::setw(13);
+                optionsss << "  " + *it << "  " + help[*it];
+
+                if (defaults.count(*it)>0 || required.count(*it)) {
+                    optionsss << " [";
+
+                    if (required.count(*it)>0) {
+                        optionsss << "required]";
+                        usagess << " [" << *it << "]";
+                    }
+
+                    if (defaults.count(*it)>0) {
+                        optionsss << "default=" << defaults[*it] << "]";
+                        usagess << " <" << *it << ">";
+                    }
+                }
+                else {
+                    usagess << " <" << *it << ">";
+                }
+
+                optionsss << "\n";
+            }
+
+        }
+
+
+        if (additional_arguments_help_text != "") {
+            optionsss << "     [...] " << additional_arguments_help_text << "\n";
         }
 
         if (additional_arguments_help_text != "") {
-            txt += "     [...] " + additional_arguments_help_text + "\n";
+            usagess << " [...]\n";
+        }
+        else {
+            usagess << "\n";
         }
 
-        std::cout << txt;
+
+        std::cout << usagess.str();
+        std::cout << helpss.str();
+        std::cout << optionsss.str();
     }
+
+
+    // Help printer
+    void print_values() {
+        std::stringstream valuesss;
+        std::vector<std::string> all;
+        all.insert(all.end(), options_order.begin(), options_order.end());
+        all.insert(all.end(), positional_order.begin(), positional_order.end());
+
+        for (std::vector<std::string>::const_iterator it=all.begin(); it!=all.end(); ++it) {
+            std::string dest = options[*it];
+
+            valuesss << dest << ":";
+
+            if (values.count(dest)>0) {
+                valuesss << values[dest];
+            }
+
+            valuesss << std::endl;
+        }
+        std::cout << valuesss.str();
+    }
+
 
     // Write error message
     void parser_error(const std::string &error_message) {
