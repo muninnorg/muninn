@@ -68,7 +68,7 @@ int main(int argc, char *argv[]) {
     Muninn::CGEfactory::Settings settings;
     settings.weight_scheme = parser.get_as<Muninn::GeEnum>("weight_scheme");
     settings.estimator = parser.get_as<Muninn::EstimatorEnum>("estimator");
-    settings.use_dynamic_binning = false;
+    settings.binner = Muninn::UNIFORM;
     settings.bin_width = parser.get_as<double>("bin_width");
     settings.statistics_log_filename = parser.get("statistics_log");
     settings.log_mode = parser.get_as<Muninn::StatisticsLogger::Mode>("log_mode");
