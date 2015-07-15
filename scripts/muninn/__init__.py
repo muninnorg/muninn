@@ -20,3 +20,5 @@
 # organizations they are, or have been, associated with may be used
 # to endorse or promote products derived from this software without
 # specific prior written permission.
+
+from parse_statics_log import parse_statics_log, convert_log_entry, convert_log_entries

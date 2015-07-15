@@ -60,7 +60,7 @@ def parse_statics_log(filename, start=None, end=None, indices=[]):
             (fullname, name, number, tarray) = match.groups()
             number = int(number)
             result.setdefault(name, [])
-
+            
             if (start==None or start<0 or start<=number) and (end==None or number<end) and (indices==[] or (number in indices)):
                 entry = (int(number), fullname, tarray)
                 result[name].append(entry)

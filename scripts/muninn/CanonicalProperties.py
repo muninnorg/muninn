@@ -106,10 +106,9 @@ class CanonicalPropertiesFromArrays(CanonicalProperties):
         self.Es = bin_centers[lnG_support]
 
 
-if __name__=="__main__":
+if __name__ == "__main__":
     ca = CanonicalProperties("../../bin/Muninn.txt")
     beta = 1E-4
-
 
     print "lnZ = ", ca.lnZ(beta)
     print "betaF = ", ca.betaF(beta)
@@ -117,6 +116,3 @@ if __name__=="__main__":
     print "E^2 = ", ca.Esq(beta)
     print "S = ", ca.S(beta)
     print "C = ", ca.C(beta)
-        
-
-        
