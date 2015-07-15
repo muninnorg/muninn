@@ -305,7 +305,7 @@ public:
             o << "statistics_log_filename" << settings.separator << settings.statistics_log_filename << std::endl;
             o << "log_mode" << settings.separator << settings.log_mode << std::endl;
             o << "log_precision" << settings.separator << settings.log_precision << std::endl;
-            o << "continue_statistics_log" << settings.continue_statistics_log << std::endl;
+            o << "continue_statistics_log" << settings.separator << settings.continue_statistics_log << std::endl;
             o << "read_statistics_log_filename" << settings.separator << settings.read_statistics_log_filename << std::endl;
             o << "read_fixed_weights_filename" << settings.separator << settings.read_fixed_weights_filename << std::endl;
             o << "initial_max" << settings.separator << settings.initial_max << std::endl;
