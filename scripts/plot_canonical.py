@@ -21,7 +21,7 @@
 # to endorse or promote products derived from this software without
 # specific prior written permission..
 
-from details.CanonicalProperties import CanonicalProperties, CanonicalException
+from muninn.CanonicalProperties import CanonicalProperties, CanonicalException
 
 if __name__ == "__main__":
     import os
@@ -29,8 +29,8 @@ if __name__ == "__main__":
     import matplotlib
     import matplotlib.pyplot as plt
     from matplotlib.backends.backend_pdf import PdfPages
-    from details.utils import pickle_to_file
-    from details.parse_statics_log import parse_statics_log, convert_log_entries
+    from muninn.utils import pickle_to_file
+    from muninn.parse_statics_log import parse_statics_log, convert_log_entries
 
     import argparse
     parser = argparse.ArgumentParser()

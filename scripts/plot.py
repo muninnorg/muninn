@@ -24,8 +24,8 @@
 import numpy
 from numpy import array, log, zeros
 from re import findall
-from details.plot_histogram import plot_histogram
-from details.utils import pickle_to_file
+from muninn.plot_histogram import plot_histogram
+from muninn.utils import pickle_to_file
 
 def plot_name_array(pdf, name, data, ndims, counts=False, bins=None, support=None, fig=None,
                     xlab=None, ylab="", xmin=None, xmax=None, main=None,
@@ -240,7 +240,7 @@ if __name__ == "__main__":
     import matplotlib
     import matplotlib.pyplot as plt
     from matplotlib.backends.backend_pdf import PdfPages
-    from details.parse_statics_log import parse_statics_log, convert_log_entries
+    from muninn.parse_statics_log import parse_statics_log, convert_log_entries
 
     import argparse
     parser = argparse.ArgumentParser()
