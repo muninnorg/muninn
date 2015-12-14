@@ -30,7 +30,6 @@ if __name__ == "__main__":
     import matplotlib.pyplot as plt
     from matplotlib.backends.backend_pdf import PdfPages
     from muninn.utils import pickle_to_file
-    from muninn.parse_statics_log import parse_statics_log, convert_log_entries
 
     import argparse
     parser = argparse.ArgumentParser()
@@ -41,13 +40,13 @@ if __name__ == "__main__":
     parser.add_argument("--min", dest="inv_beta_min", metavar="VAL", default=0.1, type=float, help="Minimal value for 1/beta (default: %(default)s)")
     parser.add_argument("--max", dest="inv_beta_max", metavar="VAL", default=10,  type=float, help="Maximal value for 1/beta (default: %(default)s)")
     parser.add_argument("--width", dest="width", metavar="FLOAT", type=float, default=10.,
-                      help="The width of the graphics region in inches (default: %(default)s).")
+                        help="The width of the graphics region in inches (default: %(default)s).")
     parser.add_argument("--height", dest="height", metavar="FLOAT", type=float, default=7.,
-                      help="The height of the graphics region in inches (default: %(default)s).")
+                        help="The height of the graphics region in inches (default: %(default)s).")
     parser.add_argument("--fontsize", dest="fontsize", metavar="INT", type=int, default=14,
-                      help="The font size (default: %(default)s).")
+                        help="The font size (default: %(default)s).")
     parser.add_argument("--color", dest="color", metavar="COLOR", type=str, default="red",
-                      help="The plot color (default: %(default)s).")
+                        help="The plot color (default: %(default)s).")
     args = parser.parse_args()
 
     # Check that the log file is accessible
@@ -65,7 +64,6 @@ if __name__ == "__main__":
 
     # Print which is used
     print "Using:", cp.fullname
-
 
     # Plot the required output
     pdf = PdfPages(args.output)
@@ -119,9 +117,9 @@ if __name__ == "__main__":
     ax.set_ylabel(r"$C(\beta) / k_\mathrm{B}$")
     pdf.savefig()
     data.append((cp.number, "C", (inv_beta, C)))
-    
+
     pdf.close()
 
     # Dump the output as a pickle
-    if args.pickle!=None:
+    if args.pickle is not None:
         pickle_to_file(data, args.pickle)
