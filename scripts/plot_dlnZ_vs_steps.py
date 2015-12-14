@@ -129,7 +129,7 @@ if __name__ == "__main__":
         ax.set_xscale('log')
 
     ax.set_xlabel("MC steps")
-    ax.set_ylabel(r"$\Delta \ln Z$")
+    ax.set_ylabel(r"$\langle \Delta \ln Z \rangle$")
     ax.ticklabel_format(style='sci', axis='x', scilimits=(0, 0))
 
     X, mean, std = results
