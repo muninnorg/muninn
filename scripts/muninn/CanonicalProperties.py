@@ -21,8 +21,9 @@
 # to endorse or promote products derived from this software without
 # specific prior written permission.
 
-from CanonicalBase import CanonicalBase, CanonicalException
-from numpy import exp, log, sum, min
+import numpy as np
+
+from CanonicalBase import CanonicalBase
 from utils import log_sum_exp
 
 
@@ -44,20 +45,20 @@ class CanonicalProperties(CanonicalBase):
         """
         Calculates the partition function at beta
         """
-        return exp(self.lnZ(beta))
+        return np.exp(self.lnZ(beta))
 
     def PE(self, beta):
         """
         Calculates the probability of each energy bin at beta
         """
-        return exp(self.lnGs - beta*self.Es - self.lnZ(beta))
+        return np.exp(self.lnGs - beta*self.Es - self.lnZ(beta))
 
     def ll(self, beta):
         """
         Calculates the log-likelihood of each energy bin at beta
         """
         return self.lnGs - beta*self.Es - self.lnZ(beta)
-        
+
     def betaF(self, beta):
         """
         Calculates the free energy multiplied by beta
@@ -69,20 +70,20 @@ class CanonicalProperties(CanonicalBase):
         Calculates the average energy at beta
         """
 
-        return sum(self.Es * self.PE(beta))
+        return np.sum(self.Es * self.PE(beta))
 
     def Esq(self, beta):
         """
         Calculates the average square energy at beta
         """
 
-        return sum(self.Es*self.Es * self.PE(beta))
+        return np.sum(self.Es*self.Es * self.PE(beta))
 
     def S(self, beta):
         """
         Calculates the entropy at beta normalized by the bolztmann constant
         """
-        
+
         return beta*self.E(beta) - self.betaF(beta)
 
     def C(self, beta):
