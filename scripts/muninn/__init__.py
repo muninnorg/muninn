@@ -22,3 +22,4 @@
 # specific prior written permission.
 
 from parse_statics_log import parse_statics_log, convert_log_entry, convert_log_entries
+from CanonicalProperties import CanonicalProperties, CanonicalPropertiesFromArrays
